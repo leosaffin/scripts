@@ -7,16 +7,22 @@ from math import pi
 def volume(cube):
     rho = a + cube.coord('altitude').points
     bounds = a + cube.coord('altitude').bounds
-    phi = (90 - cube.coord('grid_latitude').points)*(np.pi/180)
     theta = cube.coord('grid_longitude').points*(np.pi/180)
+    phi = (90 - cube.coord('grid_latitude').points)*(np.pi/180)
     return fgrid.volume(rho,bounds,theta,phi)
 
 def volume_global(cube):
     rho = a + cube.coord('altitude').points
     bounds = a + cube.coord('altitude').bounds
-    phi = (90 - cube.coord('latitude').points)*(np.pi/180)
     theta = cube.coord('longitude').points*(np.pi/180)
+    phi = (90 - cube.coord('latitude').points)*(np.pi/180)
     return fgrid.volume(rho,bounds,theta,phi)
+
+def grad(cube):
+    rho = a + cube.coord('altitude').points
+    theta = cube.coord('longitude').points*(np.pi/180)
+    phi = (90 - cube.coord('latitude').points)*(np.pi/180)
+    return fgrid.grad(cube.data,rho,theta,phi)
 
 # Calculate latitude and longitue in rotated system
 def rotate(x,y,polelon,polelat):
