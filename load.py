@@ -25,7 +25,22 @@ names['xjjhz'] = names['xjjho']
 # Debug
 names['xjjhb'] = names['xjjho']
 # IOP8 - NAE
-names['xkcqa'] = names['xjjho']
+names['xkcqa'] = ['Advection Only PV',
+                  'Short Wave Radiation PV',
+                  'Long Wave Radiation PV',
+                  'Radiation PV',
+                  'Microphysics PV',
+                  'Gravity Wave Drag PV',
+                  'Convection PV',
+                  'Boundary Layer PV',
+                  'Boundary Layer and Radiation PV'
+                  'Atmospheric Physics 1 PV',
+                  'Atmospheric Physics 2 PV',
+                  'Pressure Solver PV',
+                  'Advection Inconsistency PV',
+                  'Update Fields PV'
+                  'Cloud Rebalancing PV',
+                  'Total PV']
 
 
 # Load Tracers and Prognostics in one cubelist
