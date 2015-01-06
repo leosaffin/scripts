@@ -1,5 +1,5 @@
 import numpy as np
-import cpickle as pickle
+import cPickle as pickle
 import iris
 
 import load
@@ -25,7 +25,8 @@ nt = 120
 theta_min = 330
 theta_max = 350
 times = np.arange(0,nt+1)
-rms = np.zeros((len(names),nt+1))
+rms_north = np.zeros((len(names),nt+1))
+rms_south = np.zeros((len(names),nt+1))
 
 # loop over time
 for t in xrange(1,nt+1):
@@ -35,7 +36,7 @@ for t in xrange(1,nt+1):
 
     # Calculate grid volume
     if t==1: 
-        volume = grid.volume_global(cubes.extract('air_temperature')
+        volume = grid.volume_global(cubes.extract('air_temperature')[0])
 
     # Calculate Potential Temperature
     theta = convert.T_to_theta(cubes.extract('air_temperature')[0].data,
@@ -54,10 +55,12 @@ for t in xrange(1,nt+1):
         # Extract selected diagnostics
         cube = load.extract(cubes,name)
         # Calculate RMS Diagnostics
-        rms[i,t] = np.ma.mean((cube.data*mass))
+        rms_north[i,t] = np.ma.mean((cube.data[:,0:239,:]*mass[:,0:239,:]))
+        rms_south[i,t] = np.ma.mean((cube.data[:,240:480,:]*mass[:,240:480,:]))
 
 # Save data as pickled files
-output = open('~/data/saturation.pkl', 'wb')
+output = open('../data/saturation.pkl', 'wb')
 pickle.dump(names, output)
-pickle.dump(rms, output)
+pickle.dump(rms_north, output)
+pickle.dump(rms_south, output)
 output.close()
