@@ -1,0 +1,5 @@
+# Compiled Files
+*.py
+*.so
+# Images
+*.png
