@@ -1,7 +1,8 @@
-a = 6378100
 import numpy as np
 import fgrid
 from math import pi
+
+a = 6378100 # Radius of Earth (m)
 
 # Calculate the volume of grid boxes
 def volume(cube):

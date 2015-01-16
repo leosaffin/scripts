@@ -1,5 +1,9 @@
 # Compiled Files
-*.py
+*.pyc
 *.so
 # Images
 *.png
+# Temporary Files
+*~
+# Git Files
+.metadata/

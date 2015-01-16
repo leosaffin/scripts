@@ -1,9 +1,23 @@
 import numpy as np
 from scipy.interpolate import griddata
+from math import sqrt
 import load
 import interpolate
 import grid
 
+class Trajectory:
+    def __init__(self):
+        self.times = []
+        self.positions = {}
+    # Add data in a dictionary given by names
+    def add_data(self,data,names):
+        for i in xrange(len(data)):
+            data[i] = float(data[i])
+        self.times.append(data[0])
+        self.positions[data[0]] = {}
+        for i,name in enumerate(names):
+            self.positions[data[0]][name] = data[i]
+        
 # Reads information from lagranto output given the filename and
 # number of timesteps in the trajectories
 def load_traj(trajectory_file,nt,**kwargs):
@@ -146,7 +160,44 @@ def regular_grid(data,field,x_p,y_p):
     points = [x_s,y_s]
     points = np.transpose(np.array(points))
     return griddata(points,field,(x_p,y_p),method='linear')
-    
 
-    
+def compare(high_res,low_res):
+    # Initialise Dictionaries
+    counted = {}
+    diff_lon = {}
+    diff_lat = {}
+    diff_p = {}
+    times = low_res[0].times
+    for time in times:
+        counted[time] = 0
+        diff_lon[time] = 0
+        diff_lat[time] = 0
+        diff_p[time] = 0
+
+    # Loop over trajectories
+    for n,trajectory in enumerate(high_res):
+        # Loop over low_res times
+        for time in times:
+            high_res_data = trajectory.positions[time]
+            low_res_data = low_res[n].positions[time]
+            if (high_res_data['p'] != -1000 and
+                 low_res_data['p'] != -1000):
+
+                # Accumulate Squared Differences
+                counted[time] += 1
+                diff_lon[time] += (high_res_data['lon'] - 
+                                   low_res_data['lon'])**2
+                diff_lat[time] += (high_res_data['lat'] - 
+                                   low_res_data['lat'])**2
+                diff_p[time] += (high_res_data['p'] - 
+                                 low_res_data['p'])**2
+
+    # Loop over low_res times
+    for time in times:
+        # Calculate RMS differences
+        diff_lon[time] = sqrt(diff_lon[time]/counted[time])
+        diff_lat[time] = sqrt(diff_lat[time]/counted[time])
+        diff_p[time]   = sqrt(diff_p[time]  /counted[time])
+
+    return[diff_lon,diff_lat,diff_p]
     

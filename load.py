@@ -126,3 +126,29 @@ def extract(cubes,name):
     else:
         cube = cubes.extract(name)[0]
     return cube
+
+import trajectories
+# Loads information from a Lagranto output file
+def lagranto(filename):
+    # Initialise a trajectory list
+    trajectories_list = []
+    with open(filename,'r') as data:
+        # Skip Lines
+        data.readline()
+        data.readline()
+        # Read Header
+        header = data.readline().split()
+        # Skip Lines
+        data.readline()
+        data.readline()
+        # Read main data
+        n = 0
+        trajectories_list.append(trajectories.Trajectory())
+        for line in data:
+            try:
+                trajectories_list[n].add_data(line.split(),header)
+            # Blank Line - Next trajectory
+            except IndexError:
+                trajectories_list.append(trajectories.Trajectory())
+                n += 1
+    return trajectories_list
