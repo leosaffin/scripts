@@ -1,28 +1,30 @@
 import numpy as np
+import iris
 import fgrid
 from math import pi
 
 a = 6378100 # Radius of Earth (m)
 
+# Get spherical polar coordinates from cartesian cube
+def polar_coords(cube):
+    rho = a + cube.coord('altitude').points
+    try:
+        theta = cube.coord('longitude').points*(np.pi/180)
+        phi = (90 - cube.coord('latitude').points)*(np.pi/180)
+    except iris.exceptions.CoordinateNotFoundError:
+        theta = cube.coord('grid_longitude').points*(np.pi/180)
+        phi = (90 - cube.coord('grid_latitude').points)*(np.pi/180)
+    return[rho,theta,phi]
+
 # Calculate the volume of grid boxes
 def volume(cube):
-    rho = a + cube.coord('altitude').points
     bounds = a + cube.coord('altitude').bounds
-    theta = cube.coord('grid_longitude').points*(np.pi/180)
-    phi = (90 - cube.coord('grid_latitude').points)*(np.pi/180)
+    [rho,theta,phi] = polar_coords(cube)
     return fgrid.volume(rho,bounds,theta,phi)
 
-def volume_global(cube):
-    rho = a + cube.coord('altitude').points
-    bounds = a + cube.coord('altitude').bounds
-    theta = cube.coord('longitude').points*(np.pi/180)
-    phi = (90 - cube.coord('latitude').points)*(np.pi/180)
-    return fgrid.volume(rho,bounds,theta,phi)
-
+# Calculate the magnitude of the vector gradient of a field
 def grad(cube):
-    rho = a + cube.coord('altitude').points
-    theta = cube.coord('longitude').points*(np.pi/180)
-    phi = (90 - cube.coord('latitude').points)*(np.pi/180)
+    [rho,theta,phi] = polar_coords(cube)
     return fgrid.grad(cube.data,rho,theta,phi)
 
 # Calculate latitude and longitue in rotated system
