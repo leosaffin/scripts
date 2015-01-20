@@ -142,6 +142,7 @@ def lagranto(filename):
         data.readline()
         data.readline()
         # Read main data
+        # this can be coded better
         n = 0
         trajectories_list.append(trajectories.Trajectory())
         for line in data:

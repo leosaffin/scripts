@@ -170,9 +170,9 @@ def compare(high_res,low_res):
     times = low_res[0].times
     for time in times:
         counted[time] = 0
-        diff_lon[time] = 0
-        diff_lat[time] = 0
-        diff_p[time] = 0
+        diff_lon[time] = 0.0
+        diff_lat[time] = 0.0
+        diff_p[time] = 0.0
 
     # Loop over trajectories
     for n,trajectory in enumerate(high_res):
@@ -180,8 +180,8 @@ def compare(high_res,low_res):
         for time in times:
             high_res_data = trajectory.positions[time]
             low_res_data = low_res[n].positions[time]
-            if (high_res_data['p'] != -1000 and
-                 low_res_data['p'] != -1000):
+            if (high_res_data['p'] > 250 and high_res_data['p']<850 and
+                 low_res_data['p'] > 250 and  low_res_data['p']<850):
 
                 # Accumulate Squared Differences
                 counted[time] += 1
