@@ -1,99 +1,82 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from math import sqrt
-import load
 import interpolate
 import grid
 
 class Trajectory:
     def __init__(self):
-        self.times = []
         self.positions = {}
+
     # Add data in a dictionary given by names
     def add_data(self,data,names):
+        # Convert data to floats
         for i in xrange(len(data)):
             data[i] = float(data[i])
-        self.times.append(data[0])
-        self.positions[data[0]] = {}
-        for i,name in enumerate(names):
-            self.positions[data[0]][name] = data[i]
+
+        # Add position data to dictionary
+        try:
+            for i,name in enumerate(names):
+                self.positions[name].append(data[i])
+        # Initialise dictionary words if not already
+        except KeyError:
+            for i,name in enumerate(names):
+                self.positions[name] = []
+                self.positions[name].append(data[i])
+
+    # Convert positions to numpy arrays
+    def vectorise(self):
+        for position in self.positions:
+            self.positions[position] = np.array(self.positions[position])
+
+    # Mask values leaving the domain
+    def mask(self):
+        for position in self.positions:
+            self.positions[position] = np.ma.masked_where(
+                                         self.positions['p'] == -1000,
+                                         self.positions[position])
+    # Remove mask on array
+    def unmask(self):
+        for position in self.positions:
+             self.positions[position] = self.positions[position].data
+
+    # Reverse domain fill
+    def rdf(self,t_ref,data,pressure,**kwargs):
+        # Get index of last point in the domain
+        try:
+            index = self.positions['p'].index(-1000) - 1
+        except ValueError:
+            index = -1
+        # Trajectory start information
+        lon = self.positions['lon'][index]
+        lat = self.positions['lat'][index]
+        p = self.positions['p'][index]
+        t = self.positions['time'][index] + t_ref
+
+        # Rotate positions if data is on rotated grid
+        if 'polelat' in kwargs and 'polelon' in kwargs:
+            [lon,lat] = grid.rotate(lon,lat,kwargs['polelon'],
+                                            kwargs['polelat'])
+            lon = (lon+180)%360 + 180
+
+        # Interpolate Tracer and Pressure to lat,lon points
+        [nz,ny,nx] = data[t].data.shape
+        col_data = np.zeros(((nz,1,1)))
+        col_data[:,0,0] = interpolate.grid_to_column(data[t],lon,lat)
+        col_pressure = np.zeros(((nz,1,1)))
+        col_pressure[:,0,0] = interpolate.grid_to_column(pressure[t],lon,lat)
+        # Interpolate single column to single pressure level
+        self.rdf_pv = interpolate.any_to_pressure(col_data,col_pressure,p)
         
-# Reads information from lagranto output given the filename and
-# number of timesteps in the trajectories
-def load_traj(trajectory_file,nt,**kwargs):
-    lon_start = []         # Longitude at Trajectory Start
-    lat_start = []         # Latitude at Trajectory Start
-    p_start = []           # Pressure at Trajectory Start
-    lon_end = []           # Longitude at Trajectory End
-    lat_end = []           # Latitude at Trajectory End
-    p_end = []             # Pressure at Trajectory End
-    t_end = []             # Time at Trajectory End
 
-    #Open File
-    traj_file = open(trajectory_file,'r')
-    #Ignore Header
-    for i in xrange(0,5):
-        skip = traj_file.readline()
+    # Plot two positions along the trajectory against each other
+    def plot(self,xaxis,yaxis,*args,**kwargs):
+        plt.plot(self.positions[xaxis],self.positions[yaxis],*args,**kwargs)
+        plt.xlabel(xaxis)
+        plt.ylabel(yaxis)
 
-    t=0
-    n=0
-    end=0
-    # Loop through file lines
-    for line in traj_file:
-        # Skip gap line between trajectories
-        if (t==nt):
-            t=-1
-            n+=1
-            end=0
-        elif (t==nt-1):
-            t_end.append(t_prev)
-            lon_end.append(lon_prev)
-            lat_end.append(lat_prev)
-            p_end.append(p_prev)
-        # If trajectory hasn't exited load next line
-        elif end!=1:
-            line = line.strip()
-            columns = line.split()
-            time = float(columns[0])
-            lon = float(columns[1])
-            lat = float(columns[2])
-            p = float(columns[3])
-            if t==0:
-                lon_start.append(lon)
-                lat_start.append(lat)
-                p_start.append(p)
-                t_prev = 0
-                lon_prev = 0
-                lat_prev = 0
-                p_prev = 0
-            if 'domain' in kwargs:
-                if outside(lon,lat,**kwargs):
-                    p = -1000
-            if p!=-1000:
-                t_prev = time
-                lon_prev = lon
-                lat_prev = lat
-                p_prev = p
-            else:
-                end=1
-        t+=1
-
-    traj_file.close()
-    # Convert data to numpy arrays in dictionary
-    output = {}
-    output['lat_start'] = np.array(lat_start)
-    output['lon_start'] = np.array(lon_start)
-    output['p_start'] = np.array(p_start)
-    output['lat_end'] = np.array(lat_end)
-    output['lon_end'] = np.array(lon_end)
-    output['p_end'] = np.array(p_end)
-    output['t_end'] = np.array(t_end) + nt - 1
-    return output
-
-def outside(x,y,**kwargs):
-    if 'polelat' in kwargs and 'polelon' in kwargs:
-        [x,y] = grid.rotate(x,y,kwargs['polelon'],kwargs['polelat'])
-        x = (x+180)%360 + 180
+def outside(x,y,domain):
     [xmin,xmax,ymin,ymax] = kwargs['domain']
     if xmin<xmax:
         if x<xmin or x>xmax:
@@ -109,95 +92,48 @@ def outside(x,y,**kwargs):
             return True
     return False
 
-# Reverse domain fills using trajectory information
-def gather_ends(data,nt,job,**kwargs):
-
-    x_f = data['lon_end']
-    y_f = data['lat_end']
-    p_f = data['p_end']
-    t_f = data['t_end']
-
-    ntra = len(t_f)            # Number of Trajectories
-    loaded = set()             # Flag on whether a file has already been loaded
-    pv_start = np.zeros(ntra)  # PV at the start of the trajectory
-    tracer = {}                # Dictionary of loaded tracer cubes by time
-    pressure = {}              # Dictionary of loaded pressure cubes by time
-
-    for n in xrange(0,ntra):
-        time = int(t_f[n])
-        # Rotate Trajectory points to model grid
-        if 'polelat' in kwargs and 'polelon' in kwargs:
-            [grid_x,grid_y] = grid.rotate(x_f[n],y_f[n],
-                                          kwargs['polelon'],kwargs['polelat'])
-        else:
-            [grid_x,grid_y] = [x_f[n],y_f[n]]
-        # Irritating dependency on current data
-        grid_x = (grid_x + 180)%360 + 180
-        # Load Unloaded cubes
-        if time not in loaded:
-            cubes = load.all(job,time)
-            tracer[str(time)] = cubes.extract('Advection Only PV')[0]
-            pressure[str(time)] = cubes.extract('air_pressure')[1]
-            loaded.add(time)
-        if 'grid' not in loaded:
-            [nz,ny,nx] = cubes[0].data.shape
-            pv_temp = np.zeros(((nz,1,1)))
-            p_temp = np.zeros(((nz,1,1)))
-            loaded.add('grid')
-        # Interpolate Tracer and Pressure to lat,lon points
-        pv_temp[:,0,0] = interpolate.grid_to_column(tracer[str(time)],
-                                                    grid_x,grid_y)
-        p_temp[:,0,0] = interpolate.grid_to_column(pressure[str(time)],
-                                                   grid_x,grid_y)
-        # Interpolate single column to single pressure level
-        pv_start[n] = interpolate.any_to_pressure(pv_temp,p_temp,p_f[n])
-    return pv_start
-
 # Interpolate field defined at trajectory points to model grid
-def regular_grid(data,field,x_p,y_p):
-    x_s = data['lon_start']
-    y_s = data['lat_start']
-    points = [x_s,y_s]
+def regular_grid(field,x_points,y_points,x_grid,y_grid):
+    points = [x_points,y_points]
     points = np.transpose(np.array(points))
-    return griddata(points,field,(x_p,y_p),method='linear')
+    return griddata(points,field,(x_grid,y_grid),method='linear')
 
 def compare(high_res,low_res):
-    # Initialise Dictionaries
-    counted = {}
-    diff_lon = {}
-    diff_lat = {}
-    diff_p = {}
-    times = low_res[0].times
+    times = low_res[0].positions['time']
+    nt = len(times)
+    keys = low_res[0].positions.keys()
+    
+    index = []
+    counted = np.zeros(nt)
+    
+    # Find the indicies of the times from 
+    # low res data in high res data
     for time in times:
-        counted[time] = 0
-        diff_lon[time] = 0.0
-        diff_lat[time] = 0.0
-        diff_p[time] = 0.0
+        index.append(high_res[0].positions['time'].index(time))
+
+    # Initialise difference arrays
+    diffs = {}
+    for key in keys:
+        diffs[key] = np.zeros(nt)
 
     # Loop over trajectories
-    for n,trajectory in enumerate(high_res):
-        # Loop over low_res times
-        for time in times:
-            high_res_data = trajectory.positions[time]
-            low_res_data = low_res[n].positions[time]
-            if (high_res_data['p'] > 250 and high_res_data['p']<850 and
-                 low_res_data['p'] > 250 and  low_res_data['p']<850):
-
+    for n in xrange(len(low_res)):
+        # Loop over low resolution times
+        for i in xrange(nt):
+            # Check neither trajectory has left domain
+            if (high_res[n].positions['p'][index[i]] != -1000 and
+                 low_res[n].positions['p'][i]        != -1000):
                 # Accumulate Squared Differences
-                counted[time] += 1
-                diff_lon[time] += (high_res_data['lon'] - 
-                                   low_res_data['lon'])**2
-                diff_lat[time] += (high_res_data['lat'] - 
-                                   low_res_data['lat'])**2
-                diff_p[time] += (high_res_data['p'] - 
-                                 low_res_data['p'])**2
+                counted[i] += 1
+                for key in keys:
+                    diffs[key][i] += (high_res[n].positions[key][index[i]] - 
+                                       low_res[n].positions[key][i])**2
 
     # Loop over low_res times
-    for time in times:
-        # Calculate RMS differences
-        diff_lon[time] = sqrt(diff_lon[time]/counted[time])
-        diff_lat[time] = sqrt(diff_lat[time]/counted[time])
-        diff_p[time]   = sqrt(diff_p[time]  /counted[time])
+    for i in xrange(nt):
+        for key in keys:
+            # Calculate RMS differences
+            diffs[key][i] = sqrt(diffs[key][i]/counted[i])
 
-    return[diff_lon,diff_lat,diff_p]
+    return[times,diffs]
     

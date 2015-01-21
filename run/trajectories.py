@@ -21,6 +21,5 @@ rdf_pv = trajectories.regular_grid(data,rdf_pv,x_p,y_p)
 rdf_pv.transpose()
 
 # Save data as pickled files
-output = open('/home/lsaffi/data/rdf_pv.pkl', 'wb')
-pickle.dump(rdf_pv, output)
-output.close()
+with open('/home/lsaffi/data/rdf_pv.pkl', 'wb') as output:
+    pickle.dump(rdf_pv, output)

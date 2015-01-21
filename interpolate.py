@@ -116,26 +116,29 @@ def oblique(field,start,end,npts,*args):
 
 #
 def grid_to_column(cube,xpoint,ypoint):
-    x = cube.coords('grid_longitude')[0].points
-    y = cube.coords('grid_latitude')[0].points
-    i = ((xpoint - x).clip(0)).argmin()
-    j = ((ypoint - y).clip(0)).argmin()
-    dist1 = np.sqrt((xpoint - x[i])**2   + (ypoint - y[j])**2)
-    dist2 = np.sqrt((xpoint - x[i])**2   + (ypoint - y[j+1])**2)
-    dist3 = np.sqrt((xpoint - x[i+1])**2 + (ypoint - y[j])**2)
-    dist4 = np.sqrt((xpoint - x[i+1])**2 + (ypoint - y[j+1])**2)
-    totdist = dist1 + dist2 + dist3 + dist4
-    if totdist==0:
-        column = cube.data[:,j,i]
-    else:
-        w1=np.abs((1/3.0)*(1-dist1/totdist))
-        w2=np.abs((1/3.0)*(1-dist2/totdist))
-        w3=np.abs((1/3.0)*(1-dist3/totdist))
-        w4=np.abs((1/3.0)*(1-dist4/totdist))
-        column = (w1*cube.data[:,j,i]   + w2*cube.data[:,j,i+1] +
-                  w3*cube.data[:,j+1,i] + w4*cube.data[:,j+1,i+1])
+    try:
+        x = cube.coords('grid_longitude')[0].points
+        y = cube.coords('grid_latitude')[0].points
+        i = ((xpoint - x).clip(0)).argmin()
+        j = ((ypoint - y).clip(0)).argmin()
+        dist1 = np.sqrt((xpoint - x[i])**2   + (ypoint - y[j])**2)
+        dist2 = np.sqrt((xpoint - x[i])**2   + (ypoint - y[j+1])**2)
+        dist3 = np.sqrt((xpoint - x[i+1])**2 + (ypoint - y[j])**2)
+        dist4 = np.sqrt((xpoint - x[i+1])**2 + (ypoint - y[j+1])**2)
+        totdist = dist1 + dist2 + dist3 + dist4
+        if totdist==0:
+            column = cube.data[:,j,i]
+        else:
+            w1=np.abs((1/3.0)*(1-dist1/totdist))
+            w2=np.abs((1/3.0)*(1-dist2/totdist))
+            w3=np.abs((1/3.0)*(1-dist3/totdist))
+            w4=np.abs((1/3.0)*(1-dist4/totdist))
+            column = (w1*cube.data[:,j,i]   + w2*cube.data[:,j,i+1] +
+                      w3*cube.data[:,j+1,i] + w4*cube.data[:,j+1,i+1])
     
-    return column
+        return column
+    except IndexError:
+        return cube.data[:,j,i]
 
 # Linear Vertical Interpolation
 # Theta points model levels zp

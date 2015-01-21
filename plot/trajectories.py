@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cPickle as pickle
+import load
 import interpolate
 
 # Load RDF PV
-infile = open('/home/lsaffi/data/rdf_pv.pkl','rb')
-rdf_pv = pickle.load(infile)
-infile.close()
+with open('/home/lsaffi/data/rdf_pv.pkl','rb') as infile:
+    rdf_pv = pickle.load(infile)
 
 # Load final time PV tracers
 cubes = load.all('xjjho',35)

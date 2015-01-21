@@ -50,8 +50,8 @@ def all(job,lead_time,**kwargs):
     # Load prognostics
     cubes2 = prognostics(job,lead_time)
     # Add co-ordinate information from prognostics to tracers
-    #if 'theta_cube' in kwargs:
-    #    cubes1 = replace_coord(cubes1,cubes2[kwargs['theta_cube']])
+    if 'theta_cube' in kwargs:
+        cubes1 = replace_coord(cubes1,cubes2[kwargs['theta_cube']])
     return cubes1+cubes2
 
 # Load tracers in cubelist
@@ -92,10 +92,10 @@ def prognostics(job,lead_time):
 # Add co-ordinate informate from coord_cube to cubes in the cubelist
 def replace_coord(cubelist,coord_cube):
     # Load theta-level information from prognostics
-    for i in xrange(0,len(cubelist)):
-        # Replace the cube with a fresh cube using extra co-ordinate information
-        cubelist[i].add_aux_coord(coord_cube.coord('surface_altitude'),[1,2])
-        cubelist[i].add_aux_factory(coord_cube.aux_factory('altitude'))
+    for cube in cubelist:
+        # Add extra co-ordinate information
+        cube.add_aux_coord(coord_cube.coord('surface_altitude'),[1,2])
+        cube.add_aux_factory(coord_cube.aux_factory('altitude'))
     return cubelist
 
 def extract(cubes,name):
@@ -140,16 +140,11 @@ def lagranto(filename):
         header = data.readline().split()
         # Skip Lines
         data.readline()
-        data.readline()
         # Read main data
-        # this can be coded better
-        n = 0
-        trajectories_list.append(trajectories.Trajectory())
         for line in data:
             try:
-                trajectories_list[n].add_data(line.split(),header)
+                trajectories_list[-1].add_data(line.split(),header)
             # Blank Line - Next trajectory
             except IndexError:
                 trajectories_list.append(trajectories.Trajectory())
-                n += 1
     return trajectories_list
