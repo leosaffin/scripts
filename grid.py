@@ -80,29 +80,28 @@ def unrotate(x,y,polelon,polelat):
     #Scale between +/- pi
     x = ((x + pi)%(2*pi)) - pi
 
-    #Compute latitude using equation (4.7)
-    arg = (np.outer(np.cos(x),np.cos(y))*cos_phi_pole +
-           np.outer(np.ones(Nx),np.sin(y))*sin_phi_pole)
-    np.clip(arg,-1,1)
-    a_phi = np.arcsin(arg)
-    y_p = (180/pi)*a_phi
-                                                                            
-    #Compute longitude using equation (4.8)
-    term1 = (np.outer(np.cos(x),np.cos(y))*sin_phi_pole -
-             np.outer(np.ones(Nx),np.sin(y))*cos_phi_pole)
-    term2 = np.cos(a_phi)
-    a_lambda = np.zeros((Nx,Ny))
     for i in xrange(0,Nx):
         for j in xrange(0,Ny):
-            if(abs(term2[i,j])<1e-5):
+    #Compute latitude using equation (4.7)
+            arg = (np.cos(x[i])*np.cos(y[j])*cos_phi_pole +
+                                np.sin(y[j])*sin_phi_pole)
+            np.clip(arg,-1,1)
+            a_phi = np.arcsin(arg)
+            y_p[i,j] = (180/pi)*a_phi
+                                                                            
+    #Compute longitude using equation (4.8)
+            term1 = (np.cos(x[i])*np.cos(y[j])*sin_phi_pole -
+                                  np.sin(y[j])*cos_phi_pole)
+            term2 = np.cos(a_phi)
+            a_lambda = np.zeros((Nx,Ny))
+            if abs(term2)<1e-5:
                 a_lambda[i,j]=0.0
             else:
-                arg = term1[i,j]/term2[i,j]
-                arg = min(arg, 1.0)
-                arg = max(arg,-1.0)
-                a_lambda[i,j] = (180/pi)*np.arccos(arg)
-                a_lambda[i,j] = a_lambda[i,j]*sign[i]
-    x_p = a_lambda + polelon - 180
+                arg = term1/term2
+                arg = np.clip(arg,-1,1)
+                a_lambda = (180/pi)*np.arccos(arg)
+                a_lambda = a_lambda*sign[i]
+            x_p[i,j] = a_lambda + polelon - 180
     return [x_p,y_p]
 
 #Specify heights of theta points for terrain following coordinates 
