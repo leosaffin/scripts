@@ -39,6 +39,9 @@
      &        omegh
               ! OMEGAH ! Relaxation Parameter for 3-D Poisson Equation
 
+CF2PY      INTEGER, INTENT(HIDE)    :: nl
+CF2PY      INTEGER, INTENT(HIDE)    :: ny
+CF2PY      INTEGER, INTENT(HIDE)    :: nx
 CF2PY      REAL, INTENT(IN)         :: fco(ny,nx)
 CF2PY      REAL, INTENT(IN)         :: aps(ny,nx)
 CF2PY      REAL, INTENT(IN)         :: ac(ny,5)
@@ -53,9 +56,6 @@ CF2PY      INTEGER, INTENT(IN)      :: maxx
 CF2PY      INTEGER, INTENT(IN)      :: maxxt
 CF2PY      REAL, INTENT(IN)         :: omegs
 CF2PY      REAL, INTENT(IN)         :: omegh
-CF2PY      INTEGER, INTENT(HIDE)    :: nl
-CF2PY      INTEGER, INTENT(HIDE)    :: ny
-CF2PY      INTEGER, INTENT(HIDE)    :: nx
 
 !     Local Variables
       REAL :: mi,zm,rh(ny,nx,nl),zpl(ny,nx),zpp(ny),rs,gpts,            &
@@ -97,7 +97,7 @@ CF2PY      INTEGER, INTENT(HIDE)    :: nx
         zpp(i)=1./16.
         DO  j=2,nx-1
           zpl(i,j)=1./(16.*aps(i,j)*aps(i,j))
-          nlco(i,j)=2./( aps(i)*aps(i) )
+          nlco(i,j)=2./( aps(i,j)*aps(i,j) )
         END DO
       END DO
 

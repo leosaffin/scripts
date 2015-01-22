@@ -1,18 +1,18 @@
 import numpy.f2py as f2py
 
 # Source File Name
-fname = 'fortran/grid.f'
+filename = 'fortran/pvi.f'
 # Output Module Name
-mname = 'fgrid'
+modulename = 'pvi'
 # Compiler Flages
 flags = ''
 
 # Open Source File
-fid = open(fname)
-source = fid.read()
-fid.close()
+with open(filename) as code:
+    source = code.read()
+
 
 # Compile Fortran Code Into Python Module
-f2py.compile(source, modulename=mname, extra_args=flags)
+f2py.compile(source, modulename=modulename, extra_args=flags)
 
 
