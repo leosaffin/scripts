@@ -99,7 +99,7 @@ CF2PY      REAL, INTENT(OUT)        :: output(nz,ny,nx)
       DO k=1,nz
         DO j=1,ny
           DO i=2,nx-1
-            d_dTheta(k,j,i) = (1/rho(k,j,i)) *                          &
+            d_dTheta(k,j,i) = (1/(rho(k,j,i)*SIN(phi(j)))) *            &
      &                         (((field(k,j,i+1) - field(k,j,i-1))/     &
      &                           (    theta(i+1) - theta(i-1)   )))
           END DO
@@ -110,7 +110,7 @@ CF2PY      REAL, INTENT(OUT)        :: output(nz,ny,nx)
       DO k=1,nz
         DO j=2,ny-1
           DO i=1,nx
-            d_dPhi(k,j,i) = (1/(rho(k,j,i)*SIN(theta(i)))) *            &
+            d_dPhi(k,j,i) = (1/rho(k,j,i))*                               &
      &                       (((field(k,j+1,i) - field(k,j-1,i))/       &
      &                         (      phi(j+1) - phi(j-1)     )))
           END DO
