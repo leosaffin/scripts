@@ -1,61 +1,19 @@
 import iris
-directory='/projects/diamet/lsaffi/'
-
-# Define the List of Names in the Tracer Files for Each Run
-names = {}
-
-# IOP5 - NAE
-names['xjjho'] = ['Advection Only PV',
-                  'Short Wave Radiation PV',
-                  'Long Wave Radiation PV',
-                  'Radiation PV',
-                  'Microphysics PV',
-                  'Gravity Wave Drag PV',
-                  'Convection PV',
-                  'Boundary Layer PV',
-                  'Atmospheric Physics 1 PV',
-                  'Atmospheric Physics 2 PV',
-                  'Pressure Solver PV',
-                  'Advection Inconsistency PV',
-                  'Cloud Rebalancing PV',
-                  'Total PV']
-
-# IOP5 - Global
-names['xjjhz'] = names['xjjho']
-# Debug
-names['xjjhb'] = names['xjjho']
-# IOP8 - NAE
-names['xkcqa'] = ['Advection Only PV',
-                  'Short Wave Radiation PV',
-                  'Long Wave Radiation PV',
-                  'Radiation PV',
-                  'Microphysics PV',
-                  'Gravity Wave Drag PV',
-                  'Convection PV',
-                  'Boundary Layer PV',
-                  'Boundary Layer and Radiation PV'
-                  'Atmospheric Physics 1 PV',
-                  'Atmospheric Physics 2 PV',
-                  'Pressure Solver PV',
-                  'Advection Inconsistency PV',
-                  'Update Fields PV'
-                  'Cloud Rebalancing PV',
-                  'Total PV']
-
-
+from constants import directory,names
 # Load Tracers and Prognostics in one cubelist
 def all(job,lead_time,**kwargs):
-    # Load tracers
-    cubes1 = tracers(job,lead_time)
     # Load prognostics
-    cubes2 = prognostics(job,lead_time)
-    # Add co-ordinate information from prognostics to tracers
-    if 'theta_cube' in kwargs:
-        cubes1 = replace_coord(cubes1,cubes2[kwargs['theta_cube']])
-    return cubes1+cubes2
+    progs = prognostics(job,lead_time)
+    # Load tracers
+    if 'coord_cube' in kwargs:
+        tracer_cubes = tracers(job,lead_time,
+                               coord_cube = progs[kwargs['coord_cube']])
+    else:
+        tracer_cubes = tracers(job,lead_time)
+    return tracer_cubes + progs
 
 # Load tracers in cubelist
-def tracers(job,lead_time):
+def tracers(job,lead_time,**kwargs):
     tstep = str(lead_time-1).zfill(3)
     filename = directory + job + '/' + job + 'a_pa' + tstep
     cubes = iris.load(filename)
@@ -65,7 +23,9 @@ def tracers(job,lead_time):
     # Only Take 1st Timestep
         time_coord = cubes[0].coord('time').points[1]
         cubes = cubes.extract(iris.Constraint(time = time_coord))
-    
+
+    if 'coord_cube' in kwargs:
+        cubes = replace_coords(cubes,kwargs['coord_cube'])
     for [i,name] in enumerate(names[job]):
         # Convert PV tracers To PVU
         cubes[i] = cubes[i]*1e6
@@ -90,13 +50,16 @@ def prognostics(job,lead_time):
     return cubes
 
 # Add co-ordinate informate from coord_cube to cubes in the cubelist
-def replace_coord(cubelist,coord_cube):
-    # Load theta-level information from prognostics
-    for cube in cubelist:
-        # Add extra co-ordinate information
-        cube.add_aux_coord(coord_cube.coord('surface_altitude'),[1,2])
-        cube.add_aux_factory(coord_cube.aux_factory('altitude'))
+def replace_coords(cubelist,coord_cube):
+    # Loop over cubes to be substituted
+    for n in xrange(len(cubelist)):
+        # Make a new cube with the old cube information and new cube data
+        cubelist[n] = coord_cube.copy(data=cubelist[n].data)
     return cubelist
+
+# Same as replace coords but for a single cube
+def replace_coord(cube,coord_cube):
+    return coord_cube.copy(data=cube.data)
 
 def extract(cubes,name):
     if name == 'Total Minus Advection Only PV':
