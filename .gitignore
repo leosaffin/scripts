@@ -5,5 +5,5 @@
 *.png
 # Temporary Files
 *~
-# Git Files
-.metadata/
+# Hidden Files
+.*
