@@ -4,7 +4,7 @@ import numpy.f2py as f2py
 filename = 'fortran/pvi.f'
 # Output Module Name
 modulename = 'pvi'
-# Compiler Flages
+# Compiler Flags
 flags = ''
 
 # Open Source File
