@@ -5,21 +5,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load previously calculated data
-filename = '/home/lsaffi/data/3h_vs_1h_trajectories.pkl'
+filename = '/home/lsaffi/data/lagranto_substeps.pkl'
 with open(filename,'rb') as infile:
     diffs = pickle.load(infile)
 
 ylabels = ['Longitude', 'Latitude', 'Pressure (hPa)']
-names = ['lon.png','lat.png','pres.png']
+names = ['lon','lat','p']
+
+times = diffs[0]
 
 # Plot data
-for n,diff in enumerate(diffs):
-    xvalues = np.sort(np.array(diff.keys()))
-    yvalues = np.zeros(len(diff))
-    for i,key in enumerate(xvalues):
-        yvalues[i] = diff[key]
-    plt.figure(n)
-    plt.plot(xvalues,yvalues)
+for i,name in enumerate(names):
+    plt.clf()
+    plt.plot(times,diffs[1][name])
     plt.xlabel('Time (Hours)')
-    plt.ylabel(ylabels[n])
-    plt.savefig(names[n])
+    plt.ylabel(ylabels[i])
+    plt.savefig(name + '_traj_err.png')
