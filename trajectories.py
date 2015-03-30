@@ -39,7 +39,7 @@ class Trajectory:
     # Remove mask on array
     def unmask(self):
         for position in self.positions:
-             self.positions[position] = self.positions[position].data
+            self.positions[position] = self.positions[position].data
 
     # Reverse domain fill
     def rdf(self,t_ref,data,pressure,**kwargs):
@@ -77,7 +77,7 @@ class Trajectory:
         plt.ylabel(yaxis)
 
 def outside(x,y,domain):
-    [xmin,xmax,ymin,ymax] = kwargs['domain']
+    xmin,xmax,ymin,ymax = domain
     if xmin<xmax:
         if x<xmin or x>xmax:
             return True
