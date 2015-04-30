@@ -1,69 +1,35 @@
-#!/usr/env/bin python
-'''
-Script for calculating, saving and plotting pv on theta
-'''
-import cPickle as pickle
 import numpy as np
 import matplotlib.pyplot as plt
-import iris
-from mymodule import load
-from mymodule import convert
-from mymodule import plot
-from mymodule import interpolation
-from iris.analysis import Linear
+from mymodule import io, convert, grid, interpolate, plot
 
-def main(filename,theta_level):
-    '''
-    ARGS:
-        filename:
-        
-        theta_level:
-            Potential temperature level in Kelvin on which to put PV
-    '''
-    # Load Cubes
-    cubes = load.full(filename)
-    # Extract variables
-    pv = cubes.extract('total_pv')[0]
-    temperature = cubes.extract('air_temperature')[0]
-    pressure = cubes.extract('air_pressure')[1]
-    
-    # Calculate Potential Temperature
-    theta = convert.calc_theta(temperature,pressure.data)
-    
-    (nz,ny,nx) = pv.shape
-    # TODO - Below does not work for non-monotonic theta, need a way
-    #        round this
-    '''
-    pv_on_theta = np.zeros((ny,nx))
-    
-    # Add theta as a co-ordinate
-    newcoord = iris.coords.AuxCoord(points=theta.data,
-                                    long_name='potential_temperature')
-    pv.add_aux_coord(newcoord,[0,1,2])
-    
-    
-    # Calculate PV on theta
-    for j in xrange(ny):
-        for i in xrange(nx):
-            subcube = pv[:,j,i]
-            
-            pv_on_theta[j,i] = subcube.interpolate([('potential_temperature',
-                                                     theta_level)],
-                                                   Linear()).data
-    '''
-    pv_on_theta = interpolation.to_level_3d(pv.data,theta.data,theta_level)
 
-    # Save PV on theta
-    with open('/home/lsaffi/pv_on_theta.pkl','wb') as output:
-        pickle.dump(pv_on_theta,output)
-        
-    # Plot PV on theta
-    levels = np.arange(0,10.1,0.25)
-    plot.polar(pv_on_theta[:,(nx/2)::],'north',levels,cmap='cubehelix_r')
-    plt.savefig('pv_on_theta.png')
-    return
-    
-if __name__=='__main__':
-    filename = ['/projects/diamet/lsaffi/xjjhz/xjjhza_pa035',
-                '/projects/diamet/lsaffi/xjjhz/xjjhza_pb035']
-    main(filename,315)
+def main(filename, name, theta_value):
+    cubes = io.load(filename)
+    x = convert.calc(name, cubes)
+
+    pv = convert.calc('total_pv', cubes)
+    theta = convert.calc('air_potential_temperature', cubes)
+    thcoord = grid.make_coord(theta)
+    pv.add_aux_coord(thcoord, [0, 1, 2])
+
+    pv_on_theta = interpolate.to_level(pv, theta=theta_value)
+    pv_on_theta = pv[0].copy(data=pv_on_theta)
+
+    x_on_theta = interpolate.to_level(pv, theta=theta_value)
+    x_on_theta = x[0].copy(data=x_on_theta)
+
+    io.save(pv_on_theta, '/home/lsaffi/data/' + name + '_on_theta_' +
+            str(theta_value) + '.nc')
+
+    levs = np.linspace(-2.1, 2.1, 16)
+    plot.level(x_on_theta, pv_on_theta, levs, cmap='cubehelix_r',
+               extend='both')
+    plt.savefig('/home/lsaffi/plots/' + name + '_on_theta.png')
+
+
+if __name__ == '__main__':
+    filename = '/projects/diamet/lsaffi/xjjhq/*030'
+    name = 'advection_inconsistency_pv'
+    theta_value = 330
+    main(filename)
+

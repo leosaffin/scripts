@@ -3,14 +3,12 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import load, convert, grid, diagnostic
+from mymodule import load, convert, grid, diagnostic, plot
 
 
 def main(files, variables):
     """
     """
-    mean = {}
-
     # Load the data
     cubelist = load.full(files)
     pv = cubelist.extract('advection_only_pv')[0]
@@ -28,16 +26,18 @@ def main(files, variables):
     q = cubelist.extract('specific_humidity')[0]
     tropopause = diagnostic.tropopause(pv, q)
 
+    mean = {}
     for variable in variables:
-        data = convert.calc_tracer(cubelist, variable).data
-        data = np.ma.masked_where(tropopause, data)
-        mean[variable] = diagnostic.averaged_over(data, bins, pv.data,
-                                                  weights=mass)
+        x = convert.calc_tracer(cubelist, variable).data
+        mean[variable] = diagnostic.averaged_over(x, bins, pv.data,
+                                                  mass,
+                                                  mask=tropopause)
     # Save the data
 
     # Plot the data
+    bin_centres = [0.5 * (edges[0] + edges[1]) for edges in bins]
     for variable in variables:
-        plt.plot(mean[variable], label=variable)
+        plot.dipole(bin_centres, mean[variable])
 
     plt.savefig('dipole.png')
 
@@ -45,13 +45,9 @@ if __name__ == '__main__':
     binmin = 0.0
     binmax = 8.0
     binspace = 0.25
-    bins = []
-    for n in xrange(int(binmax / binspace)):
-        bins.append([binmin + binspace * n, binmin + binspace * (n + 1)])
-    files = []
-    prefix = '/projects/diamet/lsaffi/xjjhq/xjjhqa_p'
-    suffixes = ['a030', 'b030']
-    for suffix in suffixes:
-        files.append(prefix + suffix)
+    bins = np.linspace(binmin, binmax, int(binmax / binspace + 1))
+
+    files = '/projects/diamet/lsaffi/xjjhq/*030'
+
     variables = ['total_minus_advection_only_pv']
     main(files, variables)

@@ -47,6 +47,5 @@ def dipole(cube,pv,bins,weights):
         # Mask for PV not in bin
         weight_mask = np.ma.masked_where(pv<bin_min, weights)
         weight_mask = np.ma.masked_where(pv>bin_max, weight_mask)
-        mass = np.ma.sum(weight_mask)
-        mean[n] = np.ma.sum(cube.data*weight_mask)/mass
+        mean[n] = np.ma.average(cube.data,weights=weight_mask)
     return mean
