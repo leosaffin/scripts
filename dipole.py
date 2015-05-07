@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from mymodule import io, convert, grid, diagnostic, plot
 
 
-def main(files, variables):
+def main(files, variables, bins):
     """
     """
     # Load the data
@@ -21,7 +21,7 @@ def main(files, variables):
 
     # Make a tropopause masked
     q = convert.calc('specific_humidity', cubelist)
-    tropopause = diagnostic.tropopause(pv, q)
+    tropopause = diagnostic.tropopause(pv.data, q.data)
 
     mean = {}
     for variable in variables:
@@ -32,10 +32,11 @@ def main(files, variables):
     # Save the data
 
     # Plot the data
-    bin_centres = 0.5 * bins[0:-1] * bins[1:]
+    bin_centres = 0.5 * (bins[0:-1] + bins[1:])
     for variable in variables:
-        plot.dipole(bin_centres, mean[variable])
+        plot.dipole(bin_centres, mean[variable], label=variable)
 
+    plt.legend()
     plt.savefig('dipole.png')
 
 if __name__ == '__main__':
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     nbins = int((binmax - binmin) / binspace) + 1
     bins = np.linspace(binmin, binmax, nbins)
 
-    files = '/projects/diamet/lsaffi/xjjhq/*030'
+    files = '/projects/diamet/lsaffi/season/*054.pp'
 
-    variables = ['total_minus_advection_only_pv']
-    main(files, variables)
+    variables = ['total_minus_advection_only_pv', 'sum_of_physics_pv_tracers']
+    main(files, variables, bins)
