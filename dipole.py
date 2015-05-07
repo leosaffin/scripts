@@ -3,39 +3,36 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import load, convert, grid, diagnostic, plot
+from mymodule import io, convert, grid, diagnostic, plot
 
 
 def main(files, variables):
     """
     """
     # Load the data
-    cubelist = load.full(files)
-    pv = cubelist.extract('advection_only_pv')[0]
+    cubelist = io.load(files)
+    cubelist.remove(cubelist.extract('air_pressure')[0])
+    pv = convert.calc('advection_only_pv', cubelist)
 
     # Calculate the mass in each gridbox
-    pressure = cubelist.extract('air_pressure')[1]
-    temperature = cubelist.extract('air_temperature')[0]
-    density = convert.calc_rho(pressure, temperature)
-
-    # Calculate the volume of each gridbox
+    density = convert.calc('air_density', cubelist)
     volume = grid.volume(density)
     mass = volume * density.data
 
     # Make a tropopause masked
-    q = cubelist.extract('specific_humidity')[0]
+    q = convert.calc('specific_humidity', cubelist)
     tropopause = diagnostic.tropopause(pv, q)
 
     mean = {}
     for variable in variables:
-        x = convert.calc_tracer(cubelist, variable).data
+        x = convert.calc(variable, cubelist).data
         mean[variable] = diagnostic.averaged_over(x, bins, pv.data,
                                                   mass,
                                                   mask=tropopause)
     # Save the data
 
     # Plot the data
-    bin_centres = [0.5 * (edges[0] + edges[1]) for edges in bins]
+    bin_centres = 0.5 * bins[0:-1] * bins[1:]
     for variable in variables:
         plot.dipole(bin_centres, mean[variable])
 
@@ -45,7 +42,8 @@ if __name__ == '__main__':
     binmin = 0.0
     binmax = 8.0
     binspace = 0.25
-    bins = np.linspace(binmin, binmax, int(binmax / binspace + 1))
+    nbins = int((binmax - binmin) / binspace) + 1
+    bins = np.linspace(binmin, binmax, nbins)
 
     files = '/projects/diamet/lsaffi/xjjhq/*030'
 
