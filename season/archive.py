@@ -38,7 +38,8 @@ def clean_up(time):
     ID = job_ids[time]
     for lead_time in lead_times:
         for filename in pp_filenames(lead_time, ID):
-            os.system('rm ' + filename)
+            if 'analysis' not in filename:
+                os.system('rm ' + filename)
 
 
 # Functions mapping IDs to filenames
