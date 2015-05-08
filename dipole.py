@@ -44,7 +44,7 @@ def load(files, varnames):
 
 def calculate(pv, q, mass, variables):
     # Make a tropopause masked
-    tropopause = diagnostic.tropopause(pv.data, q.data)
+    tropopause = diagnostic.tropopause2(pv.data, q.data)
 
     means = []
     for variable in variables:
