@@ -3,41 +3,61 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import io, convert, grid, diagnostic, plot
+from mymodule import files, convert, grid, diagnostic, plot
 
 
-def main(files, variables, bins):
+def main(files, varnames, bins):
     """
     """
     # Load the data
-    cubelist = io.load(files)
+    pv, q, mass, variables = load(files, varnames)
+
+    # Calculate the diagnostic
+    means = calculate(pv, q, mass, variables)
+
+    # Save the data
+
+    # Plot the data
+    plotfig(means, bins, varnames)
+    plt.savefig('dipole.png')
+
+
+def load(files, varnames):
+    """ Extracts required fields from the file
+    """
+    # Load the data
+    cubelist = files.load(files)
     cubelist.remove(cubelist.extract('air_pressure')[0])
     pv = convert.calc('advection_only_pv', cubelist)
+    q = convert.calc('specific_humidity', cubelist)
 
     # Calculate the mass in each gridbox
     density = convert.calc('air_density', cubelist)
     volume = grid.volume(density)
     mass = volume * density.data
 
+    # Extract other diagnostics
+    variables = [convert.calc(name, cubelist).data for name in varnames]
+
+    return pv, q, mass, variables
+
+
+def calculate(pv, q, mass, variables):
     # Make a tropopause masked
-    q = convert.calc('specific_humidity', cubelist)
     tropopause = diagnostic.tropopause(pv.data, q.data)
 
-    mean = {}
+    means = []
     for variable in variables:
-        x = convert.calc(variable, cubelist).data
-        mean[variable] = diagnostic.averaged_over(x, bins, pv.data,
-                                                  mass,
-                                                  mask=tropopause)
-    # Save the data
+        means.append(diagnostic.averaged_over(variable, bins, pv.data, mass,
+                                              mask=tropopause))
+    return means
 
-    # Plot the data
+
+def plotfig(means, bins, varnames):
     bin_centres = 0.5 * (bins[0:-1] + bins[1:])
-    for variable in variables:
-        plot.dipole(bin_centres, mean[variable], label=variable)
-
+    for mean, name in zip(means, varnames):
+        plot.dipole(bin_centres, mean, label=name)
     plt.legend()
-    plt.savefig('dipole.png')
 
 if __name__ == '__main__':
     binmin = 0.0
