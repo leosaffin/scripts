@@ -3,6 +3,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import iris
 from mymodule import files, convert, grid, diagnostic, plot
 
 
@@ -10,10 +11,10 @@ def main(filenames, varnames, bins):
     """
     """
     # Load the data
-    pv, q, mass, variables = load(filenames, varnames)
+    pv, q, mass, surf, variables = load(filenames, varnames)
 
     # Calculate the diagnostic
-    means = calculate(pv, q, mass, variables)
+    means = calculate(pv, q, mass, surf, variables)
 
     # Save the data
 
@@ -27,6 +28,9 @@ def load(filenames, varnames):
     """
     # Load the data
     cubelist = files.load(filenames)
+    con = iris.Constraint(time=cubelist[0].coord('time').points[-1])
+    cubelist = cubelist.extract(con)
+
     cubelist.remove(cubelist.extract('air_pressure')[0])
     pv = convert.calc('advection_only_pv', cubelist)
     q = convert.calc('specific_humidity', cubelist)
@@ -36,20 +40,26 @@ def load(filenames, varnames):
     volume = grid.volume(density)
     mass = volume * density.data
 
+    # Calculate lower boundary
+    surf = (convert.calc('surface_altitude', cubelist) +
+            convert.calc('atmosphere_boundary_layer_thickness', cubelist))
+
     # Extract other diagnostics
     variables = [convert.calc(name, cubelist).data for name in varnames]
 
-    return pv, q, mass, variables
+    return pv, q, mass, surf, variables
 
 
-def calculate(pv, q, mass, variables):
+def calculate(pv, q, mass, surf, variables):
     # Make a tropopause masked
-    tropopause = diagnostic.tropopause2(pv, q)
+    trop = diagnostic.tropopause2(pv, q)
+    mask = surf.data * np.ones(pv.shape) > pv.coord('altitude').points
+    mask = np.logical_or(trop, mask)
 
     means = []
     for variable in variables:
         means.append(diagnostic.averaged_over(variable, bins, pv.data, mass,
-                                              mask=tropopause))
+                                              mask=mask))
     return means
 
 
@@ -66,7 +76,7 @@ if __name__ == '__main__':
     nbins = int((binmax - binmin) / binspace) + 1
     bins = np.linspace(binmin, binmax, nbins)
 
-    filenames = '/projects/diamet/lsaffi/season/*054.pp'
+    filenames = '/projects/diamet/lsaffi/xjjhq/*030'
 
     variables = ['total_minus_advection_only_pv', 'sum_of_physics_pv_tracers']
     main(filenames, variables, bins)
