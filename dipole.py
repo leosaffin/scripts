@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from mymodule import files, convert, grid, diagnostic, plot
 
 
-def main(files, varnames, bins):
+def main(filenames, varnames, bins):
     """
     """
     # Load the data
-    pv, q, mass, variables = load(files, varnames)
+    pv, q, mass, variables = load(filenames, varnames)
 
     # Calculate the diagnostic
     means = calculate(pv, q, mass, variables)
@@ -22,11 +22,11 @@ def main(files, varnames, bins):
     plt.savefig('dipole.png')
 
 
-def load(files, varnames):
+def load(filenames, varnames):
     """ Extracts required fields from the file
     """
     # Load the data
-    cubelist = files.load(files)
+    cubelist = files.load(filenames)
     cubelist.remove(cubelist.extract('air_pressure')[0])
     pv = convert.calc('advection_only_pv', cubelist)
     q = convert.calc('specific_humidity', cubelist)
@@ -44,7 +44,7 @@ def load(files, varnames):
 
 def calculate(pv, q, mass, variables):
     # Make a tropopause masked
-    tropopause = diagnostic.tropopause2(pv.data, q.data)
+    tropopause = diagnostic.tropopause2(pv, q)
 
     means = []
     for variable in variables:
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     nbins = int((binmax - binmin) / binspace) + 1
     bins = np.linspace(binmin, binmax, nbins)
 
-    files = '/projects/diamet/lsaffi/season/*054.pp'
+    filenames = '/projects/diamet/lsaffi/season/*054.pp'
 
     variables = ['total_minus_advection_only_pv', 'sum_of_physics_pv_tracers']
-    main(files, variables, bins)
+    main(filenames, variables, bins)
