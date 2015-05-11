@@ -28,9 +28,8 @@ def load(filenames, varnames):
     """
     # Load the data
     cubelist = files.load(filenames)
-    con = iris.Constraint(time=cubelist[0].coord('time').points[-1])
-    cubelist = cubelist.extract(con)
 
+    # Extract relevant variables
     cubelist.remove(cubelist.extract('air_pressure')[0])
     pv = convert.calc('advection_only_pv', cubelist)
     q = convert.calc('specific_humidity', cubelist)
@@ -76,7 +75,7 @@ if __name__ == '__main__':
     nbins = int((binmax - binmin) / binspace) + 1
     bins = np.linspace(binmin, binmax, nbins)
 
-    filenames = '/projects/diamet/lsaffi/xjjhq/*030'
+    filenames = '/projects/diamet/lsaffi/xjjhq/xjjha_036.pp'
 
     variables = ['total_minus_advection_only_pv', 'sum_of_physics_pv_tracers']
     main(filenames, variables, bins)
