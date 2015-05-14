@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.7
 """Analysis of a season of forecasts
 """
 
@@ -17,7 +18,6 @@ def main(start_time, end_time, dt):
             suites.append(Suite(new_forecast))
         for suite in suites:
             update_time(suite, time)
-            suite.analyse()
 
         time += dt
 
@@ -25,6 +25,7 @@ def main(start_time, end_time, dt):
 def update_time(suite, time):
     try:
         suite.set_time(time)
+        suite.analyse()
     except KeyError:
         # Remove the suite if it has exceeded the time
         suite.save()
