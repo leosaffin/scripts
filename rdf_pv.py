@@ -1,9 +1,12 @@
-from mymodule import forecast, interpolate, convert, grid, io, plot
+from mymodule import forecast, interpolate, convert, grid, files, plot
 from mymodule.trajectory import load
 from iris.analysis.cartography import rotate_pole
 import numpy as np
-import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
 import datetime
+
+
+name = 'advection_only_pv'
 
 
 def main(filename, start_time, mapping, pole_lon, pole_lat):
@@ -46,10 +49,10 @@ def main(filename, start_time, mapping, pole_lon, pole_lat):
     cube.rename('name')
 
     # Save the field
-    io.save(cube, '/home/lsaffi/data/rdf_pv.nc')
+    files.save(cube, '/home/lsaffi/data/rdf_pv.nc')
     # Plot the field
     levs = np.linspace(0, 5, 21)
-    plot.level(cube, cube, levs, cmap=cubehelix_r, extend='both')
+    plot.level(cube, cube, levs, cmap='cubehelix_r', extend='both')
 
 
 def regular_grid(field, lons, lats, grid_lon, grid_lat):
@@ -61,17 +64,18 @@ def regular_grid(field, lons, lats, grid_lon, grid_lat):
         grid_lon (numpy.ndarray): 1d array
         grid_lat (numpy.ndarray): 1d array
     """
-    points = [x_points, y_points]
+    points = [lons, lats]
     points = np.transpose(np.array(points))
-    return griddata(points, field, (x_grid, y_grid), method='linear')
+    return griddata(points, field, (grid_lon, grid_lat), method='linear')
 
 if __name__ == '__main__':
     pole_lon = 177.5
     pole_lat = 37.5
     filename = '/home/lsaffi/data/out_1h.1'
+    directory = '/projects/diamet/lsaffi/xjjhq/'
     start_time = datetime.datetime(2011, 11, 28, 12)
-    dt = datetime.timedelta(hours=6)
-    mapping = {start_time + (n + 1) * dt: '*' +
-               str(int((n * dt).total_seconds() / 3600)).zfill(3)
-               for n in range(6)}
+    dt = datetime.timedelta(hours=1)
+    mapping = {start_time + n * dt: directory + '*' +
+               str(int((n * dt).total_seconds() / 3600)).zfill(3) + '.pp'
+               for n in xrange(1, 37)}
     main(filename, start_time, mapping, pole_lon, pole_lat)
