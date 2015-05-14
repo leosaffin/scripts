@@ -3,14 +3,35 @@
 
 import glob
 import iris
+from mymodule import files, convert
 
 
 # List of variables to extract from the analysis
-names = ['x_wind', 'y_wind', 'upward_air_velocity',
-         'air_potential_temperature', 'dimensionless_exner_function',
-         'specific_humidity', 'mass_fraction_of_cloud_ice_in_air',
+names = ['advection_only_pv',
+         'advection_only_potential_temperature',
+         'total_pv', # ?
+         'short_wave_radiation_pv',
+         'long_wave_radiation_pv',
+         'microphysics_pv',
+         'gravity_wave_drag_pv',
+         'convection_pv',
+         'boundary_layer_pv',
+         'advection_inconsistency_pv',
+         'cloud_rebalancing_pv',
+         'air_pressure_at_sea_level',
+         'atmosphere_boundary_layer_thickness',
+         'stratiform_rainfall_amount', # ?
+         'convective_rainfall_amount', # ?
+         'x_wind',
+         'y_wind',
+         'upward_air_velocity',
+         'air_pressure', # ?
+         'surface_pressure',
+         'specific_humidity',
          'mass_fraction_of_cloud_liquid_water_in_air',
-         'atmosphere_boundary_layer_thickness', 'surface_altitude']
+         'mass_fraction_of_cloud_ice_in_air',
+         'air_temperature',
+         'surface_altitude']
 
 
 def main():
@@ -24,27 +45,21 @@ def main():
 def newpp(analysis_file, output_file):
     """ Copies an analysis file taking a subset of variables
     """
-    cubelist = iris.load(analysis_file)
+    cubelist = files.load(analysis_file)
     newcubelist = iris.cube.CubeList()
     for name in names:
-        cube = cubelist.extract(name)[0]
+        cube = convert.calc(name, cubelist)[0]
         # Remove coordinates that make save/load not work
         try:
             cube.remove_aux_factory(cube.aux_factory('altitude'))
             cube.remove_coord('surface_altitude')
             cube = cube[0:50, 15:345, 15:585]
         except iris.exceptions.CoordinateNotFoundError:
-            cube = cubelist.extract(name)[0]
+            cube = convert.calc(name, cubelist)[0]
             cube = cube[15:345, 15:585]
         newcubelist.append(cube)
-    newcubelist = nddiag(newcubelist)
     iris.save(newcubelist, output_file)
 
-
-def nddiag(cubelist):
-    """ Replace prognostic variables with NDdiag fields
-    """
-    return cubelist
 
 if __name__ == '__main__':
     main()
