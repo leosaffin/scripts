@@ -2,7 +2,7 @@ import cPickle as pickle
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import files, convert, grid
+from mymodule import convert, grid
 
 
 def main(forecast, diagnostics, lead_times):
@@ -22,8 +22,6 @@ def main(forecast, diagnostics, lead_times):
         pickle.dump(rms, output)
     with open('/home/lsaffi/data/IOP5/mean_vs_time.pkl', 'w') as output:
         pickle.dump(mean, output)
-    plot(rms, mean, lead_times, diagnostics)
-    plt.savefig('/home/lsaffi/plots/rms_mean_vs_time.png')
 
 
 def load(cubes, diagnostics):
@@ -67,17 +65,19 @@ def make_mask(surf, pv, q):
     return mask
 
 
-def plot(rms, mean, lead_times, diagnostics):
-    times = [lead_time.seconds / 3600 for lead_time in lead_times]
+def plot(x, lead_times, diagnostics):
     for n, diagnostic in enumerate(diagnostics):
-        plt.plot(times, rms[n, :], '-x',
-                 label='RMS ' + diagnostic)
-        plt.plot(times, mean[n, :], '-x',
-                 label='Mean ' + diagnostic)
+        if diagnostic in ['long_wave_radiation_pv',
+                          'microphysics_pv',
+                          'convection_pv',
+                          'boundary_layer_pv',
+                          'advection_inconsistency_pv']:
+            plt.plot(lead_times, x[n, :], '-x',
+                     label=diagnostic)
 
     plt.legend(loc='best')
     plt.xlabel('Lead time (hours)')
-    plt.ylabel('Mass Weighted PV (PVU)')
+    plt.ylabel('Mass Weighted Mean PV (PVU)')
     plt.xlim(lead_times[0], lead_times[-1])
 
 if __name__ == '__main__':
@@ -98,12 +98,10 @@ if __name__ == '__main__':
                    'sum_of_physics_pv_tracers',
                    'initial_residual_pv',
                    'final_residual_pv']
-    # main(iop5, lead_times)
+    #main(iop5, diagnostics, lead_times)
 
     with open('/home/lsaffi/data/IOP5/rms_vs_time.pkl', 'r') as infile:
-        rms = pickle.load(infile)
-    with open('/home/lsaffi/data/IOP5/mean_vs_time.pkl', 'r') as infile:
-        mean = pickle.load(infile)
+        x = pickle.load(infile)
     lead_times = range(0, 37)
-    plot(rms, mean, lead_times, diagnostics)
-    plt.savefig('/home/lsaffi/plots/errors1.png')
+    plot(x, lead_times, diagnostics)
+    plt.savefig('/home/lsaffi/plots/IOP5/mean_pv_vs_time_subset2.png')
