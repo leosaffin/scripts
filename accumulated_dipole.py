@@ -1,89 +1,84 @@
-import datetime
 import cPickle as pickle
+import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 from mymodule import convert, grid, diagnostic
-from mymodule.forecast import Forecast
 
 
-def main(forecast, times):
+def main(forecast, times, names):
     """
     """
     means = {}
     for name in names:
-        means[name] = np.zeros([len(times) + 1, len(bins) - 1])
-    means2 = np.zeros([len(times) + 1, 2])
-    for n, time in enumerate(times):
-        print(n)
-        forecast.set_time(time)
+        means[name] = np.zeros([len(times), len(bins) - 1])
+    for n, time in enumerate(times[1:]):
+        print(time)
+        forecast.set_lead_time(datetime.timedelta(hours=time))
+        # Load required variables
+        pv, q, surf, mass = extract(forecast.cubelist)
 
-        forecast.cubelist.remove(forecast.cubelist.extract('air_pressure')[0])
-        pv = convert.calc('advection_only_pv', forecast.cubelist)
-        q = convert.calc('specific_humidity', forecast.cubelist)
-        density = convert.calc('air_density', forecast.cubelist)
-        surf = convert.calc('atmosphere_boundary_layer_height',
-                            forecast.cubelist)
+        # Make a tropopause and boundary layer mask
+        mask = make_mask(pv, q, surf)
 
-        volume = grid.volume(density)
-        mass = volume * density.data
-
-        # Make a tropopause masked
-        trop = diagnostic.tropopause2(pv, q)
-        mask = surf.data * np.ones(pv.shape) > pv.coord('altitude').points
-        mask = np.logical_or(trop, mask)
-
+        # Calculate the tropopause dipole for each diagnostic
         for name in names:
             x = convert.calc(name, forecast.cubelist)
             means[name][n + 1, :] = diagnostic.averaged_over(x.data, bins,
                                                              pv.data,
                                                              mass, mask=mask)
 
-        x = convert.calc('total_minus_advection_only_pv', forecast.cubelist)
-        means2[n + 1, :] = diagnostic.averaged_over(x.data, bins2, pv.data,
-                                                    mass, mask=mask)
+    with open('/home/lsaffi/data/IOP5/long_dipole2.pkl', 'w') as output:
+        pickle.dump(means, output)
 
-    with open('/home/lsaffi/data/dipole.pkl', 'w') as output:
-        pickle.dump([means, means2], output)
+    plotfig(names, times, bins, means)
 
 
-def plotfig(names, times, bins):
-    with open('/home/lsaffi/data/dipole.pkl', 'r') as output:
-        means, means2 = pickle.load(output)
-    bin_centres = 0.5 * (bins[0:-1] + bins[1:])
-    levs = np.linspace(-0.15, 0.15, 16)
+def extract(cubelist):
+    """Obtain required variables from cubelist
+    """
+    # Remove pressure on rho levels
+    cubelist.remove(cubelist.extract('air_pressure')[0])
+    pv = convert.calc('advection_only_pv', cubelist)
+    q = convert.calc('specific_humidity', cubelist)
+    surf = convert.calc('atmosphere_boundary_layer_height', cubelist)
+
+    # Calculate the mass in each gridbox
+    density = convert.calc('air_density', cubelist)
+    volume = grid.volume(density)
+    mass = volume * density.data
+
+    return pv, q, surf, mass
+
+
+def make_mask(pv, q, surf):
+    """Makes a mask to ignore the boundary layer and far from the tropopause
+    """
+    trop = diagnostic.tropopause2(pv, q)
+    mask = surf.data * np.ones(pv.shape) > pv.coord('altitude').points
+    mask = np.logical_or(np.logical_not(trop), mask)
+    diab = np.logical_and(pv.data > 2, q.data > 0.01)
+    mask = np.logical_or(mask, diab)
+
+    return mask
+
+
+def plotfig(names, times, bins, means):
     for name in names:
-        plt.figure()
-        plt.contourf(times, bin_centres, means[name].T, levs, cmap='bwr',
-                     extend='both')
+        plt.plot(times, means[name][:, 0], '-x', label='Tropospheric Anomaly',
+                 color='b')
+        plt.plot(times, means[name][:, 1], '-x', label='Stratospheric Anomaly',
+                 color='r')
         plt.xlabel('Time')
         plt.xlim(times[0], times[-1])
-        plt.ylabel('Advection Only PV (PVU)')
-        plt.colorbar()
-        plt.savefig('/home/lsaffi/plots/' + name + 'dipole.png')
-    plt.clf()
-    plt.plot(times, means2[:, 0], '-x', label='Tropospheric Anomaly', color='b')
-    plt.plot(times, means2[:, 1], '-x', label='Stratospheric Anomaly', color='r')
-    plt.xlabel('Time')
-    plt.xlim(times[0], times[-1])
-    plt.ylabel('Mass Weighted Mean PV (PVU)')
-    plt.legend(loc='best')
-    plt.savefig('/home/lsaffi/plots/acc_dipole.png')
+        plt.ylabel('Mass Weighted Mean PV (PVU)')
+        plt.legend(loc='best')
+        plt.title(name)
+        plt.savefig('/home/lsaffi/plots/acc_dipole_long_' + name + '2.png')
 
 if __name__ == '__main__':
-    directory = '/projects/diamet/lsaffi/xjjhq/xjjha_'
-    start_time = datetime.datetime(2011, 11, 28, 12)
-    dt = datetime.timedelta(hours=1)
-    times = [start_time + n * dt for n in xrange(37)]
-    del times[0]
-    mapping = {time: directory +
-               str(int((time - start_time).total_seconds() / 3600)).zfill(3) +
-               '.pp'
-               for time in times}
-
-    names = ['total_minus_advection_only_pv', 'sum_of_physics_pv_tracers']
-    bins = np.linspace(0, 8, 33)
-    bins2 = [0, 2, 8]
-    iop5 = Forecast(start_time, mapping)
-    #main(iop5, times)
-    times = np.linspace(0, 36, 37)
-    plotfig(names, times, bins)
+    names = ['total_minus_advection_only_pv']
+    bins = [-100, 2, 100]
+    times = np.linspace(0, 120, 21)
+    with open('/home/lsaffi/data/forecasts/iop5_long.pkl') as infile:
+        forecast = pickle.load(infile)
+    main(forecast, times, names)
