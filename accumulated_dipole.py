@@ -23,11 +23,11 @@ def main(forecast, times, names):
         # Calculate the tropopause dipole for each diagnostic
         for name in names:
             x = convert.calc(name, forecast.cubelist)
-            means[name][n + 1, :] = diagnostic.averaged_over(x.data, bins,
-                                                             pv.data,
-                                                             mass, mask=mask)
+            means[name][n + 1, :], weights = (
+                diagnostic.averaged_over(x.data, bins, pv.data, mass,
+                                         mask=mask))
 
-    with open('/home/lsaffi/data/IOP5/long_dipole2.pkl', 'w') as output:
+    with open('/home/lsaffi/data/IOP5/accumulated_dipole.pkl', 'w') as output:
         pickle.dump(means, output)
 
     plotfig(names, times, bins, means)
@@ -56,29 +56,34 @@ def make_mask(pv, q, surf):
     trop = diagnostic.tropopause2(pv, q)
     mask = surf.data * np.ones(pv.shape) > pv.coord('altitude').points
     mask = np.logical_or(np.logical_not(trop), mask)
-    diab = np.logical_and(pv.data > 2, q.data > 0.01)
-    mask = np.logical_or(mask, diab)
 
     return mask
 
 
 def plotfig(names, times, bins, means):
+    levs = [-0.15, -0.125, -0.1, -0.075, -0.05, -0.025, 0.025, 0.05, 0.075,
+            0.1, 0.125, 0.15]
     for name in names:
-        plt.plot(times, means[name][:, 0], '-x', label='Tropospheric Anomaly',
-                 color='b')
-        plt.plot(times, means[name][:, 1], '-x', label='Stratospheric Anomaly',
-                 color='r')
+        plt.figure()
+        plt.contourf(times, bins, means[name].transpose(),
+                     levs, cmap='bwr', extend='both')
         plt.xlabel('Time')
         plt.xlim(times[0], times[-1])
-        plt.ylabel('Mass Weighted Mean PV (PVU)')
-        plt.legend(loc='best')
+        plt.ylabel('Advection Only PV (PVU)')
+        plt.colorbar(orientation='horizontal')
         plt.title(name)
-        plt.savefig('/home/lsaffi/plots/acc_dipole_long_' + name + '2.png')
+        plt.savefig('/home/lsaffi/plots/paper/accumulated_dipole_' + name +
+                    '.png')
 
 if __name__ == '__main__':
-    names = ['total_minus_advection_only_pv']
-    bins = [-100, 2, 100]
-    times = np.linspace(0, 120, 21)
-    with open('/home/lsaffi/data/forecasts/iop5_long.pkl') as infile:
+    names = ['total_minus_advection_only_pv',
+             'sum_of_physics_pv_tracers']
+    bins = np.linspace(0, 8, 33)
+    bin_centres = np.linspace(0.025, 7.825, 32)
+    times = np.linspace(0, 36, 37)
+    with open('/home/lsaffi/data/forecasts/iop5.pkl') as infile:
         forecast = pickle.load(infile)
-    main(forecast, times, names)
+    #main(forecast, times, names)
+    with open('/home/lsaffi/data/IOP5/accumulated_dipole.pkl', 'r') as infile:
+        means = pickle.load(infile)
+    plotfig(names, times, bin_centres, means)
