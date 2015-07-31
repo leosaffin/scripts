@@ -15,7 +15,7 @@ def main(start_time, end_time, dt):
         if time in job_ids:
             # Load the files from mass to postproc and into a forecast
             new_forecast = archive.download(time)
-            suites.append(Suite(new_forecast))
+            suites.append(Suite(new_forecast, job_ids[time]))
         for suite in suites:
             update_time(suite, time)
 
