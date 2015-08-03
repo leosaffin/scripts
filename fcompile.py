@@ -1,9 +1,9 @@
 import numpy.f2py as f2py
 
 # Source File Name
-filename = 'fortran/pvi.f'
+filename = 'fronts.f'
 # Output Module Name
-modulename = 'pvi'
+modulename = 'ffronts'
 # Compiler Flags
 flags = ''
 
@@ -14,5 +14,3 @@ with open(filename) as code:
 
 # Compile Fortran Code Into Python Module
 f2py.compile(source, modulename=modulename, extra_args=flags)
-
-
