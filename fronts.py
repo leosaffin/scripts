@@ -26,17 +26,16 @@ def main(tau):
     grad_tau = ffronts.grad2d(tau, dx)
 
     # Calculate grad_abs_grad_tau
-    abs_grad_tau = np.sqrt(grad_tau[:, :, 0] ** 2 + grad_tau[:, :, 1] ** 2)
-    grad_abs_grad_tau = ffronts.grad2d(abs_grad_tau, dx)
+    grad_abs_grad_tau = ffronts.grad2d(abs2d(grad_tau), dx)
 
     # Calculate the locating variable
     loc = locating_variable(grad_abs_grad_tau, dx)
-    mask = np.logical_and(m1(tau, grad_tau, grad_abs_grad_tau, dx),
-                          m2(tau, abs_grad_tau, grad_abs_grad_tau, dx))
+    mask1 = m1(grad_tau, grad_abs_grad_tau, dx)
+    mask2 = m2(grad_tau, grad_abs_grad_tau, dx)
 
     # Find where the locating variable is zero
     fronts = np.logical_and(loc < tol, loc > -tol)
-    fronts = np.logical_and(fronts, mask)
+    fronts = np.logical_and(fronts, np.logical_and(mask1, mask2))
 
     return fronts
 
@@ -59,43 +58,36 @@ def locating_variable(grad_abs_grad_tau, dx):
     return loc
 
 
-def m1(tau, grad_tau, grad_abs_grad_tau, dx):
-    # Calculate \(\nabla \tau \cdot \nabla |\nabla \tau |\))
+def m1(grad_tau, grad_abs_grad_tau, dx):
+    """Calculate the first masking variable
+    """
+    # Calculate grad(tau).grad(|grad(tau|)
     y = grad_tau * grad_abs_grad_tau
     y = y[:, :, 0] + y[:, :, 1]
     # Average over 5 gridpoint array
     y = ffronts.fivepointave(y, dx)
     # Use sign
-    z = np.sqrt(grad_abs_grad_tau[:, :, 0] ** 2 +
-                grad_abs_grad_tau[:, :, 1] ** 2)
+    z = abs2d(grad_abs_grad_tau)
     y = z * np.sign(y)
-
+    return y
     mask = y > k1
     return mask
 
 
-def m2(tau, abs_grad_tau, grad_abs_grad_tau, dx):
-
-    abs_grad_abs_grad_tau = np.sqrt(grad_abs_grad_tau[:, :, 0] ** 2 +
-                                    grad_abs_grad_tau[:, :, 1] ** 2)
-    y = abs_grad_tau + m * dx * abs_grad_abs_grad_tau
-
+def m2(grad_tau, grad_abs_grad_tau, dx):
+    """
+    """
+    y = abs2d(grad_tau) + m * dx * abs2d(grad_abs_grad_tau)
+    return y
     mask = y > k2
     return mask
 
 
-def mean_axis(x):
-    """ Calculate the mean axis as described in appendix 2 of Hewson 1998
-
-    Args:
-        x (list): A list of tuples containing size and angle of the axis to be
-            averaged over
+def abs2d(x):
+    """Calculate the absolute value of a 2D array of vectors
     """
-    P = sum([D * np.cos(2 * beta) for D, beta in x])
-    Q = sum([D * np.sin(2 * beta) for D, beta in x])
-    beta_mean = 0.5 * atan2(Q, P)
-    D_mean = (1 / len(x)) * np.sqrt(P ** 2 + Q ** 2)
-    return beta_mean, D_mean
+    y = np.sqrt(x[:, :, 0] ** 2 + x[:, :, 1] ** 2)
+    return y
 
 
 if __name__ == '__main__':

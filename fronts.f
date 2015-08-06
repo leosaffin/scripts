@@ -27,7 +27,9 @@ CF2PY real, intent(out) :: grad(ny, nx, 2)
       grad = 0.0
       do j=2,ny-1
         do i=2,nx-1
+          ! Calculate x-derivative
           grad(j, i, 1) = (x(j, i+1) - x(j, i-1)) / (2*dx)
+          ! Calculate y-derivative
           grad(j, i, 2) = (x(j+1, i) - x(j-1, i)) / (2*dx)
         end do
       end do
