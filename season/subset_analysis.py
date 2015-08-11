@@ -7,37 +7,37 @@ from mymodule import files, convert
 
 
 # List of variables to extract from the analysis
-names = ['advection_only_pv', # ?
-         'advection_only_potential_temperature', # ?
-         'total_pv', # ?
-         'short_wave_radiation_pv', # ?
-         'long_wave_radiation_pv', # ?
-         'microphysics_pv', # ?
-         'gravity_wave_drag_pv', # ?
-         'convection_pv', # ?
-         'boundary_layer_pv', # ?
-         'advection_inconsistency_pv', # ?
-         'cloud_rebalancing_pv', # ?
-         'air_pressure_at_sea_level', # ?
+names = ['advection_only_pv', # Equal to PV
+         'advection_only_potential_temperature', # Equal to theta
+         'total_pv', # Calculate PV
+         'short_wave_radiation_pv', # Set to zero
+         'long_wave_radiation_pv', # Set to zero
+         'microphysics_pv', # Set to zero
+         'gravity_wave_drag_pv', # Set to zero
+         'convection_pv', # Set to zero
+         'boundary_layer_pv', # Set to zero
+         'advection_inconsistency_pv', # Set to zero
+         'cloud_rebalancing_pv', # Set to zero
+         'air_pressure_at_sea_level', # Calculate from prognostic variables
          'atmosphere_boundary_layer_thickness',
-         'stratiform_rainfall_amount', # ?
-         'convective_rainfall_amount', # ?
+         'stratiform_rainfall_amount', # Set to zero
+         'convective_rainfall_amount', # Set to zero
          'x_wind',
          'y_wind',
          'upward_air_velocity',
-         'air_pressure', # ?
-         'surface_pressure', # ?
+         'air_pressure', # Calculate from exner pressure
+         'surface_pressure', # Calculate from exner pressure
          'specific_humidity',
          'mass_fraction_of_cloud_liquid_water_in_air',
          'mass_fraction_of_cloud_ice_in_air',
-         'air_temperature', # ?
+         'air_temperature', # Calculate from theta and exner pressure
          'surface_altitude']
 
 
 def main():
     """ Modifies all .analysis files in the current directory
     """
-    for analysis_file in glob.glob('*.analysis.pp'):
+    for analysis_file in glob.glob('*.analysis'):
         output_file = analysis_file + '.pp'
         newpp(analysis_file, output_file)
 
