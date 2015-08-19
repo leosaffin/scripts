@@ -21,9 +21,6 @@ names = ['x_wind',
          'specific_humidity',
          'mass_fraction_of_cloud_liquid_water_in_air',
          'mass_fraction_of_cloud_ice_in_air',
-         'surface_altitude',
-         'atmosphere_boundary_layer_thickness',
-         'surface_altitude',
          'short_wave_radiation_pv',
          'long_wave_radiation_pv',
          'microphysics_pv',
@@ -50,8 +47,7 @@ def newpp(analysis_file, output_file):
 
     for name in names:
         cube = convert.calc(name, cubelist)
-        cube = cube[zmin:zmax, ymin:ymax, xmin:xmax]
-        newcubelist.append(cube)
+        newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
 
     # Calculate diagnostic variables
     u = convert.calc('x_wind', cubelist)
@@ -61,10 +57,19 @@ def newpp(analysis_file, output_file):
     rho_rsq = convert.calc('air_density_times_r_squared', cubelist)
     Pi = convert.calc('dimensionless_exner_function', cubelist)
 
-    # y_wind
+    # Surface altitude
+    surf = convert.calc('surface_altitude', cubelist)
+    newcubelist.append(surf[ymin:ymax, xmin:xmax])
+    newcubelist.append(surf[ymin:ymax, xmin:xmax])
+
+    # Atmosphere boundary layer thickness
+    bl = convert.calc('atmosphere_boundary_layer_thickness', cubelist)
+    newcubelist.append(bl[ymin:ymax, xmin:xmax])
+
+    # Meridional velocity
     newcubelist.append(v[zmin:zmax, (ymin - 1):(ymax - 1), xmin:xmax])
 
-    # upward_air_velocity
+    # Vertical velocity
     newcubelist.append(w[(zmin + 1):(zmax + 1), ymin:ymax, xmin:xmax])
 
     # Advection only PV
@@ -106,13 +111,13 @@ def newpp(analysis_file, output_file):
     newcubelist.append(T[zmin:zmax, ymin:ymax, xmin:xmax])
 
     # Convective rainfall amount
-    data = np.zeros([zmax - zmin, ymax - ymin, xmax - xmin])
-    cube = iris.cube.Cube(data)
+    data = np.zeros([ymax - ymin, xmax - xmin])
+    cube = surf[ymin:ymax, xmin:xmax].copy(data=data)
     cube.attributes['STASH'] = STASH(1, 5, 201)
     newcubelist.append(cube)
 
     # Stratiform rainfall amount
-    cube = iris.cube.Cube(data)
+    cube = surf[ymin:ymax, xmin:xmax].copy(data=data)
     cube.attributes['STASH'] = STASH(1, 4, 201)
     newcubelist.append(cube)
 
