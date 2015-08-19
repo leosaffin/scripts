@@ -2,36 +2,36 @@
 """
 
 import glob
+import numpy as np
 import iris
-from mymodule import files, convert
+from iris.fileformats.pp import STASH
+from mymodule import files, convert, interpolate, variable
 
+
+# Subset of dimensions to extract
+zmin = 0
+zmax = 50
+ymin = 15
+ymax = 345
+xmin = 15
+xmax = 585
 
 # List of variables to extract from the analysis
-names = ['advection_only_pv', # Equal to PV
-         'advection_only_potential_temperature', # Equal to theta
-         'total_pv', # Calculate PV
-         'short_wave_radiation_pv', # Set to zero
-         'long_wave_radiation_pv', # Set to zero
-         'microphysics_pv', # Set to zero
-         'gravity_wave_drag_pv', # Set to zero
-         'convection_pv', # Set to zero
-         'boundary_layer_pv', # Set to zero
-         'advection_inconsistency_pv', # Set to zero
-         'cloud_rebalancing_pv', # Set to zero
-         'air_pressure_at_sea_level', # Calculate from prognostic variables
-         'atmosphere_boundary_layer_thickness',
-         'stratiform_rainfall_amount', # Set to zero
-         'convective_rainfall_amount', # Set to zero
-         'x_wind',
-         'y_wind',
-         'upward_air_velocity',
-         'air_pressure', # Calculate from exner pressure
-         'surface_pressure', # Calculate from exner pressure
+names = ['x_wind',
          'specific_humidity',
          'mass_fraction_of_cloud_liquid_water_in_air',
          'mass_fraction_of_cloud_ice_in_air',
-         'air_temperature', # Calculate from theta and exner pressure
-         'surface_altitude']
+         'surface_altitude',
+         'atmosphere_boundary_layer_thickness',
+         'surface_altitude',
+         'short_wave_radiation_pv',
+         'long_wave_radiation_pv',
+         'microphysics_pv',
+         'gravity_wave_drag_pv',
+         'convection_pv',
+         'boundary_layer_pv',
+         'advection_inconsistency_pv',
+         'cloud_rebalancing_pv']
 
 
 def main():
@@ -47,21 +47,78 @@ def newpp(analysis_file, output_file):
     """
     cubelist = files.load(analysis_file)
     newcubelist = iris.cube.CubeList()
+
     for name in names:
-        cube = convert.calc(name, cubelist)[0]
-        # Remove coordinates that make save/load not work
-        try:
-            cube.remove_aux_factory(cube.aux_factory('altitude'))
-            cube.remove_coord('surface_altitude')
-            if name == 'y_wind':
-                cube = cube[0:50, 14:344, 15:585]
-            else:
-                cube = cube[0:50, 15:345, 15:585]
-        except iris.exceptions.CoordinateNotFoundError:
-            cube = convert.calc(name, cubelist)[0]
-            cube = cube[15:345, 15:585]
+        cube = convert.calc(name, cubelist)
+        cube = cube[zmin:zmax, ymin:ymax, xmin:xmax]
         newcubelist.append(cube)
-    iris.save(newcubelist, output_file)
+
+    # Calculate diagnostic variables
+    u = convert.calc('x_wind', cubelist)
+    v = convert.calc('y_wind', cubelist)
+    w = convert.calc('upward_air_velocity', cubelist)
+    theta = convert.calc('air_potential_temperature', cubelist)
+    rho_rsq = convert.calc('air_density_times_r_squared', cubelist)
+    Pi = convert.calc('dimensionless_exner_function', cubelist)
+
+    # y_wind
+    newcubelist.append(v[zmin:zmax, (ymin - 1):(ymax - 1), xmin:xmax])
+
+    # upward_air_velocity
+    newcubelist.append(w[(zmin + 1):(zmax + 1), ymin:ymax, xmin:xmax])
+
+    # Advection only PV
+    pv = variable.pv(u, v, w, theta, rho_rsq)
+    cube = convert.calc('advection_only_pv', cubelist)
+    cube = cube.copy(data=pv.data)
+    newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Total PV
+    cube = convert.calc('total_pv', cubelist)
+    cube = cube.copy(data=pv.data)
+    newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Mean sea-level pressure
+    cube = variable.mslp(theta, Pi, w)
+    cube.attributes['STASH'] = STASH(1, 16, 222)
+    newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Air pressure on rho levels
+    P_rho = convert.calc('air_pressure', cubelist)
+    P_rho.attributes['STASH'] = STASH()
+    newcubelist.append(P_rho[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Air pressure on theta levels
+    P_theta = interpolate.main(
+        P_rho, level_height=theta.coord('level_height').points)
+    P_theta.attributes['STASH'] = STASH()
+    newcubelist.append(P_theta[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Surface pressure
+    P_surf = interpolate.main(
+        P_rho, level_height=theta.coord('level_height').points)[0]
+    P_surf.attributes['STASH'] = STASH()
+    newcubelist.append(P_surf[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Air temperature
+    T = convert.temp(P_theta, theta)
+    T.attributes['STASH'] = STASH(1, 16, 4)
+    newcubelist.append(T[zmin:zmax, ymin:ymax, xmin:xmax])
+
+    # Convective rainfall amount
+    data = np.zeros([zmax - zmin, ymax - ymin, xmax - xmin])
+    cube = iris.cube.Cube(data)
+    cube.attributes['STASH'] = STASH(1, 5, 201)
+    newcubelist.append(cube)
+
+    # Stratiform rainfall amount
+    cube = iris.cube.Cube(data)
+    cube.attributes['STASH'] = STASH(1, 4, 201)
+    newcubelist.append(cube)
+
+    files.save(newcubelist, output_file)
+
+    return
 
 
 if __name__ == '__main__':
