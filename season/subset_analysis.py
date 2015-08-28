@@ -2,8 +2,10 @@
 """
 
 import glob
+import os
 import numpy as np
 import iris
+from iris.unit import Unit
 from iris.fileformats.pp import STASH
 from mymodule import files, convert, interpolate, variable
 
@@ -31,17 +33,21 @@ names = ['x_wind',
          'cloud_rebalancing_pv']
 
 
-def main():
+def main(url):
     """ Modifies all .analysis files in the current directory
     """
-    for analysis_file in glob.glob('*.analysis'):
-        output_file = analysis_file + '.pp'
-        newpp(analysis_file, output_file)
+    for analysis_file in glob.glob(url + '*.analysis'):
+        try:
+            output_file = analysis_file + '.pp'
+            newpp(analysis_file, output_file)
+        except ValueError:
+            print('Could not subset ' + analysis_file)
 
 
 def newpp(analysis_file, output_file):
     """ Copies an analysis file taking a subset of variables
     """
+    print analysis_file
     cubelist = files.load(analysis_file)
     newcubelist = iris.cube.CubeList()
 
@@ -86,28 +92,39 @@ def newpp(analysis_file, output_file):
     # Mean sea-level pressure
     cube = variable.mslp(theta, Pi, w)
     cube.attributes['STASH'] = STASH(1, 16, 222)
-    newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
+    newcubelist.append(cube[ymin:ymax, xmin:xmax])
 
     # Air pressure on rho levels
     P_rho = convert.calc('air_pressure', cubelist)
-    P_rho.attributes['STASH'] = STASH()
+    P_rho.attributes['STASH'] = STASH(1, 0, 407)
+    P_rho.rename('air_pressure')
     newcubelist.append(P_rho[zmin:zmax, ymin:ymax, xmin:xmax])
 
     # Air pressure on theta levels
-    P_theta = interpolate.main(
-        P_rho, level_height=theta.coord('level_height').points)
-    P_theta.attributes['STASH'] = STASH()
+    Pi_theta = interpolate.main(
+        Pi, level_height=theta.coord('level_height').points)
+    # Interpolated cubes muck up pp saver
+    Pi_theta = theta.copy(data=Pi_theta.data)
+    Pi_theta.rename('dimensionless_exner_function')
+    Pi_theta.units = Unit('')
+
+    # Air pressure on theta levels
+    P_theta = convert.pressure(Pi_theta)
+    P_theta.attributes['STASH'] = STASH(1, 0, 408)
+    P_theta.rename('air_pressure')
     newcubelist.append(P_theta[zmin:zmax, ymin:ymax, xmin:xmax])
 
     # Surface pressure
     P_surf = interpolate.main(
-        P_rho, level_height=theta.coord('level_height').points)[0]
-    P_surf.attributes['STASH'] = STASH()
-    newcubelist.append(P_surf[zmin:zmax, ymin:ymax, xmin:xmax])
+        P_rho, level_height=w.coord('level_height').points)[0]
+    P_surf.attributes['STASH'] = STASH(1, 0, 409)
+    P_surf.rename('surface_air_pressure')
+    newcubelist.append(P_surf[ymin:ymax, xmin:xmax])
 
     # Air temperature
-    T = convert.temp(P_theta, theta)
+    T = convert.temp(Pi_theta, theta)
     T.attributes['STASH'] = STASH(1, 16, 4)
+    T.rename('air_temperature')
     newcubelist.append(T[zmin:zmax, ymin:ymax, xmin:xmax])
 
     # Convective rainfall amount
@@ -123,8 +140,11 @@ def newpp(analysis_file, output_file):
 
     files.save(newcubelist, output_file)
 
+    os.system('rm ' + analysis_file)
+
     return
 
 
 if __name__ == '__main__':
-    main()
+    url = '/projects/diamet/lsaffi/season/'
+    main(url)
