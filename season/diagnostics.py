@@ -1,11 +1,17 @@
 import cPickle as pickle
 import numpy as np
-from mymodule import convert, diagnostic, grid
+from mymodule import convert, diagnostic, grid, interpolate
+from scripts.season import subset
 
 
 # Constant parameters for each forecast
 bins = np.linspace(0, 8, 33)
-names = ['total_minus_advection_only_pv',
+
+# Pressure level for error statistics
+plevs = np.linspace(850, 250, 13)
+
+names = ['total_minus_advection_only_potential_temperature'
+         'total_minus_advection_only_pv',
          'advection_inconsistency_pv',
          'microphysics_pv',
          'short_wave_radiation_pv',
@@ -15,58 +21,122 @@ names = ['total_minus_advection_only_pv',
          'boundary_layer_pv',
          'cloud_rebalancing_pv']
 
+error_measures = ['total_pv',
+                  'air_potential_temperature',
+                  'air_temperature']
+#'height',
+#'wind_speed',
+#'relative_humidity',
+#'air_pressure_at_mean_sea_level']
+
 
 class Suite():
     """A collection of diagnostics used to analyse a forecast
+
+    Attributes:
+        forecast (mymodule.forecast.Forecast): A collection of forecast data
+        id (str): An identifier for saved files to match the job
+        data (dict): A database of analysed data from the forecast
+        errors (dict): A database of forecast error measures
     """
 
     def __init__(self, forecast, job_id):
         self.forecast = forecast
         self.id = job_id
         self.data = {}
+        self.errors = {}
 
     def set_time(self, time):
+        """ Sets the time of the associated forecast
+
+        Args:
+            time (datetime.datetime): Time to set the forecast to
+        """
         self.forecast.set_time(time)
+        # When time is set remove duplicate cubes from newly loaded cubelist
+        cubes = self.forecast.cubelist
+        cubes.remove(cubes.extract('air_pressure')[0])
+        cubes.remove(cubes.extract('surface_altitude')[0])
 
     def analyse(self):
+        """ Performs an independent analysis of a single timestep
+        """
+        # Initialise the data storage for this timestep
+        self.data[self.forecast.time] = {}
+
         # Extract the cubes at the current time
         cubes = self.forecast.cubelist
 
-        # Calculate all diagnostics
-        diagnostics = analyse_timestep(cubes)
+        # Make tropopause mask
+        mask = make_mask(cubes)
 
-        self.data[self.forecast.time] = diagnostics
+        # Extract variables
+        variables = [convert.calc(name, cubes).data for name in names]
+        adv = convert.calc('advection_only_pv', cubes).data
+        density = convert.calc('air_density', cubes)
+        volume = grid.volume(density)
+        mass = volume * density.data
+
+        # Loop over subsets of the domain
+        for domain in subset.subsets:
+            self.data[self.forecast.time][domain] = (
+                calc_diagnostics(variables, adv, mass, mask,
+                                 subset.subsets[domain]))
+
+    def analyse_errors(self, suite):
+        """Analyses forecast errors
+
+        Args:
+            suite (Suite): Another suite holding data about a forecast
+                initialised after the forecast held in this suite
+        """
+        start_dt = suite.forecast.start_time - self.forecast.start_time
+        full_dt = suite.forecast.time - self.forecast.start_time
+        # Initialise dictionary for two forecasts if it's the first set
+        if start_dt == full_dt:
+            self.errors[start_dt] = {}
+        # Initialise dictionary for current dt
+        self.errors[start_dt][full_dt] = {}
+
+        # Calculate mean sea-level pressure variables
+        forecast = convert.calc('air_pressure_at_mean_sea_level',
+                                self.forecast.cubelist)
+        analysis = convert.calc('air_pressure_at_mean_sea_level',
+                                self.forecast.cubelist)
+        diff = (forecast - analysis).data
+        self.errors[start_dt][full_dt]['air_pressure_at_mean_sea_level'] = (
+            calc_errors(diff))
+
+        # Make pressure coordinates
+        p = convert.calc('air_pressure', self.forecast.cubelist)
+        p_f = grid.make_coord(p)
+        p = convert.calc('air_pressure', suite.forecast.cubelist)
+        p_a = grid.make_coord(p)
+
+        # Analyse all 3d fields
+        for variable in error_measures:
+            # Extract forecast and proxy analysis fields
+            cube = convert.calc(variable, self.forecast.cubelist)
+            cube.add_aux_coord(p_f, [0, 1, 2])
+            forecast = interpolate.to_level(cube, air_pressure=plevs)
+
+            cube = convert.calc(variable, self.forecast.cubelist)
+            cube.add_aux_coord(p_a, [0, 1, 2])
+            analysis = interpolate.to_level(cube, air_pressure=plevs)
+
+            diff = (forecast - analysis).data
+            mask = np.logical_or(forecast.data == 0, analysis.data == 0)
+            diff = np.ma.masked_where(mask, diff)
+            self.errors[start_dt][full_dt][variable] = calc_errors(diff)
 
     def save(self):
         with open('/home/lsaffi/data/season/' +
-                  self.id + '.pkl', 'w') as output:
+                  self.id + '2.pkl', 'w') as output:
             pickle.dump(self.data, output)
+            pickle.dump(self.errors, output)
 
     def __del__(self):
         print('Analysed ' + str(self.forecast.start_time))
-
-
-def analyse_timestep(cubelist):
-    """
-    """
-    cubelist.remove(cubelist.extract('air_pressure')[0])
-    cubelist.remove(cubelist.extract('surface_altitude')[0])
-
-    # Make tropopause mask
-    mask = make_mask(cubelist)
-
-    # Extract variables
-    variables = [convert.calc(name, cubelist).data for name in names]
-    adv = convert.calc('advection_only_pv', cubelist).data
-    density = convert.calc('air_density', cubelist)
-    volume = grid.volume(density)
-    mass = volume * density.data
-
-    # Calculate PV dipole
-    means, weights = diagnostic.averaged_over(variables, bins, adv, mass,
-                                              mask=mask)
-
-    return [means, weights]
 
 
 def make_mask(cubelist):
@@ -80,3 +150,47 @@ def make_mask(cubelist):
     mask = np.logical_or(np.logical_not(trop), mask)
 
     return mask
+
+
+def calc_diagnostics(variables, adv, mass, mask, subset):
+    """Calculates a single timestep of diagnostics
+
+    Args:
+        variables (list): List of cubes to be analysed for the tropopause
+            dipole
+        adv (np.array): The data array of the advection only PV
+        mass (np.array): The mass in each gridbox
+        mask (np.array): A tropopause mask
+    """
+    # Subset data arrays
+    variables = [subset.slice(variable) for variable in variables]
+    adv = subset.slice(adv)
+    mass = subset.slice(mass)
+    mask = subset.slice(mask)
+
+    # Intialise output
+    output = {}
+
+    # Calculate PV dipole
+    output['dipole'] = diagnostic.averaged_over(variables, bins, adv, mass,
+                                                mask=mask)
+
+    # Calculate front diagnostics
+
+    # Calculate Eady growth rate
+
+    return output
+
+
+def calc_errors(diff):
+    """Calculates measures of forecast errors
+    """
+    output = {}
+    if diff.ndim == 3:
+        output['rms'] = np.sqrt(np.ma.mean(diff**2, axis=(1, 2)))
+        output['mean'] = np.ma.mean(diff, axis=(1, 2))
+    else:
+        output['rms'] = np.sqrt(np.ma.mean(diff**2))
+        output['mean'] = np.ma.mean(diff)
+
+    return output

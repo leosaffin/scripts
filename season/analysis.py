@@ -16,9 +16,12 @@ def main(start_time, end_time, dt):
             # Load the files from mass to postproc and into a forecast
             new_forecast = archive.download(time)
             suites.append(Suite(new_forecast, job_ids[time]))
-        time += dt
         for suite in suites:
             update_time(suite, time, suites)
+        # Compare different forecasts
+        for n in xrange(len(suites) - 1):
+            compare(suites[n], suites[n + 1])
+        time += dt
 
 
 def update_time(suite, time, suites):
@@ -31,6 +34,15 @@ def update_time(suite, time, suites):
         archive.clean_up(suite.forecast.start_time)
         suites.remove(suite)
         del suite
+
+
+def compare(suite1, suite2):
+    """
+    """
+    if suite1.forecast.start_time < suite2.forecast.start_time:
+        suite1.analyse_errors(suite2)
+    else:
+        suite2.analyse_errors(suite1)
 
 
 if __name__ == '__main__':
