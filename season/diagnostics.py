@@ -1,5 +1,7 @@
 import cPickle as pickle
 import numpy as np
+import iris.analysis.maths as imath
+from iris.analysis import MEAN
 from mymodule import convert, diagnostic, grid, interpolate
 from scripts.season import subset
 
@@ -10,7 +12,7 @@ bins = np.linspace(0, 8, 33)
 # Pressure level for error statistics
 plevs = np.linspace(850, 250, 13)
 
-names = ['total_minus_advection_only_potential_temperature'
+names = ['total_minus_advection_only_potential_temperature',
          'total_minus_advection_only_pv',
          'advection_inconsistency_pv',
          'microphysics_pv',
@@ -23,11 +25,9 @@ names = ['total_minus_advection_only_potential_temperature'
 
 error_measures = ['total_pv',
                   'air_potential_temperature',
-                  'air_temperature']
-#'height',
-#'wind_speed',
-#'relative_humidity',
-#'air_pressure_at_mean_sea_level']
+                  'air_temperature',
+                  'relative_humidity',
+                  'wind_speed']
 
 
 class Suite():
@@ -72,16 +72,18 @@ class Suite():
 
         # Extract variables
         variables = [convert.calc(name, cubes).data for name in names]
+        log_q = imath.log10(convert.calc('specific_humidity'), cubes)
+        variables.append(log_q)
         adv = convert.calc('advection_only_pv', cubes).data
         density = convert.calc('air_density', cubes)
         volume = grid.volume(density)
         mass = volume * density.data
 
         # Loop over subsets of the domain
-        for domain in subset.subsets:
-            self.data[self.forecast.time][domain] = (
+        for name in subset.subsets:
+            self.data[self.forecast.time][name] = (
                 calc_diagnostics(variables, adv, mass, mask,
-                                 subset.subsets[domain]))
+                                 subset.subsets[name]))
 
     def analyse_errors(self, suite):
         """Analyses forecast errors
@@ -152,7 +154,7 @@ def make_mask(cubelist):
     return mask
 
 
-def calc_diagnostics(variables, adv, mass, mask, subset):
+def calc_diagnostics(variables, adv, mass, mask, domain):
     """Calculates a single timestep of diagnostics
 
     Args:
@@ -163,10 +165,10 @@ def calc_diagnostics(variables, adv, mass, mask, subset):
         mask (np.array): A tropopause mask
     """
     # Subset data arrays
-    variables = [subset.slice(variable) for variable in variables]
-    adv = subset.slice(adv)
-    mass = subset.slice(mass)
-    mask = subset.slice(mask)
+    variables = [domain.slice(variable) for variable in variables]
+    adv = domain.slice(adv)
+    mass = domain.slice(mass)
+    mask = domain.slice(mask)
 
     # Intialise output
     output = {}
@@ -174,6 +176,8 @@ def calc_diagnostics(variables, adv, mass, mask, subset):
     # Calculate PV dipole
     output['dipole'] = diagnostic.averaged_over(variables, bins, adv, mass,
                                                 mask=mask)
+    output['mean'] = [x.collapsed(['grid_longitude', 'grid_latitude'], MEAN)
+                      for x in variables]
 
     # Calculate front diagnostics
 
@@ -186,11 +190,14 @@ def calc_errors(diff):
     """Calculates measures of forecast errors
     """
     output = {}
-    if diff.ndim == 3:
-        output['rms'] = np.sqrt(np.ma.mean(diff**2, axis=(1, 2)))
-        output['mean'] = np.ma.mean(diff, axis=(1, 2))
-    else:
-        output['rms'] = np.sqrt(np.ma.mean(diff**2))
-        output['mean'] = np.ma.mean(diff)
+    for name in subset.subsets:
+        output[name] = {}
+        ndiff = subset.subsets[name].slice(diff)
+        if diff.ndim == 3:
+            output[name]['rms'] = np.sqrt(np.ma.mean(ndiff**2, axis=(1, 2)))
+            output[name]['mean'] = np.ma.mean(ndiff, axis=(1, 2))
+        else:
+            output[name]['rms'] = np.sqrt(np.ma.mean(ndiff**2))
+            output[name]['mean'] = np.ma.mean(ndiff)
 
     return output
