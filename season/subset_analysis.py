@@ -84,6 +84,11 @@ def newpp(analysis_file, output_file):
     cube = cube.copy(data=pv.data)
     newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
 
+    # Advection only potential temperature
+    cube = convert.calc('advection_only_potential_temperature')
+    cube = cube.copy(data=theta.data)
+    newcubelist.append(cube[zmin:zmax, ymin:ymax, xmin:xmax])
+
     # Total PV
     cube = convert.calc('total_pv', cubelist)
     cube = cube.copy(data=pv.data)
