@@ -8,7 +8,7 @@ from scripts.season import subset
 bins = np.linspace(0, 8, 33)
 
 # Pressure level for error statistics
-plevs = np.linspace(850, 250, 13)
+plevs = np.linspace(85000, 25000, 13)
 
 names = ['total_minus_advection_only_potential_temperature',
          'total_minus_advection_only_pv',
