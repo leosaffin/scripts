@@ -1,7 +1,5 @@
 import cPickle as pickle
 import numpy as np
-import iris.analysis.maths as imath
-from iris.analysis import MEAN
 from mymodule import convert, diagnostic, grid, interpolate
 from scripts.season import subset
 
@@ -14,6 +12,8 @@ plevs = np.linspace(850, 250, 13)
 
 names = ['total_minus_advection_only_potential_temperature',
          'total_minus_advection_only_pv',
+         'total_pv',
+         'advection_only_pv',
          'advection_inconsistency_pv',
          'microphysics_pv',
          'short_wave_radiation_pv',
@@ -21,7 +21,10 @@ names = ['total_minus_advection_only_potential_temperature',
          'gravity_wave_drag_pv',
          'convection_pv',
          'boundary_layer_pv',
-         'cloud_rebalancing_pv']
+         'cloud_rebalancing_pv',
+         'wind_speed',
+         'relative_humidity',
+         'specific_humidity']
 
 error_measures = ['total_pv',
                   'air_potential_temperature',
@@ -72,8 +75,6 @@ class Suite():
 
         # Extract variables
         variables = [convert.calc(name, cubes).data for name in names]
-        log_q = imath.log10(convert.calc('specific_humidity'), cubes)
-        variables.append(log_q)
         adv = convert.calc('advection_only_pv', cubes).data
         density = convert.calc('air_density', cubes)
         volume = grid.volume(density)
@@ -101,9 +102,9 @@ class Suite():
         self.errors[start_dt][full_dt] = {}
 
         # Calculate mean sea-level pressure variables
-        forecast = convert.calc('air_pressure_at_mean_sea_level',
+        forecast = convert.calc('air_pressure_at_sea_level',
                                 self.forecast.cubelist)
-        analysis = convert.calc('air_pressure_at_mean_sea_level',
+        analysis = convert.calc('air_pressure_at_sea_level',
                                 self.forecast.cubelist)
         diff = (forecast - analysis).data
         self.errors[start_dt][full_dt]['air_pressure_at_mean_sea_level'] = (
@@ -126,7 +127,7 @@ class Suite():
             cube.add_aux_coord(p_a, [0, 1, 2])
             analysis = interpolate.to_level(cube, air_pressure=plevs)
 
-            diff = (forecast - analysis).data
+            diff = forecast.data - analysis.data
             mask = np.logical_or(forecast.data == 0, analysis.data == 0)
             diff = np.ma.masked_where(mask, diff)
             self.errors[start_dt][full_dt][variable] = calc_errors(diff)
@@ -176,8 +177,9 @@ def calc_diagnostics(variables, adv, mass, mask, domain):
     # Calculate PV dipole
     output['dipole'] = diagnostic.averaged_over(variables, bins, adv, mass,
                                                 mask=mask)
-    output['mean'] = [x.collapsed(['grid_longitude', 'grid_latitude'], MEAN)
-                      for x in variables]
+    output['mean'] = [np.mean(x, axis=(1, 2)) for x in variables]
+
+    output['variance'] = [np.std(x, axis=(1, 2)) for x in variables]
 
     # Calculate front diagnostics
 
@@ -194,10 +196,13 @@ def calc_errors(diff):
         output[name] = {}
         ndiff = subset.subsets[name].slice(diff)
         if diff.ndim == 3:
-            output[name]['rms'] = np.sqrt(np.ma.mean(ndiff**2, axis=(1, 2)))
-            output[name]['mean'] = np.ma.mean(ndiff, axis=(1, 2))
+            output[name]['rms'] = np.sqrt(np.ma.mean(np.ma.mean(ndiff ** 2,
+                                                                axis=2),
+                                                     axis=1)).data
+            output[name]['mean'] = np.ma.mean(np.ma.mean(ndiff, axis=2),
+                                              axis=1).data
         else:
-            output[name]['rms'] = np.sqrt(np.ma.mean(ndiff**2))
+            output[name]['rms'] = np.sqrt(np.ma.mean(ndiff ** 2))
             output[name]['mean'] = np.ma.mean(ndiff)
 
     return output
