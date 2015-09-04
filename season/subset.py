@@ -38,6 +38,6 @@ class Subset(object):
 
 # Define subsets to be analysed
 subsets = {'full': Subset(0, 50, 0, 330, 0, 570),
-           'north': Subset(0, 50, 165, 300, 0, 570),
+           'north': Subset(0, 50, 165, 330, 0, 570),
            'south': Subset(0, 50, 0, 165, 0, 570)
            }
