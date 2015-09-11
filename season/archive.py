@@ -9,6 +9,9 @@ from mymodule.forecast import Forecast
 from user_information import job_ids, letters, lead_times
 
 
+path = '/projects/diamet/lsaffi/season/'
+
+
 def download(time):
     """Downloads data for a single forecast from mass
 
@@ -51,7 +54,7 @@ def mass_filenames(ID):
 def pp_filenames(lead_time, ID):
     lead_time = int(lead_time.total_seconds() / 3600)
     if lead_time == 0:
-        return [ID + '.analysis.pp']
+        return [path + ID + '.analysis.pp']
     else:
         return [ID + 'a_p' + letter + str(lead_time - 6).zfill(3) + '.pp'
                 for letter in letters]

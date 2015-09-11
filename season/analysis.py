@@ -2,6 +2,7 @@
 """Analysis of a season of forecasts
 """
 
+import cProfile as profile
 import datetime
 import archive
 from diagnostics import Suite
@@ -12,6 +13,7 @@ def main(start_time, end_time, dt):
     time = start_time
     suites = []
     while time <= end_time:
+        print time
         if time in job_ids:
             # Load the files from mass to postproc and into a forecast
             new_forecast = archive.download(time)
@@ -21,9 +23,11 @@ def main(start_time, end_time, dt):
         # Compare different forecasts
         for n in xrange(len(suites) - 1):
             compare(suites[n], suites[n + 1])
+        print('Compared Forecasts')
         time += dt
         for suite in suites:
             update_time(suite, time, suites)
+        print('Analysed Forecasts')
 
 
 def update_time(suite, time, suites):
@@ -48,7 +52,8 @@ def compare(suite1, suite2):
 
 
 if __name__ == '__main__':
-    start_time = datetime.datetime(2013, 11, 1)
+    start_time = datetime.datetime(2013, 11, 30)
     end_time = datetime.datetime(2014, 2, 4)
     dt = datetime.timedelta(hours=6)
-    main(start_time, end_time, dt)
+    profile.run('main(start_time, end_time, dt)',
+                '/home/lsaffi/data/season/profile')

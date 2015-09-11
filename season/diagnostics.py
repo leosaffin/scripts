@@ -106,7 +106,7 @@ class Suite():
                                 self.forecast.cubelist)
         analysis = convert.calc('air_pressure_at_sea_level',
                                 suite.forecast.cubelist)
-        diff = (forecast - analysis).data
+        diff = forecast.data - analysis.data
         self.errors[start_dt][full_dt]['air_pressure_at_mean_sea_level'] = (
             calc_errors(diff))
 
