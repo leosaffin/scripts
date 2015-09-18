@@ -1,22 +1,39 @@
 import cPickle as pickle
 import datetime
 import numpy as np
+import iris
 from iris.cube import Cube, CubeList
 from iris.coords import DimCoord
 from scripts.season import user_information, diagnostics, subset
 
 
+path = '/home/lsaffi/data/season/'
+
 plevs = DimCoord(diagnostics.plevs, standard_name='air_pressure', units='Pa')
-advlevs = DimCoord(diagnostics.bins, standard_name='ertel_potential_vorticity',
+bin_centres = 0.5 * (diagnostics.bins[:-1] + diagnostics.bins[1:])
+advlevs = DimCoord(bin_centres, standard_name='ertel_potential_vorticity',
                    units='PVU')
-zlevs = DimCoord(np.linspace(1, 50, 50), standard_name='level_height',
-                 units='m')
-tdiff = [x.total_seconds() for x in user_information.lead_times]
-tlevs = DimCoord(tdiff, standard_name='time', units='s')
-t_index1 = user_information.lead_times[4:]
-err_tlevs1 = tlevs[4:]
-t_index2 = user_information.lead_times[8:]
-err_tlevs2 = tlevs[8:]
+example_cubes = iris.load('/projects/diamet/lsaffi/xjjhq/xjjhqa_001.pp')
+zlevs = example_cubes[0].coord('level_height')
+#zlevs = DimCoord(np.linspace(1, 50, 50), long_name='level_height',
+#                 units='m')
+tdiff = [x.total_seconds() for x in user_information.lead_times[1:]]
+tlevs = DimCoord(tdiff[0:6] + tdiff[7:], standard_name='time', units='s')
+t_index = user_information.lead_times[4:]
+err_tlevs = DimCoord(tdiff[3:], standard_name='time', units='s')
+
+
+def load_all():
+    """
+    """
+    output = []
+    for time in user_information.start_times:
+        job_id = user_information.job_ids[time]
+        print job_id
+        print time
+        output.append(load(job_id))
+
+    return output
 
 
 def load(job_id):
@@ -35,7 +52,7 @@ def load(job_id):
     start_time = user_information.start_times[index]
 
     # Open the raw data from the initial analysis
-    with open(job_id + '2.pkl') as infile:
+    with open(path + job_id + '2.pkl') as infile:
         diags = pickle.load(infile)
         errors = pickle.load(infile)
 
@@ -46,6 +63,21 @@ def load(job_id):
         # Add all error measures to the cubelist
         for name in diagnostics.error_measures:
             _extract_errors(errors, name, output, domain)
+        # Add mslp
+        for error_type in ['rms', 'mean']:
+            # Extract data for each error measure at each time
+            data = []
+            for dt in t_index:
+                data.append(errors[t_index[0]][dt]
+                            ['air_pressure_at_mean_sea_level']
+                            [domain][error_type])
+
+            # Create new cube with extracted data
+            cube_name = (error_type + '_error_of_' +
+                         'air_pressure_at_mean_sea_level')
+            newcube = Cube(data=np.array(data), long_name=cube_name,
+                           dim_coords_and_dims=[(err_tlevs, 0)])
+            output[domain].append(newcube)
         # Add all diagnostics to the cubelist
         for n, name in enumerate(diagnostics.names):
             _extract_diags(diags, start_time, n, name, output, domain)
@@ -61,20 +93,17 @@ def _extract_errors(errors, name, output, domain):
         output (dict): Database to add output cube to
         domain (str): Name of subdomain to extract
     """
-    for error_type in ['RMS', 'MEAN']:
-        for t_index, t_coord, prefix in [(t_index1, err_tlevs1, 'one_day_'),
-                                         (t_index2, err_tlevs2, 'two_day_')]:
+    for error_type in ['rms', 'mean']:
+        # Extract data for each error measure at each time
+        data = []
+        for dt in t_index:
+            data.append(errors[t_index[0]][dt][name][domain][error_type])
 
-            # Extract data for each error measure at each time
-            data = []
-            for dt in t_index:
-                data.append(errors[t_index[0]][dt][name][error_type])
-
-            # Create new cube with extracted data
-            cube_name = prefix + error_type.lower() + '_error_of_' + name
-            newcube = Cube(data=np.array(data), long_name=cube_name,
-                           dim_coords_and_dims=[(t_coord, 0), (plevs, 1)])
-            output[domain].append(newcube)
+        # Create new cube with extracted data
+        cube_name = error_type + '_error_of_' + name
+        newcube = Cube(data=np.array(data), long_name=cube_name,
+                        dim_coords_and_dims=[(err_tlevs, 0), (plevs, 1)])
+        output[domain].append(newcube)
 
 
 def _extract_diags(diags, start_time, n, name, output, domain):
@@ -90,7 +119,8 @@ def _extract_diags(diags, start_time, n, name, output, domain):
     """
     # Extract pv dipole data at each time
     data = []
-    for dt in user_information.lead_times:
+    for dt in (user_information.lead_times[1:7] +
+               user_information.lead_times[8:]):
         data.append(diags[start_time + dt][domain]['dipole'][0][n])
 
     # Create new cube with extracted data
@@ -99,14 +129,26 @@ def _extract_diags(diags, start_time, n, name, output, domain):
                    dim_coords_and_dims=[(tlevs, 0), (advlevs, 1)])
     output[domain].append(newcube)
 
-    for statistic in ['MEAN', 'VARIANCE']:
+    # Extract mass
+    data = []
+    for dt in (user_information.lead_times[1:7] +
+               user_information.lead_times[8:]):
+        data.append(diags[start_time + dt][domain]['dipole'][1])
+    # Create new cube with extracted data
+    cube_name = 'mass'
+    newcube = Cube(data=np.array(data), long_name=cube_name,
+                   dim_coords_and_dims=[(tlevs, 0), (advlevs, 1)])
+    output[domain].append(newcube)
+
+    for statistic in ['mean', 'variance']:
         # Extract data for each statistic at each time
         data = []
-        for dt in user_information.lead_times:
+        for dt in (user_information.lead_times[1:7] +
+                   user_information.lead_times[8:]):
             data.append(diags[start_time + dt][domain][statistic][n])
 
         # Create new cube with extracted data
-        cube_name = statistic.lower() + '_of_' + name
+        cube_name = statistic + '_of_' + name
         newcube = Cube(data=np.array(data), long_name=cube_name,
                        dim_coords_and_dims=[(tlevs, 0), (zlevs, 1)])
         output[domain].append(newcube)
