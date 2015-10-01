@@ -60,18 +60,22 @@ def calculate(pv1, pv2, q, mass, surf, variables):
     return means, masses
 
 
+line = ['-xk', '--xk', ':xk', '-.xk']
+
+
 def plotfig(means, masses, bins, varnames):
     bin_centres = 0.5 * (bins[0:-1] + bins[1:])
-    for mean, name in zip(means, varnames):
-        plot.dipole(bin_centres, mean, label=name)
-    plt.axis([0,8,-0.25,0.25])
+    for n, mean in enumerate(means):
+        plot.dipole(bin_centres, mean, line[n], linewidth=2, ms=5, mew=2,
+                    label=varnames[n].replace('_', ' '))
+    plt.axis([0, 8, -0.25, 0.25])
     plt.legend(loc='best')
-    plt.savefig('/home/lsaffi/plots/IOP5/dipole/36h_adv_dipole.png')
+    plt.savefig('/home/lsaffi/plots/iop5/dipole/36h_adv_dipole.png')
     plt.clf()
     plt.bar(bins[0:-1], masses, width=bins[1] - bins[0])
     plt.ylabel('Mass (kg)')
     plt.xlabel('Advection Only PV (PVU)')
-    plt.savefig('/home/lsaffi/plots/IOP5/dipole/36h_mass.png')
+    plt.savefig('/home/lsaffi/plots/iop5/dipole/36h_mass.png')
 
 if __name__ == '__main__':
     binmin = 0.0
@@ -84,6 +88,6 @@ if __name__ == '__main__':
 
     variables = ['total_minus_advection_only_pv',
                  'sum_of_physics_pv_tracers',
-                 'advection_inconsistency_pv',
-                 'final_residual_pv']
+                 'dynamics_tracer_inconsistency',
+                 'residual_pv']
     main(filenames, variables, bins)
