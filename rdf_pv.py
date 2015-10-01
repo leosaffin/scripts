@@ -7,9 +7,13 @@ from mymodule.trajectory import load as trload
 from mymodule import convert, grid, interpolate, files, plot
 
 
-def main(filename, forecast, name, pole_lon, pole_lat):
+def main(filename, forecast, name, pole_lon, pole_lat, domain):
     # Load the trajectories
     trajectories = trload.raw(filename)
+
+    # Check which trajectories are in the domain
+    for trajectory in trajectories:
+        in_domain(trajectory, pole_lon, pole_lat, domain)
 
     # Calculate variable at the start of all trajectories
     rlons, rlats, values, cube = rdf(name, trajectories, pole_lon, pole_lat)
@@ -30,6 +34,36 @@ def main(filename, forecast, name, pole_lon, pole_lat):
     # Plot the field
     levs = np.linspace(0, 5, 41)
     plotfig(cube, cube, levs, cmap='cubehelix_r', extend='both')
+    plt.savefig('/home/lsaffi/plots/rdf_pv.png')
+
+
+
+def in_domain(trajectory, pole_lon, pole_lat, domain):
+    """Checks whether the trajectory is in the given domain
+    """
+    for n in xrange(len(trajectory)):
+        lon = trajectory.variable('lon')[n]
+        lat = trajectory.variable('lat')[n]
+        rlon, rlat = rotate_pole(np.array(lon), np.array(lat),
+                                 pole_lon, pole_lat)
+        rlon = rlon + 360
+        if outside_bounds(rlon, rlat, domain):
+            trajectory.data = trajectory.data[0:(n + 1)]
+            return
+
+    return
+
+
+def outside_bounds(rlon, rlat, domain):
+    if rlon < domain[0]:
+        return True
+    if rlon > domain[1]:
+        return True
+    if rlat < domain[2]:
+        return True
+    if rlat > domain[3]:
+        return True
+    return False
 
 
 def rdf(name, trajectories, pole_lon, pole_lat):
@@ -51,10 +85,8 @@ def rdf(name, trajectories, pole_lon, pole_lat):
     rlats = []
     values = []
 
-    n = 0
     # Loop over all trajectories
-    for trajectory in trajectories:
-        n += 1
+    for n, trajectory in enumerate(trajectories):
         if n % 10000 == 0:
             print n
         # Extract the position at the last trajectory point
@@ -121,7 +153,8 @@ if __name__ == '__main__':
     name = 'advection_only_pv'
     pole_lon = 177.5
     pole_lat = 37.5
-    filename = '/home/lsaffi/data/trace.1'
+    domain = [328.3, 390.35, -17.97, 17.77]
+    filename = '/home/lsaffi/data/iop5/trajectories/trace.1'
     with open('/home/lsaffi/data/forecasts/iop5.pkl', 'r') as infile:
         forecast = pickle.load(infile)
-    main(filename, forecast, name, pole_lon, pole_lat)
+    main(filename, forecast, name, pole_lon, pole_lat, domain)
