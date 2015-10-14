@@ -1,4 +1,3 @@
-from math import atan2
 import numpy as np
 import matplotlib.pyplot as plt
 import iris
@@ -23,10 +22,10 @@ def main(tau):
         fronts (list):
     """
     # Calculate grad(tau)
-    grad_tau = ffronts.grad2d(tau, dx)
+    grad_tau = np.array(ffronts.grad2d(tau, dx))
 
     # Calculate grad_abs_grad_tau
-    grad_abs_grad_tau = ffronts.grad2d(abs2d(grad_tau), dx)
+    grad_abs_grad_tau = np.array(ffronts.grad2d(abs2d(grad_tau), dx))
 
     # Calculate the locating variable
     loc = locating_variable(grad_abs_grad_tau, dx)
@@ -42,24 +41,26 @@ def main(tau):
 
 def locating_variable(grad_abs_grad_tau, dx):
     """
-    'At each gridpoint \(\hat{s}\) is evaluated by computing a mean of five
-    values of \(\nabla \nabla \tau \), treating each as an axis as opposed to a
-    vector
+    'At each gridpoint :math:`\hat{s}` is evaluated by computing a mean of five
+    values of :math:`\nabla \nabla \tau`, treating each as an axis as opposed
+    to a vector
     """
     # Derive a five point mean axis
-    means = ffronts.mean_axis(grad_abs_grad_tau, dx)
-    beta = means[0, :, :]
-    D = means[1, :, :]
-    # Resolve the four outer vectors into the positive \(\hat{s}\) direction
+    beta, D = ffronts.axis(grad_abs_grad_tau)
+    # Resolve the four outer vectors into the positive \hat{s} direction
     # and compute the total divergence of the resolved vectors using simple
     # first order finite differencing
-    loc = ffronts.div2d(beta, D, dx)
+    loc = np.array(ffronts.div2d(beta, D, dx))
 
     return loc
 
 
 def m1(grad_tau, grad_abs_grad_tau, dx):
     """Calculate the first masking variable
+
+    Equation 10 in Hewson (1998),
+    :math:`|\nabla|\nabla \tau||
+           (sign[\nabla \tau \cdot \nabla |\nabla \tau|])`
     """
     # Calculate grad(tau).grad(|grad(tau|)
     y = grad_tau * grad_abs_grad_tau
@@ -69,16 +70,17 @@ def m1(grad_tau, grad_abs_grad_tau, dx):
     # Use sign
     z = abs2d(grad_abs_grad_tau)
     y = z * np.sign(y)
-    return y
     mask = y > k1
     return mask
 
 
 def m2(grad_tau, grad_abs_grad_tau, dx):
-    """
+    """Calculate the second masking variable
+
+    Equation 11 in Hewson (1998)
+    :math:`|\nabla \tau| + m \chi |\nabla |\nabla \tau||
     """
     y = abs2d(grad_tau) + m * dx * abs2d(grad_abs_grad_tau)
-    return y
     mask = y > k2
     return mask
 
