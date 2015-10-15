@@ -5,10 +5,9 @@ from mymodule import convert, grid, interpolate
 import ffronts
 
 
-k1 = 0.4 * (12 ** 2 / 100 ** 2)
-k2 = 1.45 * (12 / 100)
+k1 = 0.4 * (12. ** 2 / 100. ** 2)
+k2 = 1.45 * (12. / 100.)
 dx = 1.0
-tol = 1
 m = 1 / np.sqrt(2)
 
 
@@ -19,7 +18,8 @@ def main(tau):
             locating fronts
 
     Returns:
-        fronts (list):
+        fronts (np.ma.masked_array): An array with fronts locating at
+            zero-points
     """
     # Calculate grad(tau)
     grad_tau = np.array(ffronts.grad2d(tau, dx))
@@ -33,8 +33,7 @@ def main(tau):
     mask2 = m2(grad_tau, grad_abs_grad_tau, dx)
 
     # Find where the locating variable is zero
-    fronts = np.logical_and(loc < tol, loc > -tol)
-    fronts = np.logical_and(fronts, np.logical_and(mask1, mask2))
+    fronts = np.ma.masked_where(np.logical_or(mask1, mask2), loc)
 
     return fronts
 
@@ -70,7 +69,7 @@ def m1(grad_tau, grad_abs_grad_tau, dx):
     # Use sign
     z = abs2d(grad_abs_grad_tau)
     y = z * np.sign(y)
-    mask = y > k1
+    mask = y < k1
     return mask
 
 
@@ -81,7 +80,7 @@ def m2(grad_tau, grad_abs_grad_tau, dx):
     :math:`|\nabla \tau| + m \chi |\nabla |\nabla \tau||
     """
     y = abs2d(grad_tau) + m * dx * abs2d(grad_abs_grad_tau)
-    mask = y > k2
+    mask = y < k2
     return mask
 
 
