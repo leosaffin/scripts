@@ -5,9 +5,13 @@ from mymodule import convert, grid, interpolate
 import ffronts
 
 
-k1 = 0.4 * (12. ** 2 / 100. ** 2)
-k2 = 1.45 * (12. / 100.)
-dx = 1.0
+# First masking threshold in K^2 m^-2
+k1 = 0.4 * (1. / 100000. ** 2)
+# Second masking threshold in K m^-1
+k2 = 1.45 * (1. / 100000.)
+# Grid spacing in m
+dx = 12000.0
+# Normalised distance to centre of gridbox for 2d geometry
 m = 1 / np.sqrt(2)
 
 
@@ -24,16 +28,19 @@ def main(tau):
     # Calculate grad(tau)
     grad_tau = np.array(ffronts.grad2d(tau, dx))
 
-    # Calculate grad_abs_grad_tau
+    # Calculate grad(|grad(tau)|)
     grad_abs_grad_tau = np.array(ffronts.grad2d(abs2d(grad_tau), dx))
 
     # Calculate the locating variable
     loc = locating_variable(grad_abs_grad_tau, dx)
+
+    # Calculate the masking criteria
     mask1 = m1(grad_tau, grad_abs_grad_tau, dx)
     mask2 = m2(grad_tau, grad_abs_grad_tau, dx)
+    mask = np.logical_or(mask1, mask2)
 
     # Find where the locating variable is zero
-    fronts = np.ma.masked_where(np.logical_or(mask1, mask2), loc)
+    fronts = np.ma.masked_where(mask, loc)
 
     return fronts
 

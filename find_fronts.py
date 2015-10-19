@@ -1,4 +1,7 @@
+import numpy as np
 import matplotlib.pyplot as plt
+import iris.quickplot as qplt
+import iris.plot as iplt
 from mymodule import files, convert, grid, interpolate
 from scripts import fronts
 
@@ -12,10 +15,15 @@ def main():
     theta.add_aux_coord(p, [0, 1, 2])
     theta650 = interpolate.to_level(theta, air_pressure=[65000])
     loc = fronts.main(theta650.data[0])
-    return loc
+    loc = theta650[0].copy(data=loc)
+    qplt.contourf(theta650[0], np.linspace(280, 320, 31), cmap='gray',
+                  extend='both')
+    plt.gca().coastlines()
+    plt.gca().gridlines()
+    plt.title(r'$\theta$ at 650 hPa')
+    iplt.contour(loc, [0], colors='b', linewidths=3)
+    plt.savefig('../test_fronts5.png')
 
 
 if __name__ == '__main__':
     loc = main()
-    plt.contour(loc, [0])
-    plt.savefig('../test_fronts.png')
