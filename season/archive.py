@@ -37,8 +37,14 @@ def download(time):
     return Forecast(time, mapping)
 
 
-def clean_up(time):
-    ID = job_ids[time]
+def clean_up(start_time):
+    """Remove all forecast files associated with the given start time
+
+    Args:
+        start_time (datetime.datetime): The start time of the forecast of which
+            to remove associated files from postproc.
+    """
+    ID = job_ids[start_time]
     for lead_time in lead_times:
         for filename in pp_filenames(lead_time, ID):
             if 'analysis' not in filename:
