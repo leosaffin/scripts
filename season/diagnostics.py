@@ -12,7 +12,7 @@ plevs = np.linspace(85000, 25000, 13)
 
 names = ['total_minus_advection_only_potential_temperature',
          'total_minus_advection_only_pv',
-         'ertel_potential_vorticity,
+         'ertel_potential_vorticity',
          'advection_only_pv',
          'dynamics_tracer_inconsistency',
          'microphysics_pv',
