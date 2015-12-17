@@ -12,9 +12,9 @@ plevs = np.linspace(85000, 25000, 13)
 
 names = ['total_minus_advection_only_potential_temperature',
          'total_minus_advection_only_pv',
-         'total_pv',
+         'ertel_potential_vorticity,
          'advection_only_pv',
-         'advection_inconsistency_pv',
+         'dynamics_tracer_inconsistency',
          'microphysics_pv',
          'short_wave_radiation_pv',
          'long_wave_radiation_pv',
@@ -26,7 +26,7 @@ names = ['total_minus_advection_only_potential_temperature',
          'relative_humidity',
          'specific_humidity']
 
-error_measures = ['total_pv',
+error_measures = ['ertel_potential_vorticity',
                   'air_potential_temperature',
                   'air_temperature',
                   'relative_humidity',
@@ -56,10 +56,6 @@ class Suite():
             time (datetime.datetime): Time to set the forecast to
         """
         self.forecast.set_time(time)
-        # When time is set remove duplicate cubes from newly loaded cubelist
-        cubes = self.forecast.cubelist
-        cubes.remove(cubes.extract('air_pressure')[0])
-        cubes.remove(cubes.extract('surface_altitude')[0])
 
     def analyse(self):
         """ Performs an independent analysis of a single timestep
@@ -123,13 +119,11 @@ class Suite():
             cube.add_aux_coord(p_f, [0, 1, 2])
             forecast = interpolate.to_level(cube, air_pressure=plevs)
 
-            cube = convert.calc(variable, self.forecast.cubelist)
+            cube = convert.calc(variable, suite.forecast.cubelist)
             cube.add_aux_coord(p_a, [0, 1, 2])
             analysis = interpolate.to_level(cube, air_pressure=plevs)
 
-            diff = forecast.data - analysis.data
-            mask = np.logical_or(forecast.data == 0, analysis.data == 0)
-            diff = np.ma.masked_where(mask, diff)
+            diff = (forecast - analysis).data
             self.errors[start_dt][full_dt][variable] = calc_errors(diff)
 
     def save(self):
@@ -144,11 +138,18 @@ class Suite():
 
 def make_mask(cubelist):
     """Makes a mask to ignore the boundary layer and far from the tropopause
+
+    Args:
+        cubelist (iris.cube.Cubelist):
+
+    Returns:
+        mask (np.array): An array with True in places that are to be masked and
+            False elsewhere
     """
-    pv = convert.calc('total_pv', cubelist)
+    pv = convert.calc('advection_only_pv', cubelist)
     q = convert.calc('specific_humidity', cubelist)
     surf = convert.calc('atmosphere_boundary_layer_height', cubelist)
-    trop = diagnostic.tropopause2(pv, q)
+    trop = diagnostic.tropopause(pv, q)
     mask = surf.data * np.ones(pv.shape) > pv.coord('altitude').points
     mask = np.logical_or(np.logical_not(trop), mask)
 
@@ -179,7 +180,7 @@ def calc_diagnostics(variables, adv, mass, mask, domain):
                                                 mask=mask)
     output['mean'] = [np.mean(x, axis=(1, 2)) for x in variables]
 
-    output['variance'] = [np.std(x, axis=(1, 2)) for x in variables]
+    output['stdev'] = [np.std(x, axis=(1, 2)) for x in variables]
 
     # Calculate front diagnostics
 
@@ -196,11 +197,9 @@ def calc_errors(diff):
         output[name] = {}
         ndiff = subset.subsets[name].slice(diff)
         if diff.ndim == 3:
-            output[name]['rms'] = np.sqrt(np.ma.mean(np.ma.mean(ndiff ** 2,
-                                                                axis=2),
-                                                     axis=1)).data
-            output[name]['mean'] = np.ma.mean(np.ma.mean(ndiff, axis=2),
-                                              axis=1).data
+            output[name]['rms'] = np.sqrt(
+                np.ma.average(ndiff ** 2, axis=(1, 2)))
+            output[name]['mean'] = np.ma.average(ndiff, axis=(1, 2))
         else:
             output[name]['rms'] = np.sqrt(np.ma.mean(ndiff ** 2))
             output[name]['mean'] = np.ma.mean(ndiff)
