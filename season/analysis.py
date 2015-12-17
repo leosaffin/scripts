@@ -12,34 +12,49 @@ from user_information import job_ids
 def main(start_time, end_time, dt):
     time = start_time
     suites = []
+    # Loop until the end of the final forecast
     while time <= end_time:
         print time
         if time in job_ids:
             # Load the files from mass to postproc and into a forecast
             new_forecast = archive.download(time)
+            # Associate this forecast with an analysis suite
             suite = Suite(new_forecast, job_ids[time])
+            # Set the suite time to its start time to trigger loading
             suite.set_time(time)
+            # Add the suite to the list of suites being analysed
             suites.append(suite)
+
         # Compare different forecasts
+        # To Do - This is wrong and doesn't actually compare all forecasts if
+        #         there are more than two (you muppet)
         for n in xrange(len(suites) - 1):
             compare(suites[n], suites[n + 1])
         print('Compared Forecasts')
+
+        # Update reference time and trigger analysis of timestep
         time += dt
-        for suite in suites:
-            update_time(suite, time, suites)
+        suites = [suite for suite in suites if update_time(suite, time)]
         print('Analysed Forecasts')
 
 
-def update_time(suite, time, suites):
+def update_time(suite, time):
+    """Updates the suite time and triggers an analysis of that timestep
+
+    Returns:
+        True/False: Tells us whether the time has exceeded the suite bounds and
+            should be kept (True = Keep, False = Delete)
+    """
     try:
         suite.set_time(time)
         suite.analyse()
+        return True
+
     except KeyError:
-        # Remove the suite if it has exceeded the time
+        # Save the data from the suite
         suite.save()
         archive.clean_up(suite.forecast.start_time)
-        suites.remove(suite)
-        del suite
+        return False
 
 
 def compare(suite1, suite2):
@@ -52,7 +67,7 @@ def compare(suite1, suite2):
 
 
 if __name__ == '__main__':
-    start_time = datetime.datetime(2013, 11, 30)
+    start_time = datetime.datetime(2013, 11, 1)
     end_time = datetime.datetime(2014, 2, 4)
     dt = datetime.timedelta(hours=6)
     profile.run('main(start_time, end_time, dt)',
