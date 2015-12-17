@@ -7,29 +7,30 @@ from iris.coords import DimCoord
 from scripts.season import user_information, diagnostics, subset
 
 
-path = '/home/lsaffi/data/season/'
+path = '/home/lsaffin/Documents/meteorology/data/season/'
 
 plevs = DimCoord(diagnostics.plevs, standard_name='air_pressure', units='Pa')
 bin_centres = 0.5 * (diagnostics.bins[:-1] + diagnostics.bins[1:])
 advlevs = DimCoord(bin_centres, standard_name='ertel_potential_vorticity',
                    units='PVU')
-example_cubes = iris.load('/projects/diamet/lsaffi/xjjhq/xjjhqa_001.pp')
+example_cubes = iris.load('/home/lsaffin/Documents/meteorology/data/' +
+                          'iop5_36h.pp')
 zlevs = example_cubes[0].coord('level_height')
-#zlevs = DimCoord(np.linspace(1, 50, 50), long_name='level_height',
-#                 units='m')
 tdiff = [x.total_seconds() for x in user_information.lead_times[1:]]
-tlevs = DimCoord(tdiff[0:6] + tdiff[7:], standard_name='time', units='s')
+tlevs = DimCoord(tdiff, standard_name='time', units='s')
 t_index = user_information.lead_times[4:]
 err_tlevs = DimCoord(tdiff[3:], standard_name='time', units='s')
 
 
 def load_all():
-    """
+    """Loads the full set of data from the analysis of the systematic forecasts
+
+    Returns:
+        output (list):
     """
     output = []
     for time in user_information.start_times:
         job_id = user_information.job_ids[time]
-        print job_id
         print time
         output.append(load(job_id))
 
@@ -100,9 +101,9 @@ def _extract_errors(errors, name, output, domain):
             data.append(errors[t_index[0]][dt][name][domain][error_type])
 
         # Create new cube with extracted data
-        cube_name = error_type + '_error_of_' + name
+        cube_name = error_type + '_error_of_' + name        '''
         newcube = Cube(data=np.array(data), long_name=cube_name,
-                        dim_coords_and_dims=[(err_tlevs, 0), (plevs, 1)])
+                       dim_coords_and_dims=[(err_tlevs, 0), (plevs, 1)])
         output[domain].append(newcube)
 
 
@@ -119,9 +120,13 @@ def _extract_diags(diags, start_time, n, name, output, domain):
     """
     # Extract pv dipole data at each time
     data = []
-    for dt in (user_information.lead_times[1:7] +
-               user_information.lead_times[8:]):
-        data.append(diags[start_time + dt][domain]['dipole'][0][n])
+    for dt in (user_information.lead_times[1:]):
+        try:
+            data.append(diags[start_time + dt][domain]['dipole'][0][n])
+        except KeyError:
+            if n == 0 and domain == 'full':
+                print('Skipped at ' + str(dt))
+            data.append(np.zeros(len(data[0])))
 
     # Create new cube with extracted data
     cube_name = 'mass_weighted_mean_of_' + name
@@ -131,9 +136,11 @@ def _extract_diags(diags, start_time, n, name, output, domain):
 
     # Extract mass
     data = []
-    for dt in (user_information.lead_times[1:7] +
-               user_information.lead_times[8:]):
-        data.append(diags[start_time + dt][domain]['dipole'][1])
+    for dt in (user_information.lead_times[1:]):
+        try:
+            data.append(diags[start_time + dt][domain]['dipole'][1])
+        except KeyError:
+            data.append(np.zeros(len(data[0])))
     # Create new cube with extracted data
     cube_name = 'mass'
     newcube = Cube(data=np.array(data), long_name=cube_name,
@@ -143,9 +150,11 @@ def _extract_diags(diags, start_time, n, name, output, domain):
     for statistic in ['mean', 'variance']:
         # Extract data for each statistic at each time
         data = []
-        for dt in (user_information.lead_times[1:7] +
-                   user_information.lead_times[8:]):
-            data.append(diags[start_time + dt][domain][statistic][n])
+        for dt in (user_information.lead_times[1:]):
+            try:
+                data.append(diags[start_time + dt][domain][statistic][n])
+            except KeyError:
+                data.append(np.zeros(len(data[0])))
 
         # Create new cube with extracted data
         cube_name = statistic + '_of_' + name
