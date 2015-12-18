@@ -4,6 +4,7 @@
 
 import cProfile as profile
 import datetime
+from itertools import combinations
 import archive
 from diagnostics import Suite
 from user_information import job_ids
@@ -26,14 +27,15 @@ def main(start_time, end_time, dt):
             suites.append(suite)
 
         # Compare different forecasts
-        # To Do - This is wrong and doesn't actually compare all forecasts if
-        #         there are more than two (you muppet)
-        for n in xrange(len(suites) - 1):
-            compare(suites[n], suites[n + 1])
+        # itertools.combinations gives all unique pairs
+        for suite_pair in combinations(suites, 2):
+            compare(*suite_pair)
         print('Compared Forecasts')
 
         # Update reference time and trigger analysis of timestep
         time += dt
+        # Use a list comprehension so suites exceeding times can be removed
+        # within the loop
         suites = [suite for suite in suites if update_time(suite, time)]
         print('Analysed Forecasts')
 
