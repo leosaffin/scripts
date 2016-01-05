@@ -101,7 +101,7 @@ def _extract_errors(errors, name, output, domain):
             data.append(errors[t_index[0]][dt][name][domain][error_type])
 
         # Create new cube with extracted data
-        cube_name = error_type + '_error_of_' + name        '''
+        cube_name = error_type + '_error_of_' + name
         newcube = Cube(data=np.array(data), long_name=cube_name,
                        dim_coords_and_dims=[(err_tlevs, 0), (plevs, 1)])
         output[domain].append(newcube)
