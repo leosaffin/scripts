@@ -12,6 +12,8 @@ plevs = np.linspace(85000, 25000, 13)
 
 names = ['total_minus_advection_only_potential_temperature',
          'total_minus_advection_only_pv',
+         'sum_of_physics_pv_tracers',
+         'residual_pv',
          'ertel_potential_vorticity',
          'advection_only_pv',
          'dynamics_tracer_inconsistency',
@@ -26,7 +28,7 @@ names = ['total_minus_advection_only_potential_temperature',
          'relative_humidity',
          'specific_humidity']
 
-error_measures = ['ertel_potential_vorticity',
+error_measures = ['total_pv',
                   'air_potential_temperature',
                   'air_temperature',
                   'relative_humidity',
