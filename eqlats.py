@@ -3,7 +3,7 @@
 import datetime
 import numpy as np
 import iris
-from mymodule import convert, grid, interpolate
+from mymodule import convert, interpolate
 
 directory = "/home/lsaffin/Documents/meteorology/data/"
 infile = "emuseries_2009110100"
@@ -103,37 +103,35 @@ def thetapv2():
     theta = eqlats_cube.coord('potential_temperature').points
     eqlats = interpolate.main(eqlats_cube, ertel_potential_vorticity=2).data
 
-    # Load the NAE grid
-    cubes = iris.load(directory + 'IOP5/iop5_36h.pp')
-    lat = grid.true_coords(cubes[0])[1]
+    # Create a coordinate for latitude
+    nlats = 91
+    lat = np.linspace(0, 90, nlats)
 
     # Initialise the output
-    nt = len(eqlats)
-    ny, nx = lat.shape
-    output = np.zeros([nt, ny, nx])
+    ntimes = len(eqlats)
+    output = np.zeros([ntimes, nlats])
 
-    for n in xrange(nt):
+    for n in xrange(ntimes):
         print n
-        for j in xrange(ny):
-            for i in xrange(nx):
-                # Search upward for the equivalent latitude value
-                k = 0
-                while eqlats[n, k] < lat[j, i]:
-                    k += 1
+        for j in xrange(nlats):
+            # Search upward for the equivalent latitude value
+            k = 0
+            while eqlats[n, k] < lat[j]:
+                k += 1
 
-                # Linearly interpolate to find theta
-                alpha = ((lat[j, i] - eqlats[n, k - 1]) /
-                         (eqlats[n, k] - eqlats[n, k - 1]))
-                output[n, j, i] = (alpha * theta[k] +
-                                   (1 - alpha) * theta[k - 1])
+            # Linearly interpolate to find theta
+            alpha = ((lat[j] - eqlats[n, k - 1]) /
+                     (eqlats[n, k] - eqlats[n, k - 1]))
+
+            output[n, j] = (alpha * theta[k] + (1 - alpha) * theta[k - 1])
 
     output = iris.cube.Cube(
         output, long_name='potential_temperature', units='K',
         dim_coords_and_dims=[(eqlats_cube.coord('time'), 0),
-                             (cubes[0].coord('grid_latitude'), 1),
-                             (cubes[0].coord('grid_longitude'), 2)])
+                             (iris.coords.DimCoord(lat, long_name='latitude',
+                                                   units='degrees'), 1)])
 
-    iris.save(output, directory + 'eqlat_pv2.nc')
+    iris.save(output, directory + 'theta_pv2.nc')
 
 if __name__ == '__main__':
     # main()
