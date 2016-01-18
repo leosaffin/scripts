@@ -6,7 +6,7 @@ from mymodule.forecast import Forecast
 
 def iop5():
     job_name = 'xjjhq'
-    start_time = datetime(2011, 11, 28, 0)
+    start_time = datetime(2011, 11, 28, 12)
     mapping = {start_time + timedelta(hours=lead_time):
                'datadir/' + job_name + '/' + job_name + 'a_' +
                str(lead_time).zfill(3) + '.pp'
