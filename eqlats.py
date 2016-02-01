@@ -3,9 +3,9 @@
 import datetime
 import numpy as np
 import iris
-from mymodule import convert, interpolate
+from mymodule import convert, interpolate, grid
 
-directory = "/home/lsaffin/Documents/meteorology/data/"
+directory = "/home/lsaffin/Documents/meteorology/data/eqlats/"
 infile = "emuseries_2009110100"
 outfile = "eqlats.nc"
 
@@ -132,6 +132,48 @@ def thetapv2():
                                                    units='degrees'), 1)])
 
     iris.save(output, directory + 'theta_pv2.nc')
+
+
+def thetapv2_nae():
+    """Re-arrange the data as theta(time, grid_lat, grid_lon)
+    """
+    # Load the equivalent latitude data on PV2
+    cubes = iris.load(directory + outfile)
+    eqlats_cube = convert.calc('equivalent_latitude', cubes)[:, 46:]
+    theta = eqlats_cube.coord('potential_temperature').points
+    eqlats = interpolate.main(eqlats_cube, ertel_potential_vorticity=2).data
+
+    # Load the NAE grid
+    cubes = iris.load(directory + 'xjjhq/xjjhq_036.pp')
+    lat = grid.true_coords(cubes[0])[1]
+
+    # Initialise the output
+    nt = len(eqlats)
+    ny, nx = lat.shape
+    output = np.zeros([nt, ny, nx])
+
+    for n in xrange(nt):
+        print n
+        for j in xrange(ny):
+            for i in xrange(nx):
+                # Search upward for the equivalent latitude value
+                k = 0
+                while eqlats[n, k] < lat[j, i]:
+                    k += 1
+
+                # Linearly interpolate to find theta
+                alpha = ((lat[j, i] - eqlats[n, k - 1]) /
+                         (eqlats[n, k] - eqlats[n, k - 1]))
+                output[n, j, i] = (alpha * theta[k] +
+                                   (1 - alpha) * theta[k - 1])
+
+    output = iris.cube.Cube(
+        output, long_name='potential_temperature', units='K',
+        dim_coords_and_dims=[(eqlats_cube.coord('time'), 0),
+                             (cubes[0].coord('grid_latitude'), 1),
+                             (cubes[0].coord('grid_longitude'), 2)])
+
+    iris.save(output, directory + 'eqlats/eqlat_pv2_nae.nc')
 
 if __name__ == '__main__':
     # main()
