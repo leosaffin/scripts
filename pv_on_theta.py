@@ -1,79 +1,32 @@
-import numpy as np
 import matplotlib.pyplot as plt
-import iris
 import iris.plot as iplt
+from iris.time import PartialDateTime as PDT
 from mymodule import files, convert, grid, interpolate, plot
+from mymodule.detection import rossby_waves
 
 
-def main(filename, names, theta_value, cscale):
-    cubes, tot, adv = load(filename, names)
+def main(cubes, theta_value, **kwargs):
+    pv = convert.calc('ertel_potential_vorticity', cubes)
+    theta = convert.calc('air_potential_temperature', cubes)
 
-    # Interpolate two measure of pv to theta level
-    tot_theta = interpolate.to_level(tot,
-                        air_potential_temperature=[theta_value])[0]
-    adv_theta = interpolate.to_level(adv,
-                        air_potential_temperature=[theta_value])[0]
+    pv.add_aux_coord(grid.make_coord(theta), [0, 1, 2])
 
-    theta_cubelist = iris.cube.CubeList()
-    theta_cubelist.append(tot_theta)
-    theta_cubelist.append(adv_theta)
+    # Interpolate pv to theta level
+    pv = interpolate.to_level(pv, air_potential_temperature=[theta_value])[0]
 
-    for name, cube in zip(names, cubes):
-        # interpolate variable to theta level
-        cube_theta = interpolate.to_level(cube,
-                        air_potential_temperature=[theta_value])[0]
+    # Add equivalent latitude
+    lon, lat = grid.true_coords(theta)
+    lat = pv.copy(data=lat)
+    time = grid.get_datetime(theta)[0]
+    time = PDT(month=time.month, day=time.day, hour=time.hour)
+    eqlat = rossby_waves.equivalent_latitude(time, theta_value, 2)
 
-        # Plot variable
-        plot.level(cube_theta, tot_theta, cscale, cmap='bwr', extend='both')
-        iplt.contour(adv_theta, [2], colors='k',
-                     linewidths='20', linestyles='--')
-        plt.savefig('/home/lsaffi/plots/iop5/pv_on_theta/'
-                    + str(theta_value) + 'k_' + name + '.png')
-        plt.clf()
-
-        # Add to cubelist
-        theta_cubelist.append(cube_theta)
-
-    files.save(theta_cubelist, ('/home/lsaffi/data/iop5/pv_on_theta/' +
-                                str(theta_value) + 'k.nc'))
-
-
-def load(filename, names):
-    """
-    """
-    cubelist = files.load(filename)
-    cubelist.remove(cubelist.extract('air_pressure')[0])
-
-    # Create a potential temperature auxiliary coord
-    theta = convert.calc('air_potential_temperature', cubelist)
-    thcoord = grid.make_coord(theta)
-
-    cubes = iris.cube.CubeList()
-    for name in names:
-        cube = convert.calc(name, cubelist)
-        cube.add_aux_coord(thcoord, [0, 1, 2])
-        cubes.append(cube)
-
-    adv = convert.calc('advection_only_pv', cubelist)
-    adv.add_aux_coord(thcoord, [0, 1, 2])
-    tot = convert.calc('total_pv', cubelist)
-    tot.add_aux_coord(thcoord, [0, 1, 2])
-
-    return cubes, tot, adv
-
+    # Plot PV on theta
+    plot.pcolormesh(pv, pv=pv, **kwargs)
+    iplt.contour(lat, [eqlat.data], colors='r', linewidths=3)
+    plt.show()
 
 if __name__ == '__main__':
-    filename = '/projects/diamet/lsaffi/xjjhq/*036.pp'
-    names = ['residual_pv',
-             'short_wave_radiation_pv',
-             'long_wave_radiation_pv',
-             'microphysics_pv',
-             'gravity_wave_drag_pv',
-             'convection_pv',
-             'boundary_layer_pv',
-             'cloud_rebalancing_pv',
-             'advection_inconsistency_pv']
-
+    cubes = files.load('datadir/xjjhq/xjjhq_036.pp')
     theta_value = 320
-    cscale = np.linspace(-2.1, 2.1, 16)
-    main(filename, names, theta_value, cscale)
+    main(cubes, theta_value, vmin=0, vmax=10, cmap='plasma')
