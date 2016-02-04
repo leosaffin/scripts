@@ -15,11 +15,11 @@ def iop5():
 
 
 def iop8():
-    job_name = 'xjjhq'
+    job_name = 'xkcqa'
     start_time = datetime(2011, 12, 7, 12)
     mapping = {start_time + timedelta(hours=lead_time):
-               'datadir/' + job_name + '/' + job_name + '_p*' +
-               str(lead_time).zfill(3)
-               for lead_time in xrange(36)}
+               'datadir/' + job_name + '/' + job_name + 'a*' +
+               str(lead_time).zfill(3) + '.pp'
+               for lead_time in xrange(1, 37)}
 
     return Forecast(start_time, mapping)
