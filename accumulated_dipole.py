@@ -5,19 +5,15 @@ from scripts import case_studies
 
 
 def main(forecast, times, names):
-    """
-    """
-
     for n, time in enumerate(times):
         print(time)
-        forecast.set_lead_time(time)
-        cubes = forecast.cubelist
-        cubes.append(grid.volume)
+        cubes = forecast.set_lead_time(time)
 
         # Load required variables
         pv = convert.calc('advection_only_pv', cubes)
         q = convert.calc('specific_humidity', cubes)
         surf = convert.calc('atmosphere_boundary_layer_height', cubes)
+        cubes.append(grid.volume(pv))
         mass = convert.calc('mass', cubes)
 
         # Make a tropopause and boundary layer mask
