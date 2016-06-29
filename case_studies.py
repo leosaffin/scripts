@@ -14,6 +14,21 @@ def iop5():
     return Forecast(start_time, mapping)
 
 
+def iop5b():
+    job_name = 'xjjhq'
+    start_time = datetime(2011, 11, 28, 12)
+    mapping = {}
+    for lead_time in xrange(1, 37):
+        tracers_file = ('datadir/' + job_name + '/' + job_name + 'b_' +
+                        str(lead_time).zfill(3) + '.pp')
+        prognostics_file = ('datadir/' + job_name + '/' + job_name +
+                            'b_nddiag_' + str(lead_time).zfill(3) + '.pp')
+        mapping[start_time + timedelta(hours=lead_time)] = [tracers_file,
+                                                            prognostics_file]
+
+    return Forecast(start_time, mapping)
+
+
 def iop8():
     job_name = 'xkcqa'
     start_time = datetime(2011, 12, 7, 12)
