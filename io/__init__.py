@@ -1,8 +1,7 @@
 import iris
-from mymodule import files
 
 
-def ff2nc(infile, outfile, stash_maps=[]):
+def ff2nc(infile, outfile, stash_maps=[], orography=None):
     cubes = iris.load(infile)
 
     # Define attributes of custom variables by stash mapping
@@ -23,5 +22,8 @@ def ff2nc(infile, outfile, stash_maps=[]):
             iris.util.promote_aux_coord_to_dim_coord(cube, 'level_height')
         except iris.exceptions.CoordinateNotFoundError:
             pass
+
+        if orography is not None:
+            cube.add_aux_coord(orography, [1, 2])
 
     iris.save(cubes, outfile + '.nc')
