@@ -1,82 +1,100 @@
-! Subroutine BALNC
-! Calculates Geopotential Height and Streamfunction by inverting an 
-! input PV field using the Charney (1955) balance equation.
-      SUBROUTINE balnc(fco, aps, ac, h, s, qe, tha, pe, part,           &
-     &                 thrs, maxx, maxxt, omegs, omegh,                 &
-     &                 nl, ny, nx)
+!/home/zq822358/programming/ppvi/PVItoolbox
+
+module pv_inversion
+
+implicit none
+
+contains
+
+  subroutine balnc(fco, aps, ac, h, s, qe, tha, pe, part, thrs, maxx, maxxt,    &
+                   omegs, omegh, nx, ny, nl)
+  ! Calculates geopotential height and streamfunction by inverting an
+  ! input pv field using the charney (1955) balance equation.
+
+  !f2py      integer, intent(hide)    :: nx, ny, nl
+  !f2py      real, intent(in)         :: fco(nx,ny)
+  !f2py      real, intent(in)         :: aps(nx,ny)
+  !f2py      real, intent(in)         :: ac(ny,5)
+  !f2py      real, intent(inout)     :: h(nx,ny,nl)
+  !f2py      real, intent(inout)     :: s(nx,ny,nl)
+  !f2py      real, intent(inout)     :: qe(nx,ny,nl)
+  !f2py      real, intent(inout)     :: tha(nx,ny,2)
+  !f2py      real, intent(in)         :: pe(nl)
+  !f2py      real, intent(in)         :: part
+  !f2py      real, intent(in)         :: thrs
+  !f2py      integer, intent(in)      :: maxx
+  !f2py      integer, intent(in)      :: maxxt
+  !f2py      real, intent(in)         :: omegs
+  !f2py      real, intent(in)         :: omegh
+
+  !-Input variables-------------------------------------------------------------
+  ! Grid dimensions
+  integer, intent(in) :: nx, ny, nl
+
+  ! coriolis parameter
+  real, intent(in) :: fco(nx,ny)
+
+  ! ap ! cos(latitude)
+  real, intent(in) :: aps(nx,ny)
       
-      IMPLICIT NONE
+  ! a  ! coefficients for 2-d laplacian operator
+  real, intent(in) :: ac(ny,5)
 
-      INTEGER nx,ny,nl
-      REAL    fco(ny,nx),                                               &
-              ! Coriolis Parameter
-     &        aps(ny,nx),                                               &
-              ! ap ! Cos(Latitude)
-     &        ac(ny,5),                                                 &
-              ! a  ! Coefficients for 2-D Laplacian operator
-     &        h(ny,nx,nl),                                              &
-              ! hz ! Geopotential Height
-     &        s(ny,nx,nl),                                              &
-              ! si ! Streamfunction
-     &        qe(ny,nx,nl),                                             &
-              ! q  ! PV (/0.01 PVU)
-     &        tha(ny,nx,2),                                             &
-!            THT(i,j,m)= Boundary theta, m=1 is lower boundary (midway
-!            between k=1 and k=2) and m=2 is upper boundary
-!            (between k=NL-1 and k=NL)
-     &        pe(nl),                                                   &
-              ! pi ! Exner Function
-     &        part,                                                     &
-              ! prt ! Relaxation Parameter
-     &        thrs,                                                     &
-              ! thr ! Threshold parameter
-     &        maxx,                                                     &
-              ! max ! Maximum Iterations
-     &        maxxt,                                                    &
-              ! maxt ! Maximum Cycles
-     &        omegs,                                                    &
-              ! OMEGAS ! Relaxation Parameter for 2-D Poisson Equation
-     &        omegh
-              ! OMEGAH ! Relaxation Parameter for 3-D Poisson Equation
+  ! hz ! geopotential height
+  real, intent(inout) :: h(nx,ny,nl)
 
-CF2PY      INTEGER, INTENT(HIDE)    :: nl
-CF2PY      INTEGER, INTENT(HIDE)    :: ny
-CF2PY      INTEGER, INTENT(HIDE)    :: nx
-CF2PY      REAL, INTENT(IN)         :: fco(ny,nx)
-CF2PY      REAL, INTENT(IN)         :: aps(ny,nx)
-CF2PY      REAL, INTENT(IN)         :: ac(ny,5)
-CF2PY      REAL, INTENT(IN OUT)     :: h(ny,nx,nl)
-CF2PY      REAL, INTENT(IN OUT)     :: s(ny,nx,nl)
-CF2PY      REAL, INTENT(IN OUT)     :: qe(ny,nx,nl)
-CF2PY      REAL, INTENT(IN OUT)     :: tha(ny,nx,2)
-CF2PY      REAL, INTENT(IN)         :: pe(nl)
-CF2PY      REAL, INTENT(IN)         :: part
-CF2PY      REAL, INTENT(IN)         :: thrs
-CF2PY      INTEGER, INTENT(IN)      :: maxx
-CF2PY      INTEGER, INTENT(IN)      :: maxxt
-CF2PY      REAL, INTENT(IN)         :: omegs
-CF2PY      REAL, INTENT(IN)         :: omegh
+  ! si ! streamfunction
+  real, intent(inout) :: s(nx,ny,nl)
 
-!     Local Variables
-      REAL :: mi,zm,rh(ny,nx,nl),zpl(ny,nx),zpp(ny),rs,gpts,            &
+  ! q  ! pv (/0.01 pvu)
+  real, intent(inout) :: qe(nx,ny,nl)
+
+  ! tha(i,j,m)= boundary theta
+  !    m=1 is lower boundary (midway between k=1    and k=2)
+  !    m=2 is upper boundary (midway between k=nl-1 and k=nl)
+  real, intent(inout) :: tha(nx,ny,2)
+
+  ! pi ! exner function
+  real, intent(in) :: pe(nl)
+
+  ! prt ! relaxation parameter
+  real, intent(in) :: part
+
+  ! thr ! threshold parameter
+  real, intent(in) :: thrs
+
+  ! max ! maximum iterations
+  real, intent(in) :: maxx
+
+  ! maxt ! maximum cycles
+  real, intent(in) :: maxxt
+
+  ! omegas ! relaxation parameter for 2-d poisson equation
+  real, intent(in) :: omegs
+
+  ! omegah ! relaxation parameter for 3-d poisson equation
+  real, intent(in) :: omegh
+
+  !-Local variables-------------------------------------------------------------
+      real :: mi,zm,rh(ny,nx,nl),zpl(ny,nx),zpp(ny),rs,gpts,            &
      &        stb(ny,nx,nl),asi(ny,nx,nl),bb(nl),bh(nl),bl(nl),         &
-     &        vor,OLD(ny,nx,nl),dpi2(nl),nlco(ny,nx),coef(ny,nl),       &
+     &        vor,old(ny,nx,nl),dpi2(nl),nlco(ny,nx),coef(ny,nl),       &
      &        dh(ny,nx,nl),znl,rhs(ny,nx,nl),delh(ny,nx,nl),            &
      &        dsi(ny,nx,nl),vozro(nl),spzro(nl),maxhz(nl),              &
      &        minvor(nl),maxvor(nl),                                    &
      &        betas,dhmax,rha,rhst,sxx,sxy,syy,                         &
      &        zhl,zhp,zmrs,zl,zsl,zsp,zp
 
-      INTEGER :: I,J,K,igtz,ihm,iitot,iltz,insq,                        &
+      integer :: i,J,K,igtz,ihm,iitot,iltz,insq,                        &
      &           itc,itc1,itcm,itcold,itct,jhm,khm
 
-      LOGICAL :: it,icon
+      logical :: it,icon
 
 !-----------------------------------------------------------------------!
-!                          START OF SUBROUTINE                          !
+!                          start of subroutine                          !
 !-----------------------------------------------------------------------!
       mi=9999.90
-      gpts=FLOAT(ny*nx*(nl-2))
+      gpts=float(ny*nx*(nl-2))
 
       iltz=0
       igtz=0
@@ -87,69 +105,69 @@ CF2PY      REAL, INTENT(IN)         :: omegh
       iitot=0
       itcold=0
 
-      DO k=1,nl
+      do k=1,nl
         vozro(k)=0.
         minvor(k)=100000.
         maxvor(k)=-100000.
-      END DO
+      end do
 
-      DO i=2,ny-1
+      do i=2,ny-1
         zpp(i)=1./16.
-        DO  j=2,nx-1
+        do  j=2,nx-1
           zpl(i,j)=1./(16.*aps(i,j)*aps(i,j))
           nlco(i,j)=2./( aps(i,j)*aps(i,j) )
-        END DO
-      END DO
+        end do
+      end do
 
-      DO k=1,nl
+      do k=1,nl
         bb(k)=0.
         bh(k)=0.
         bl(k)=0.
-      END DO
+      end do
 
-      DO k=2,nl-1
+      do k=2,nl-1
         bb(k)=-2./( (pe(k+1)-pe(k))*(pe(k)-pe(k-1)) )
         bh(k)=2./( (pe(k+1)-pe(k))*(pe(k+1)-pe(k-1)) )
         bl(k)=2./( (pe(k)-pe(k-1))*(pe(k+1)-pe(k-1)) )
         dpi2(k)=(pe(k+1) - pe(k-1))/2.
-        DO i=1,ny
+        do i=1,ny
           coef(i,k)=ac(i,3)/bb(k)
-        END DO
-      END DO
+        end do
+      end do
 
-      DO k=1,nl
+      do k=1,nl
         maxhz(k)=0
-      END DO
+      end do
 
-      DO k=1,nl
-        DO j=1,nx
-          DO i=1,ny
-            OLD(i,j,k)=h(i,j,k)
-            IF (h(i,j,k)>maxhz(k)) THEN
+      do k=1,nl
+        do j=1,nx
+          do i=1,ny
+            old(i,j,k)=h(i,j,k)
+            if (h(i,j,k)>maxhz(k)) then
               maxhz(k)=h(i,j,k)
-            END IF
-          END DO
-        END DO
-      END DO
+            end if
+          end do
+        end do
+      end do
 !-----------------------------------------------------------------------!
 
-  900 CONTINUE
-      IF (iitot == 0) GO TO 700
+  900 continue
+      if (iitot == 0) go to 700
       itcm=0
       itc1=0
-      DO k=1,nl
+      do k=1,nl
         spzro(k)=0.
-      END DO
+      end do
 
-      DO k=2,nl-1
-        DO j=2,nx-1
-          DO i=2,ny-1
-            OLD(i,j,k)=s(i,j,k)
-            IF (k == 2) THEN
-              OLD(i,j,1)=s(i,j,1)
-            ELSE IF (k == nl-1) THEN
-              OLD(i,j,nl)=s(i,j,nl)
-            END IF
+      do k=2,nl-1
+        do j=2,nx-1
+          do i=2,ny-1
+            old(i,j,k)=s(i,j,k)
+            if (k == 2) then
+              old(i,j,1)=s(i,j,1)
+            else if (k == nl-1) then
+              old(i,j,nl)=s(i,j,nl)
+            end if
             delh(i,j,k)= ac(i,1)*h(i-1,j,k) + ac(i,2)*h(i,j-1,k) +      &
      &                   ac(i,3)*h(i,j,k)   + ac(i,4)*h(i,j+1,k) +      &
      &                   ac(i,5)*h(i+1,j,k)
@@ -157,20 +175,20 @@ CF2PY      REAL, INTENT(IN)         :: omegh
             stb(i,j,k)=bl(k)*h(i,j,k-1) + bh(k)*h(i,j,k+1) +            &
      &                 bb(k)*h(i,j,k)
 
-            IF (stb(i,j,k) <= 0.0001) THEN
+            if (stb(i,j,k) <= 0.0001) then
               stb(i,j,k)=0.0001
                
-!     Modify boundary theta (k=2) or PV if static stability
-!     becomes too small. Theta becomes smaller; PV becomes larger
+!     modify boundary theta (k=2) or pv if static stability
+!     becomes too small. theta becomes smaller; pv becomes larger
 !     by a small amount (0.2 nondimensionally, which works out to
 !     be perhaps a tenth of a degree K.
                
-              IF (k == 2) THEN
+              if (k == 2) then
                 tha(i,j,1)=tha(i,j,1)-0.2
-              END IF
+              end if
               qe(i,j,k)=qe(i,j,k) + 0.2/(pe(k)-pe(k+1))
               spzro(k)=spzro(k) + 1
-            END IF
+            end if
             sxx=s(i,j+1,k) + s(i,j-1,k) - 2.*s(i,j,k)
             syy=s(i-1,j,k) + s(i+1,j,k) - 2.*s(i,j,k)
             sxy=( s(i-1,j+1,k) - s(i-1,j-1,k) -                         &
@@ -190,82 +208,82 @@ CF2PY      REAL, INTENT(IN)         :: omegh
      &             znl + zl + zp
             rhs(i,j,k)=rhst/(fco(i,j) + stb(i,j,k))
 
-          END DO
-        END DO
-      END DO
+          end do
+        end do
+      end do
 
-  23  FORMAT(f6.0,' NEG STABILITIES.')
-      DO k=1,nl
+  23  format(f6.0,' neg stabilities.')
+      do k=1,nl
         spzro(k)=0.
-      END DO
+      end do
 
-!*************ITERATION FOR PSI **********************
-      DO k=2,nl-1
+!*************iteration for psi **********************
+      do k=2,nl-1
         itc=0
-  800   CONTINUE
+  800   continue
         it=.true.
-        DO j=2,nx-1
-          DO i=2,ny-1
+        do j=2,nx-1
+          do i=2,ny-1
             rs = ac(i,1)*s(i-1,j,k) + ac(i,2)*s(i,j-1,k) +              &
      &           ac(i,3)*s(i,j,k)   + ac(i,4)*s(i,j+1,k) +              &
      &           ac(i,5)*s(i+1,j,k) - rhs(i,j,k)
             dsi(i,j,k)=-omegs*rs/ac(i,3)
             s(i,j,k) = s(i,j,k) + dsi(i,j,k)
-!*******Check accuracy criterion *******************************
-            IF (ABS(dsi(i,j,k)) > thrs) THEN
+!*******check accuracy criterion *******************************
+            if (abs(dsi(i,j,k)) > thrs) then
               it=.false.
-            END IF
-          END DO
-        END DO
+            end if
+          end do
+        end do
       
         itc=itc+1
-        IF (it) THEN
+        if (it) then
           icon=.true.
-          IF (itc > itcm) itcm=itc
-          IF (itc == 1) itc1=itc1 + 1
-        ELSE
-          IF (itc < maxx) THEN
-            GO TO 800
-          ELSE
+          if (itc > itcm) itcm=itc
+          if (itc == 1) itc1=itc1 + 1
+        else
+          if (itc < maxx) then
+            go to 800
+          else
             icon=.true.
-          END IF
-        END IF      
-      END DO
+          end if
+        end if
+      end do
 
-      IF (iitot > 0) THEN
+      if (iitot > 0) then
         itct=itct + itcm
-        DO k=1,nl
-          DO j=2,nx-1
-            DO i=2,ny-1
-              s(i,j,k)=part*s(i,j,k) + (1.-part)*OLD(i,j,k)
-              OLD(i,j,k)=h(i,j,k)
-            END DO
-          END DO
-        END DO
-      END IF
+        do k=1,nl
+          do j=2,nx-1
+            do i=2,ny-1
+              s(i,j,k)=part*s(i,j,k) + (1.-part)*old(i,j,k)
+              old(i,j,k)=h(i,j,k)
+            end do
+          end do
+        end do
+      end if
 
-!*************CALCULATE THE RHS OF BAL-PV EQUATION (PHI,H) ************
+!*************calculate the rhs of bal-pv eQuation (phi,h) ************
 
-  700 CONTINUE
-      DO k=2,nl-1
-        DO j=2,nx-1
-          DO i=2,ny-1
+  700 continue
+      do k=2,nl-1
+        do j=2,nx-1
+          do i=2,ny-1
             vor = ac(i,1)*s(i-1,j,k) + ac(i,2)*s(i,j-1,k) +             &
      &            ac(i,3)*s(i,j,k)   + ac(i,4)*s(i,j+1,k) +             &
      &            ac(i,5)*s(i+1,j,k)
-            IF (vor <= minvor(k)) THEN
+            if (vor <= minvor(k)) then
               minvor(k)=vor
-            END IF
-            IF (vor >= maxvor(k)) THEN
+            end if
+            if (vor >= maxvor(k)) then
               maxvor(k)=vor
-            END IF
-            IF (vor <= 0.0001-fco(i,j)) THEN
+            end if
+            if (vor <= 0.0001-fco(i,j)) then
               vor = (0.0001 - fco(i,j))
-!     Increase PV where absolute vorticity is too small. Similar to
+!     increase pv where absolute vorticity is too small. similar to
 !     case where stratification is too small.
               qe(i,j,k)=qe(i,j,k) + 0.01
               vozro(k)=vozro(k) + 1
-            END IF
+            end if
             asi(i,j,k)=fco(i,j) + vor
             sxx=s(i,j+1,k)+s(i,j-1,k)-2.*s(i,j,k)
             syy=s(i-1,j,k)+s(i+1,j,k)-2.*s(i,j,k)
@@ -285,24 +303,24 @@ CF2PY      REAL, INTENT(IN)         :: omegh
             rha=fco(i,j)*vor + nlco(i,j)*(sxx*syy - sxy*sxy) + betas
             rh(i,j,k)=rha + qe(i,j,k) + zl + zp
                
-          END DO
-        END DO
-      END DO
+          end do
+        end do
+      end do
 
-  24  FORMAT(i11,2F11.3,f6.0,' NEG ABS VORTICITIES IN PHI EQ.')
-      DO k=1,nl
+  24  format(i11,2f11.3,f6.0,' neg abs vorticities in phi eQ.')
+      do k=1,nl
         vozro(k)=0.
-      END DO
+      end do
 
-!*************SOLVE FOR H AT EACH LEVEL *****************
+!*************solve for h at each level *****************
 
       itc=0
   701 it=.true.
       zmrs=0.
-      DO k=2,nl-1
-        DO j=2,nx-1
-          DO i=2,ny-1
-            IF (k == 2) THEN
+      do k=2,nl-1
+        do j=2,nx-1
+          do i=2,ny-1
+            if (k == 2) then
               rs = ac(i,1)*h(i-1,j,k) +                                 &
      &             ac(i,2)*h(i,j-1,k) +                                 &
      &            (ac(i,3) + asi(i,j,k)*(bb(k)+bl(k)) )*h(i,j,k) +      &
@@ -314,7 +332,7 @@ CF2PY      REAL, INTENT(IN)         :: omegh
               h(i,j,k) = zm - omegh*rs/(ac(i,3) +                       &
      &                                  asi(i,j,k)*(bb(k)+bl(k)))
                
-            ELSE IF (k == nl-1) THEN
+            else if (k == nl-1) then
               rs = ac(i,1)*h(i-1,j,k) +                                 & 
      &             ac(i,2)*h(i,j-1,k) +                                 &
      &            (ac(i,3) + asi(i,j,k)*(bb(k)+bh(k)) )*h(i,j,k) +      &
@@ -326,7 +344,7 @@ CF2PY      REAL, INTENT(IN)         :: omegh
               h(i,j,k) = zm - omegh*rs/(ac(i,3) +                       &
      &                                  asi(i,j,k)*(bb(k)+bh(k)))
                
-            ELSE
+            else
               rs = ac(i,1)*h(i-1,j,k) +                                 &
      &             ac(i,2)*h(i,j-1,k) +                                 &
      &            (ac(i,3) + asi(i,j,k)*bb(k) )*h(i,j,k) +              &
@@ -338,84 +356,86 @@ CF2PY      REAL, INTENT(IN)         :: omegh
               zm = h(i,j,k)
               h(i,j,k) = zm - omegh*rs/(ac(i,3) +                       &
      &                                  asi(i,j,k)*bb(k))
-            END IF
+            end if
             dh(i,j,k)=h(i,j,k) - zm
-            zmrs=zmrs + ABS(dh(i,j,k))
-            IF (ABS(dh(i,j,k)) > thrs) THEN
+            zmrs=zmrs + abs(dh(i,j,k))
+            if (abs(dh(i,j,k)) > thrs) then
               it=.false.
-            END IF
+            end if
 
-          END DO
-        END DO
-      END DO
+          end do
+        end do
+      end do
 
-      IF (AMOD(FLOAT(itc),5.) == 0) THEN
+      if (amod(float(itc),5.) == 0) then
         dhmax=thrs/10.
         zmrs=zmrs/gpts
-        DO k=2,nl-1
-          DO j=2,nx-1
-            DO i=2,ny-1
-              IF (ABS(dh(i,j,k)) > dhmax) THEN
-                dhmax=ABS(dh(i,j,k))
+        do k=2,nl-1
+          do j=2,nx-1
+            do i=2,ny-1
+              if (abs(dh(i,j,k)) > dhmax) then
+                dhmax=abs(dh(i,j,k))
                 ihm=i
                 jhm=j
                 khm=k
-              END IF
-            END DO
-          END DO
-        END DO
+              end if
+            end do
+          end do
+        end do
 
-  716   FORMAT(2E9.2,3I5,f8.3)
-      END IF
+  716   format(2e9.2,3i5,f8.3)
+      end if
       zmrs=0.
 
       itc=itc+1
-      IF (it) THEN
+      if (it) then
         itct=itct + itc
-        DO j=1,nx
-          DO i=1,ny
+        do j=1,nx
+          do i=1,ny
             h(i,j,1) = h(i,j,2) + tha(i,j,1)*(pe(2)-pe(1))
             s(i,j,1) = s(i,j,2) + tha(i,j,1)*(pe(2)-pe(1))
             h(i,j,nl) = h(i,j,nl-1) - tha(i,j,2)*(pe(nl)-pe(nl-1))
             s(i,j,nl) = s(i,j,nl-1) - tha(i,j,2)*(pe(nl)-pe(nl-1))
-          END DO
-        END DO
+          end do
+        end do
          
-        IF (iitot > 0) THEN
-          DO k=1,nl
-            DO j=2,nx-1
-              DO i=2,ny-1
-                h(i,j,k)=part*h(i,j,k) + (1.-part)*OLD(i,j,k)
-              END DO
-            END DO
-          END DO
-        END IF
-        IF ( (itc > itcold+10).AND.(iitot > 30) ) THEN
-          PRINT*,'started diverging'
-          GO TO 901
-        END IF
+        if (iitot > 0) then
+          do k=1,nl
+            do j=2,nx-1
+              do i=2,ny-1
+                h(i,j,k)=part*h(i,j,k) + (1.-part)*old(i,j,k)
+              end do
+            end do
+          end do
+        end if
+        if ( (itc > itcold+10).and.(iitot > 30) ) then
+          print*,'started diverging'
+          go to 901
+        end if
         itcold=itc
-        IF ((itc == 1).AND.(itc1 == nl-2)) THEN
-          PRINT*,'TOTAL CONVERGENCE.'
-        ELSE
+        if ((itc == 1).and.(itc1 == nl-2)) then
+          print*,'total convergence.'
+        else
           iitot=iitot + 1
-  22      FORMAT(i4,' TOTAL ITERATION(S).')
-          IF (iitot > maxxt) THEN
-            PRINT*,'TOO MANY TOTAL ITERATIONS.'
-            GO TO 901
-          ELSE
-            GO TO 900
-          END IF
-        END IF
-      ELSE
-        IF (itc < maxx) THEN
-          GO TO 701
-        ELSE
-          PRINT*,'TOO MANY ITERATIONS FOR HGHT.'
+  22      format(i4,' total iteration(s).')
+          if (iitot > maxxt) then
+            print*,'too many total iterations.'
+            go to 901
+          else
+            go to 900
+          end if
+        end if
+      else
+        if (itc < maxx) then
+          go to 701
+        else
+          print*,'too many iterations for hght.'
           icon=.false.
-          GO TO 901
-        END IF
-      END IF
+          go to 901
+        end if
+      end if
 !*******************************************************
- 901  RETURN
-      END SUBROUTINE balnc
+ 901  return
+      end subroutine balnc
+
+end module pv_inversion

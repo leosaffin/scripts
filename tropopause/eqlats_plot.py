@@ -1,4 +1,3 @@
-from datetime import timedelta as dt
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.time import PartialDateTime as PDT
@@ -8,6 +7,12 @@ from scripts import case_studies
 
 
 def main(cubes, theta_value, **kwargs):
+    """Plot PV on theta and the equivalent latitude circle
+
+    Args:
+        cubes (iris.cube.CubeList): Contains variables to calculate PV and
+            potential temperature
+    """
     pv = convert.calc('ertel_potential_vorticity', cubes,
                       levels=('air_potential_temperature', [theta_value]))[0]
 
@@ -21,11 +26,11 @@ def main(cubes, theta_value, **kwargs):
     # Plot PV on theta
     plot.pcolormesh(pv, pv=pv, **kwargs)
     iplt.contour(lat, [eqlat.data], colors='r', linewidths=2)
+    plt.title('')
     plt.show()
 
 if __name__ == '__main__':
-    forecast = case_studies.iop8()
-    forecast.set_lead_time(dt(hours=36))
-    cubes = forecast.cubelist
-    theta_value = 310
-    main(cubes, theta_value, vmin=0, vmax=10, cmap='plasma')
+    forecast = case_studies.iop5()
+    cubes = forecast.set_lead_time(hours=36)
+    theta_value = 330
+    main(cubes, theta_value, vmin=0, vmax=10, cmap='cubehelix_r')
