@@ -1,7 +1,11 @@
 import iris
+from iris.cube import CubeList
 
 
-def ff2nc(infile, outfile, stash_maps=[], orography=None):
+slices = [slice(0, 50), slice(15, 345), slice(15, 585)]
+
+
+def ff2nc(infile, outfile, stash_maps=[], orography=None, slices=slices):
     cubes = iris.load(infile)
 
     # Define attributes of custom variables by stash mapping
@@ -25,5 +29,7 @@ def ff2nc(infile, outfile, stash_maps=[], orography=None):
 
         if orography is not None:
             cube.add_aux_coord(orography, [1, 2])
+
+    cubes = CubeList([cube[slices] for cube in cubes])
 
     iris.save(cubes, outfile + '.nc')
