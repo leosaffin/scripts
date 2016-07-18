@@ -2,7 +2,8 @@
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import convert, grid, diagnostic, plot
+from mymodule import convert, grid, diagnostic, interpolate, plot
+from mymodule.detection import rossby_waves
 from scripts import case_studies
 
 
@@ -26,6 +27,29 @@ def main(cubes, varnames, bins):
     plot.multiline(means)
     plt.show()
 
+
+def from_cubelist(cubes, **kwargs):
+    names = []
+
+    # Extract variables from the cubelist
+    pv = convert.calc('advection_only_pv')
+    tracers = convert.calc(names, cubes)
+
+    # Calculate the tropopause altitude
+    grid.add_hybrid_height(pv)
+    z = grid.make_cube(pv, 'altitude')
+    zpv2 = interpolate.to_level(z, ertel_potential_vorticity=[2])[0]
+
+    # Mask troughs
+    theta = convert.calc('air_potential_temperature', cubes,
+                         levels=('ertel_potential_vorticity', [2]))[0]
+    ridges, troughs = rossby_waves.make_nae_mask(theta)
+
+    # Calculate the diagnostic
+    dz = kwargs['dz']
+    output = diagnostic.profile(tracers, zpv2, dz, mask=troughs)
+
+    return output
 
 if __name__ == '__main__':
     forecast = case_studies.iop5()
