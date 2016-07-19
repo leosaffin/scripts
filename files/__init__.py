@@ -1,6 +1,6 @@
 import iris
 from iris.cube import CubeList
-from mymodule import convert, grid, variable
+from mymodule import convert, interpolate, grid, variable
 
 
 slices = slice(0, 50), slice(15, 345), slice(15, 585)
@@ -100,7 +100,7 @@ def _nddiag(newcubes, filename):
     # u and v are staggered on rho-levels
     for name in ('x_wind', 'y_wind'):
         cube = convert.calc(name, cubes)
-        cube = variable._regrid_3d(cube, w)
+        cube = interpolate.remap_3d(cube, w, 'level_height')
         newcubes.append(cube)
 
     newcubes.append(w)
@@ -124,7 +124,7 @@ def _prognostics(newcubes, filename):
     # Remap rho to theta-levels
     rho = convert.calc('unknown', cubes)
     rho.rename('air_density')
-    rho = variable._regrid_3d(rho, theta)
+    rho = interpolate.remap_3d(rho, theta, 'level_height')
 
     # Extract exner on theta levels (ignore on rho levels)
     exner = cubes.extract('dimensionless_exner_function')[1]
