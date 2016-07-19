@@ -29,25 +29,30 @@ def main(cubes, varnames, bins):
 
 
 def from_cubelist(cubes, **kwargs):
-    names = []
+    names = ['dynamics_tracer_inconsistency',
+             'long_wave_radiation_pv',
+             'boundary_layer_pv',
+             'microphysics_pv',
+             'convection_pv']
 
     # Extract variables from the cubelist
-    pv = convert.calc('advection_only_pv')
+    pv = convert.calc('advection_only_pv', cubes)
     tracers = convert.calc(names, cubes)
+
+    # Add altitude to tracers
+    for cube in tracers:
+        grid.add_hybrid_height(cube)
 
     # Calculate the tropopause altitude
     grid.add_hybrid_height(pv)
     z = grid.make_cube(pv, 'altitude')
-    zpv2 = interpolate.to_level(z, ertel_potential_vorticity=[2])[0]
-
-    # Mask troughs
-    theta = convert.calc('air_potential_temperature', cubes,
-                         levels=('ertel_potential_vorticity', [2]))[0]
-    ridges, troughs = rossby_waves.make_nae_mask(theta)
+    pv = grid.make_coord(pv)
+    z.add_aux_coord(pv, [0, 1, 2])
+    zpv2 = interpolate.to_level(z, advection_only_pv=[2])[0]
 
     # Calculate the diagnostic
     dz = kwargs['dz']
-    output = diagnostic.profile(tracers, zpv2, dz, mask=troughs)
+    output = diagnostic.profile(tracers, zpv2, dz)
 
     return output
 

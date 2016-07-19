@@ -10,8 +10,8 @@ def iop5():
     inpath = '/projects/diamet/lsaffi/xjjhq/xjjhqa_p'
     outpath = '/projects/diamet/lsaffi/iop5/'
 
-    orog = iris.load('/projects/diamet/lsaffi/nae_orography.nc')
-    orog = grid.make_coord(orog[0][0, 0])
+    z_0 = iris.load('/projects/diamet/lsaffi/nae_orography.nc')[0][0, 0]
+    orog = grid.make_coord(z_0)
     for n in range(36):
         print n
         # Prognostics
@@ -22,10 +22,10 @@ def iop5():
                     slices=slices)
 
         # Diagnostics
-        infile = inpath + 'c' + str(n).zfill(3)
+        infile = inpath + 'd' + str(n).zfill(3)
         outfile = outpath + 'diagnostics_' + str(n + 1).zfill(3)
-        diagnostics(
-            infile, outfile, slices=(slice(15, 345), slice(15, 585)))
+        diagnostics(infile, outfile,
+                    slices=(slice(15, 345), slice(15, 585)))
 
 
 def ff2nc(infile, outfile, **kwargs):
@@ -55,7 +55,7 @@ def diagnostics(infile, outfile, **kwargs):
 
     cubes = convert.calc(['boundary_layer_type',
                           'air_pressure_at_sea_level',
-                          'atmosphere_boundary_layer_height',
+                          'atmosphere_boundary_layer_thickness',
                           'convective_rainfall_amount',
                           'stratiform_rainfall_amount'], cubes)
 
@@ -111,6 +111,9 @@ def _nddiag(newcubes, filename):
         cube = convert.calc(name, cubes)
         newcubes.append(cube)
 
+    for cube in newcubes:
+        cube.remove_coord('surface_altitude')
+
     return
 
 
@@ -124,7 +127,8 @@ def _prognostics(newcubes, filename):
     # Remap rho to theta-levels
     rho = convert.calc('unknown', cubes)
     rho.rename('air_density')
-    rho = interpolate.remap_3d(rho, theta, 'level_height')
+    rho.units = 'kg m-3'
+    rho = variable._regrid_3d(rho, theta)
 
     # Extract exner on theta levels (ignore on rho levels)
     exner = cubes.extract('dimensionless_exner_function')[1]
