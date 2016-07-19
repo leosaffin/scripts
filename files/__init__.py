@@ -128,7 +128,7 @@ def _prognostics(newcubes, filename):
     rho = convert.calc('unknown', cubes)
     rho.rename('air_density')
     rho.units = 'kg m-3'
-    rho = variable._regrid_3d(rho, theta)
+    rho = interpolate.remap_3d(rho, theta, 'level_height')
 
     # Extract exner on theta levels (ignore on rho levels)
     exner = cubes.extract('dimensionless_exner_function')[1]
