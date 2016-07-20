@@ -39,7 +39,7 @@ def ff2nc(infile, outfile, **kwargs):
 def prognostics(nddiag_name, progs_name, outfile, **kwargs):
     cubes = CubeList()
 
-    # Extract u,v,w, q_cl and q_cf from the NDdiag file
+    # Extract u, v, w, q, q_cl and q_cf from the NDdiag file
     _nddiag(cubes, nddiag_name)
 
     # Extract rho, theta and exner on theta levels from prognostics file
@@ -106,7 +106,8 @@ def _nddiag(newcubes, filename):
     newcubes.append(w)
 
     # Simply copy across cubes on theta levels
-    for name in ('mass_fraction_of_cloud_liquid_water_in_air',
+    for name in ('specific_humidity',
+                 'mass_fraction_of_cloud_liquid_water_in_air',
                  'mass_fraction_of_cloud_ice_in_air'):
         cube = convert.calc(name, cubes)
         newcubes.append(cube)
