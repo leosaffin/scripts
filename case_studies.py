@@ -21,45 +21,42 @@ def make_filenames(job_id, filenames, n, suffix):
     return names
 
 
+# DIAMET IOP5
+start_time = datetime(2011, 11, 28, 12)
+lead_times = [timedelta(hours=n) for n in range(1, 37)]
+
 # Original IOP5 forecast with dynamics-tracer inconsistency including pressure
 # solver increments
-def iop5():
-    start_time = datetime(2011, 11, 28, 12)
-    lead_times = [timedelta(hours=n) for n in range(1, 37)]
-    job_id = 'xjjhq'
-    filenames = ['xjjhqa_']
-
-    return generate_forecast(start_time, lead_times, job_id,
-                             filenames, suffix='.pp')
+job_id = 'xjjhq'
+filenames = ['xjjhqa_']
+iop5 = generate_forecast(
+    start_time, lead_times, job_id, filenames, suffix='.pp')
 
 
 # Dynamics-tracer inconsistency using basic diagnostic without pressure solver
 # increments
-def iop5b():
-    start_time = datetime(2011, 11, 28, 12)
-    lead_times = [timedelta(hours=n) for n in range(1, 37)]
-    job_id = 'xjjhq'
-    filenames = ['xjjhqb_', 'xjjhqb_nddiag_']
-
-    return generate_forecast(start_time, lead_times, job_id,
-                             filenames, suffix='.pp')
+filenames = ['xjjhqb_', 'xjjhqb_nddiag_']
+iop5b = generate_forecast(
+    start_time, lead_times, job_id, filenames, suffix='.pp')
 
 
 # Same as iop5b but using monotone limiter for PV tracer advection
-def iop5_mono():
-    start_time = datetime(2011, 11, 28, 12)
-    lead_times = [timedelta(hours=n) for n in range(1, 37)]
-    job_id = 'iop5'
-    filenames = ['prognostics_', 'diagnostics_', 'pv_tracer_mono_']
+job_id = 'iop5'
+filenames = ['prognostics_', 'diagnostics_', 'pv_tracer_mono_']
+iop5_mono = generate_forecast(start_time, lead_times, job_id, filenames)
 
-    return generate_forecast(start_time, lead_times, job_id, filenames)
+# Theta tracers
+filenames = ['prognostics_', 'diagnostics_', 'theta_tracers_']
+iop5_theta = generate_forecast(start_time, lead_times, job_id, filenames)
 
+# DIAMET IOP8
+start_time = datetime(2011, 12, 7, 12)
+lead_times = [timedelta(hours=n) for n in range(1, 37)]
 
-def iop8():
-    start_time = datetime(2011, 12, 7, 12)
-    lead_times = [timedelta(hours=n) for n in range(1, 37)]
-    job_id = 'xkcqa'
-    filenames = ['xkcqaa_*']
+# Dynamics-tracer inconsistency using basic diagnostic without pressure solver
+# increments
+job_id = 'xkcqa'
+filenames = ['xkcqaa_*']
 
-    return generate_forecast(start_time, lead_times, job_id,
-                             filenames, suffix='.pp')
+iop8 = generate_forecast(
+    start_time, lead_times, job_id, filenames, suffix='.pp')
