@@ -1,34 +1,53 @@
 import iris
 from iris.cube import CubeList
 from mymodule import convert, interpolate, grid, variable
+from scripts.files import stash_maps
 
 
-slices = slice(0, 50), slice(15, 345), slice(15, 585)
-
-
-def iop5():
+def main():
+    # Filename parameters
+    strlen = 3
     inpath = '/projects/diamet/lsaffi/xjjhq/xjjhqa_p'
     outpath = '/projects/diamet/lsaffi/iop5/'
 
+    # Load grid orography
     z_0 = iris.load('/projects/diamet/lsaffi/nae_orography.nc')[0][0, 0]
     orog = grid.make_coord(z_0)
+
+    # Define which area of grid to subset
+    slices = slice(0, 50), slice(15, 345), slice(15, 585)
+
     for n in range(36):
         print n
+        # Tracers
+        infile = inpath + 'a' + str(n).zfill(strlen)
+        outfile = outpath + 'pv_tracers_' + str(n + 1).zfill(strlen)
+        tracers(infile, outfile, stash_maps=[stash_maps.pv_tracers],
+                orography=orog, slices=slices)
+
         # Prognostics
-        nddiag_name = inpath + 'b' + str(n).zfill(3)
-        progs_name = inpath + 'c' + str(n).zfill(3)
-        outfile = outpath + 'prognostics_' + str(n + 1).zfill(3)
+        nddiag_name = inpath + 'b' + str(n).zfill(strlen)
+        progs_name = inpath + 'c' + str(n).zfill(strlen)
+        outfile = outpath + 'prognostics_' + str(n + 1).zfill(strlen)
         prognostics(nddiag_name, progs_name, outfile, orography=orog,
                     slices=slices)
 
         # Diagnostics
-        infile = inpath + 'd' + str(n).zfill(3)
-        outfile = outpath + 'diagnostics_' + str(n + 1).zfill(3)
+        infile = inpath + 'd' + str(n).zfill(strlen)
+        outfile = outpath + 'diagnostics_' + str(n + 1).zfill(strlen)
         diagnostics(infile, outfile,
-                    slices=(slice(15, 345), slice(15, 585)))
+                    slices=slices[1:])
 
 
 def ff2nc(infile, outfile, **kwargs):
+    cubes = iris.load(infile)
+
+    cubes = redo_cubes(cubes, **kwargs)
+
+    iris.save(cubes, outfile + '.nc')
+
+
+def tracers(infile, outfile, **kwargs):
     cubes = iris.load(infile)
 
     cubes = redo_cubes(cubes, **kwargs)
@@ -64,7 +83,7 @@ def diagnostics(infile, outfile, **kwargs):
     iris.save(cubes, outfile + '.nc')
 
 
-def redo_cubes(cubes, stash_maps=[], orography=None, slices=slices):
+def redo_cubes(cubes, stash_maps=[], orography=None, slices=None):
     # Define attributes of custom variables by stash mapping
     for stash_map in stash_maps:
         stash_map.remap_cubelist(cubes)
@@ -138,3 +157,7 @@ def _prognostics(newcubes, filename):
     [newcubes.append(cube) for cube in [rho, theta, exner]]
 
     return
+
+
+if __name__ == '__main__':
+    main()
