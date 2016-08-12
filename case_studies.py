@@ -1,4 +1,4 @@
-"""Forecast objects for
+"""Generate forecast objects for case studies
 """
 from datetime import datetime, timedelta
 from mymodule.forecast import Forecast
@@ -33,15 +33,13 @@ iop5 = generate_forecast(
     start_time, lead_times, job_id, filenames, suffix='.pp')
 
 
+job_id = 'iop5'
 # Dynamics-tracer inconsistency using basic diagnostic without pressure solver
 # increments
-filenames = ['xjjhqb_', 'xjjhqb_nddiag_']
-iop5b = generate_forecast(
-    start_time, lead_times, job_id, filenames, suffix='.pp')
-
+filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_']
+iop5b = generate_forecast(start_time, lead_times, job_id, filenames)
 
 # Same as iop5b but using monotone limiter for PV tracer advection
-job_id = 'iop5'
 filenames = ['prognostics_', 'diagnostics_', 'pv_tracer_mono_']
 iop5_mono = generate_forecast(start_time, lead_times, job_id, filenames)
 
@@ -52,11 +50,9 @@ iop5_theta = generate_forecast(start_time, lead_times, job_id, filenames)
 # DIAMET IOP8
 start_time = datetime(2011, 12, 7, 12)
 lead_times = [timedelta(hours=n) for n in range(1, 37)]
+job_id = 'iop8'
 
 # Dynamics-tracer inconsistency using basic diagnostic without pressure solver
 # increments
-job_id = 'xkcqa'
-filenames = ['xkcqaa_*']
-
-iop8 = generate_forecast(
-    start_time, lead_times, job_id, filenames, suffix='.pp')
+filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_']
+iop8 = generate_forecast(start_time, lead_times, job_id, filenames)
