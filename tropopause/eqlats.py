@@ -5,9 +5,9 @@ import numpy as np
 import iris
 from mymodule import convert, interpolate, grid
 
-directory = "/home/lsaffin/Documents/meteorology/data/eqlats/"
-infile = "emuseries_2009110100"
-outfile = "eqlats.nc"
+directory = "/home/lsaffin/Documents/meteorology/data/"
+infile = "eqlats/emuseries_2013120100"
+outfile = "eqlats/2013_eqlats.nc"
 
 
 def main():
@@ -94,14 +94,23 @@ def readlines(data, npoints):
     return np.array(values)
 
 
-def thetapv2():
+def theta_pv2(start_time):
+    # Load the equivalent latitude data on PV2
+    cubes = iris.load(directory + 'eqlats/eqlats_' + start_time + '.nc')
+
+    # Only include lower levels [:, 46:]
+    eqlats_cube = convert.calc('equivalent_latitude', cubes)
+    theta = eqlats_cube.coord('potential_temperature').points
+    eqlats = interpolate.main(eqlats_cube, ertel_potential_vorticity=2).data
+
+    return eqlats_cube, theta, eqlats
+
+
+def thetapv2_hemisphere(start_time):
     """Re-arrange the data as theta(time, grid_lat, grid_lon)
     """
     # Load the equivalent latitude data on PV2
-    cubes = iris.load(directory + outfile)
-    eqlats_cube = convert.calc('equivalent_latitude', cubes)[:, 46:]
-    theta = eqlats_cube.coord('potential_temperature').points
-    eqlats = interpolate.main(eqlats_cube, ertel_potential_vorticity=2).data
+    eqlats_cube, theta, eqlats = theta_pv2(start_time)
 
     # Create a coordinate for latitude
     nlats = 91
@@ -131,20 +140,17 @@ def thetapv2():
                              (iris.coords.DimCoord(lat, long_name='latitude',
                                                    units='degrees'), 1)])
 
-    iris.save(output, directory + 'theta_pv2.nc')
+    iris.save(output, directory + 'eqlats/theta_2pvu_' + start_time + '.nc')
 
 
-def thetapv2_nae():
+def thetapv2_nae(start_time):
     """Re-arrange the data as theta(time, grid_lat, grid_lon)
     """
     # Load the equivalent latitude data on PV2
-    cubes = iris.load(directory + outfile)
-    eqlats_cube = convert.calc('equivalent_latitude', cubes)[:, 46:]
-    theta = eqlats_cube.coord('potential_temperature').points
-    eqlats = interpolate.main(eqlats_cube, ertel_potential_vorticity=2).data
+    eqlats_cube, theta, eqlats = theta_pv2(start_time)
 
     # Load the NAE grid
-    cubes = iris.load(directory + 'xjjhq/xjjhq_036.pp')
+    cubes = iris.load(directory + 'xjjhq/xjjhqa_036.pp')
     lat = grid.true_coords(cubes[0])[1]
 
     # Initialise the output
@@ -173,8 +179,11 @@ def thetapv2_nae():
                              (cubes[0].coord('grid_latitude'), 1),
                              (cubes[0].coord('grid_longitude'), 2)])
 
-    iris.save(output, directory + 'eqlats/eqlat_pv2_nae.nc')
+    iris.save(output,
+              directory + 'eqlats/theta_2pvu_nae_' + start_time + '.nc')
 
 if __name__ == '__main__':
-    # main()
-    thetapv2()
+    main()
+    start_time = '2009_11'
+    thetapv2_hemisphere(start_time)
+    thetapv2_nae(start_time)
