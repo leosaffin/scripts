@@ -12,7 +12,6 @@ outfile = "eqlats/2013_eqlats.nc"
 
 def main():
     """
-
     Equivalent Latitude (PV Level, Theta Level, Time)
 
     Surface Equivalent Latitude (Theta Level, Time)
@@ -98,10 +97,15 @@ def theta_pv2(start_time):
     # Load the equivalent latitude data on PV2
     cubes = iris.load(directory + 'eqlats/eqlats_' + start_time + '.nc')
 
-    # Only include lower levels [:, 46:]
+    # phi(t, theta, q)
     eqlats_cube = convert.calc('equivalent_latitude', cubes)
+
+    # theta coordinate
     theta = eqlats_cube.coord('potential_temperature').points
-    eqlats = interpolate.main(eqlats_cube, ertel_potential_vorticity=2).data
+
+    # phi(t, theta, q=2PVU)
+    eqlats = interpolate.main(
+        eqlats_cube, ertel_potential_vorticity=[2])[:, :, 0].data
 
     return eqlats_cube, theta, eqlats
 
@@ -117,22 +121,26 @@ def thetapv2_hemisphere(start_time):
     lat = np.linspace(0, 90, nlats)
 
     # Initialise the output
-    ntimes = len(eqlats)
+    ntimes, ntheta = eqlats.shape
     output = np.zeros([ntimes, nlats])
 
-    for n in xrange(ntimes):
-        print n
-        for j in xrange(nlats):
+    for n in range(ntimes):
+        print(n)
+        for j in range(nlats):
             # Search upward for the equivalent latitude value
-            k = 0
-            while eqlats[n, k] < lat[j]:
-                k += 1
+            k = ntheta - 2
+            while eqlats[n, k] > lat[j] and k > 0:
+                k -= 1
 
-            # Linearly interpolate to find theta
-            alpha = ((lat[j] - eqlats[n, k - 1]) /
-                     (eqlats[n, k] - eqlats[n, k - 1]))
+            if k > 0:
+                # Linearly interpolate to find theta
+                alpha = ((lat[j] - eqlats[n, k]) /
+                         (eqlats[n, k + 1] - eqlats[n, k]))
 
-            output[n, j] = (alpha * theta[k] + (1 - alpha) * theta[k - 1])
+                output[n, j] = (alpha * theta[k + 1] + (1 - alpha) * theta[k])
+
+            else:
+                output[n, j] = theta[k]
 
     output = iris.cube.Cube(
         output, long_name='potential_temperature', units='K',
@@ -154,24 +162,27 @@ def thetapv2_nae(start_time):
     lat = grid.true_coords(cubes[0])[1]
 
     # Initialise the output
-    nt = len(eqlats)
+    nt, ntheta = eqlats.shape
     ny, nx = lat.shape
     output = np.zeros([nt, ny, nx])
 
-    for n in xrange(nt):
-        print n
-        for j in xrange(ny):
-            for i in xrange(nx):
+    for n in range(nt):
+        print(n)
+        for j in range(ny):
+            for i in range(nx):
                 # Search upward for the equivalent latitude value
-                k = 0
-                while eqlats[n, k] < lat[j, i]:
-                    k += 1
+                k = ntheta - 2
+                while eqlats[n, k] > lat[j, i]:
+                    k -= 1
 
-                # Linearly interpolate to find theta
-                alpha = ((lat[j, i] - eqlats[n, k - 1]) /
-                         (eqlats[n, k] - eqlats[n, k - 1]))
-                output[n, j, i] = (alpha * theta[k] +
-                                   (1 - alpha) * theta[k - 1])
+                if k > 0:
+                    # Linearly interpolate to find theta
+                    alpha = ((lat[j, i] - eqlats[n, k]) /
+                             (eqlats[n, k + 1] - eqlats[n, k]))
+                    output[n, j, i] = (alpha * theta[k + 1] +
+                                       (1 - alpha) * theta[k])
+                else:
+                    output[n, j, i] = theta[k]
 
     output = iris.cube.Cube(
         output, long_name='potential_temperature', units='K',
@@ -183,7 +194,6 @@ def thetapv2_nae(start_time):
               directory + 'eqlats/theta_2pvu_nae_' + start_time + '.nc')
 
 if __name__ == '__main__':
-    main()
-    start_time = '2009_11'
+    start_time = '2011_11'
     thetapv2_hemisphere(start_time)
     thetapv2_nae(start_time)
