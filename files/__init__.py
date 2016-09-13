@@ -1,6 +1,6 @@
 import iris
 from iris.cube import CubeList
-from mymodule import convert, interpolate, grid, variable
+from mymodule import calculus, convert, interpolate, grid, variable
 from scripts.files import stash_maps
 
 
@@ -8,7 +8,7 @@ def main():
     # Filename parameters
     strlen = 3
     inpath = '/projects/diamet/lsaffi/xjjhq/xjjhqa_p'
-    outpath = '/projects/diamet/lsaffi/temp/'
+    outpath = '/projects/diamet/lsaffi/iop5/'
     time = 'hours since 2011-11-28 12:00:00'
 
     # Load grid orography
@@ -18,7 +18,7 @@ def main():
     # Define which area of grid to subset
     slices = slice(0, 50), slice(15, 345), slice(15, 585)
 
-    for n in range(36):
+    for n in range(1):
         print n
         # Tracers
         infile = inpath + 'a' + str(n).zfill(strlen)
@@ -39,14 +39,6 @@ def main():
         diagnostics(infile, outfile, slices=slices[1:], time=time)
 
 
-def ff2nc(infile, outfile, **kwargs):
-    cubes = iris.load(infile)
-
-    cubes = redo_cubes(cubes, **kwargs)
-
-    iris.save(cubes, outfile + '.nc')
-
-
 def tracers(infile, outfile, **kwargs):
     cubes = iris.load(infile)
 
@@ -63,6 +55,9 @@ def prognostics(nddiag_name, progs_name, outfile, **kwargs):
 
     # Extract rho, theta and exner on theta levels from prognostics file
     _prognostics(cubes, progs_name)
+
+    # Calculate derived diagnostics
+    _derived(cubes)
 
     cubes = redo_cubes(cubes, **kwargs)
 
@@ -91,6 +86,9 @@ def redo_cubes(cubes, stash_maps=[], orography=None, slices=None, time=None):
     for cube in cubes:
         # Remove unneeded attributes
         cube.attributes = {}
+
+        for coord in cube.aux_factories:
+            cube.remove_aux_factory(coord)
 
         try:
             # Use the hybrid height coordinate as the main vertical coordinate
@@ -162,6 +160,15 @@ def _prognostics(newcubes, filename):
 
     # Add the prognostics to the newcubelist
     [newcubes.append(cube) for cube in [rho, theta, exner]]
+
+    return
+
+def _derived(cubes):
+    # Vorticity
+
+    # Divergence
+
+    # PV using different calculation
 
     return
 
