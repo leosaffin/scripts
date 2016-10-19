@@ -1,15 +1,19 @@
 import iris
 from mymodule import convert
-from scripts.files import stash_maps
 import files
+from files import stash_maps
+
 
 # Filename parameters
 path = '/projects/diamet/lsaffi/'
 strlen = 3
-inpath = path + 'xjjhq/xjjhqa_p'
-outpath = path + 'iop5/'
-time = 'hours since 2011-11-28 12:00:00'
+inpath = path + 'xkcqa/xkcqa_p'
+outpath = path + 'iop8/'
+time = 'hours since 2011-12-07 12:00:00'
 nt = 36
+
+# Surface altitude file
+surf = '/projects/diamet/lsaffi/nae_orography.nc'
 
 # Define which area of grid to subset
 slices = slice(0, 50), slice(15, 345), slice(15, 585)
@@ -59,13 +63,18 @@ def tracers(infile, outfile, **kwargs):
 
 def prognostics(nddiag_name, progs_name, outfile, **kwargs):
     # Extract u, v, w, q, q_cl and q_cf from the NDdiag file
-    cubes = files.load_cubes(nddiag_name, nddiag_names)
+    cubes_all = iris.load(nddiag_name)
+    cubes = convert.calc(nddiag_names, cubes_all)
 
     # Extract rho, theta and exner on theta levels from prognostics file
     _prognostics(cubes, progs_name)
 
     # Calculate derived diagnostics
-    _derived(cubes)
+    # Add altitude to prognostic variables
+    P = cubes_all.extract('air_pressure')
+    z_rho = P[0].coord('altitude')
+    z_theta = P[1].coord('altitude')
+    files.derived(cubes, z_rho, z_theta)
 
     cubes = files.redo_cubes(cubes, basis_cube, **kwargs)
 
@@ -75,6 +84,11 @@ def prognostics(nddiag_name, progs_name, outfile, **kwargs):
 def diagnostics(infile, outfile, **kwargs):
     cubes = files.load_cubes(infile, diag_names)
     cubes = files.redo_cubes(cubes, basis_cube, **kwargs)
+
+    # Remove names from bl type
+    bl_type = cubes.extract('boundary_layer_type')[0]
+    del bl_type.attributes['names']
+
     iris.save(cubes, outfile + '.nc')
 
 
@@ -95,16 +109,6 @@ def _prognostics(newcubes, filename):
 
     # Add the prognostics to the newcubelist
     [newcubes.append(cube) for cube in [rho, theta, exner]]
-
-    return
-
-
-def _derived(cubes):
-    # Vorticity
-
-    # Divergence
-
-    # PV using different calculation
 
     return
 
