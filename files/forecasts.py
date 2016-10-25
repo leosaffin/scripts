@@ -1,3 +1,6 @@
+"""Convert UM model output to a set of NetCDF files
+"""
+
 import iris
 from mymodule import convert
 import files
@@ -7,7 +10,7 @@ from files import stash_maps
 # Filename parameters
 path = '/projects/diamet/lsaffi/'
 strlen = 3
-inpath = path + 'xkcqa/xkcqa_p'
+inpath = path + 'xkcqa/xkcqaa_p'
 outpath = path + 'iop8/'
 time = 'hours since 2011-12-07 12:00:00'
 nt = 36
@@ -66,15 +69,16 @@ def prognostics(nddiag_name, progs_name, outfile, **kwargs):
     cubes_all = iris.load(nddiag_name)
     cubes = convert.calc(nddiag_names, cubes_all)
 
-    # Extract rho, theta and exner on theta levels from prognostics file
-    _prognostics(cubes, progs_name)
-
-    # Calculate derived diagnostics
-    # Add altitude to prognostic variables
+    # Extract altitude to add to prognostic variables
     P = cubes_all.extract('air_pressure')
     z_rho = P[0].coord('altitude')
     z_theta = P[1].coord('altitude')
-    files.derived(cubes, z_rho, z_theta)
+
+    # Extract rho, theta and exner on theta levels from prognostics file
+    _prognostics(cubes, progs_name, z_rho, z_theta)
+
+    # Calculate derived diagnostics
+    files.derived(cubes)
 
     cubes = files.redo_cubes(cubes, basis_cube, **kwargs)
 
@@ -92,20 +96,23 @@ def diagnostics(infile, outfile, **kwargs):
     iris.save(cubes, outfile + '.nc')
 
 
-def _prognostics(newcubes, filename):
+def _prognostics(newcubes, filename, z_rho, z_theta):
     # Load the cubes
     cubes = iris.load(filename)
 
     # Extract theta
     theta = convert.calc('air_potential_temperature', cubes)
+    theta.add_aux_coord(z_theta, [0, 1, 2])
 
     # Remap rho to theta-levels
     rho = convert.calc('unknown', cubes)
     rho.rename('air_density')
     rho.units = 'kg m-3'
+    rho.add_aux_coord(z_rho, [0, 1, 2])
 
     # Extract exner on theta levels (ignore on rho levels)
     exner = cubes.extract('dimensionless_exner_function')[1]
+    exner.add_aux_coord(z_theta, [0, 1, 2])
 
     # Add the prognostics to the newcubelist
     [newcubes.append(cube) for cube in [rho, theta, exner]]

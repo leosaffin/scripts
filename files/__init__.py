@@ -22,30 +22,24 @@ def redo_cubes(cubes, basis_cube, stash_maps=[], slices=None, time=None):
 
     newcubelist = CubeList()
     for cube in cubes:
-        # Squeeze cubes dimensions
-        newcube = squeeze(cube)
-
-        # Cut off boundaries
-        newcube = newcube[slices]
-
         # Remove unneccessary time coordinates
         for coord in ['forecast_period', 'forecast_reference_time']:
             try:
-                newcube.remove_coord(coord)
+                cube.remove_coord(coord)
             except iris.exceptions.CoordinateNotFoundError:
                 pass
 
-        if newcube.ndim == 3:
+        if cube.ndim == 3:
             # Use the hybrid height coordinate as the main vertical coordinate
             try:
-                newcube.remove_coord('model_level_number')
+                cube.remove_coord('model_level_number')
             except iris.exceptions.CoordinateNotFoundError:
                 pass
-            iris.util.promote_aux_coord_to_dim_coord(newcube, 'level_height')
-            newcube.coord('level_height').rename(z.name())
+            cube.coord('level_height').rename(z.name())
+            iris.util.promote_aux_coord_to_dim_coord(cube, z.name())
 
             # Remap the cubes to theta points
-            newcube = interpolate.remap_3d(newcube, basis_cube, z.name())
+            newcube = interpolate.remap_3d(cube, basis_cube, z.name())
 
         # Convert the main time coordinate
         if time is not None:
@@ -56,15 +50,13 @@ def redo_cubes(cubes, basis_cube, stash_maps=[], slices=None, time=None):
     return newcubelist
 
 
-def derived(cubes, z_rho, z_theta):
+def derived(cubes):
     # Extract variables
     u = cubes.extract('x_wind')[0]
     v = cubes.extract('y_wind')[0]
     w = cubes.extract('upward_air_velocity')[0]
     theta = cubes.extract('air_potential_temperature')[0]
-    theta.add_aux_coord(z_theta, [0, 1, 2])
     rho = cubes.extract('air_density')[0]
-    rho.add_aux_coord(z_rho, [0, 1, 2])
 
     # Vorticity
     xi_i, xi_j, xi_k = variable.vorticity(u, v, w)
