@@ -1,22 +1,55 @@
 """Read in John's equivalent latitude data and output as netcdf
+
+Input files have name: emuseries_{YYYYMMDDHH}
 """
 import datetime
 import numpy as np
+import matplotlib.pyplot as plt
 import iris
-from mymodule import convert, interpolate, grid
+from mymodule import convert, interpolate, grid, plot
 
-directory = "/home/lsaffin/Documents/meteorology/data/"
-infile = "eqlats/emuseries_2013120100"
-outfile = "eqlats/2013_eqlats.nc"
+directory = "/home/lsaffin/Documents/meteorology/data/eqlats/"
 
 
-def main():
+def main(YYYY, MM, DD, HH):
+    # Put the text file in to NetCDF
+    infile = directory + 'emuseries_' + YYYY + MM + DD + HH
+    outfile = directory + 'eqlats_' + YYYY + '_' + MM + '.nc'
+    convert_to_nc(infile, outfile)
+
+    # Calculate theta on 2PVU from NetCDF files
+    infile = outfile
+
+    # As a function of latitude
+    theta_lat = thetapv2_hemisphere(infile)
+    outfile = directory + 'theta_2pvu_' + YYYY + '_' + MM + '.nc'
+    iris.save(theta_lat, outfile)
+
+    # On the NAE grid
+    theta_nae = thetapv2_nae(infile)
+    outfile = directory + 'theta_2pvu_nae_' + YYYY + '_' + MM + '.nc'
+    iris.save(theta_nae, outfile)
+
+    # Plot the overview of the time period
+    plot_summary(theta_lat)
+    plt.ion()
+
+    return
+
+
+def convert_to_nc(infile, outfile):
+    """Read in emuseries text file and sort data to netcdf
+
+    Output file contains:
+        Equivalent Latitude (PV Level, Theta Level, Time)
+        Surface Equivalent Latitude (Theta Level, Time)
+
+    Args:
+        infile (str): Name of input text file
+
+        outfile (str): Name of output NetCDF file
     """
-    Equivalent Latitude (PV Level, Theta Level, Time)
-
-    Surface Equivalent Latitude (Theta Level, Time)
-    """
-    with open(directory + infile) as data:
+    with open(infile) as data:
         # Top line has the start date
         date = data.readline().split()[-1]
         date = datetime.datetime(
@@ -27,8 +60,12 @@ def main():
 
         # Third line gives the time interval
         dt = int(data.readline().split()[0])
+
+        # Make a time coordinate
+        t_units = 'hours since ' + str(date)
         time = iris.coords.DimCoord(
-            np.arange(ntimes) * dt, long_name='time', units='hours')
+            np.arange(ntimes) * dt, long_name='time', units=t_units)
+        time.convert_units('days since ' + str(date))
 
         # Next block states the number of latitudes and their values
         nlats = int(data.readline().split()[0])
@@ -39,7 +76,7 @@ def main():
         ntheta = int(data.readline().split()[0])
         theta = readlines(data, ntheta)
         theta = iris.coords.DimCoord(
-            theta, long_name='potential_temperature')
+            theta, long_name='potential_temperature', units='K')
 
         # The next line states the top boundary of isentropic levels
         theta_max = float(data.readline().split()[0])
@@ -81,7 +118,9 @@ def main():
             units='degrees',
             dim_coords_and_dims=[(time, 0), (theta, 1), (pv, 2)])
 
-        iris.save(iris.cube.CubeList([eqlat, eqlat_s]), directory + outfile)
+        iris.save(iris.cube.CubeList([eqlat, eqlat_s]), outfile)
+
+        return
 
 
 def readlines(data, npoints):
@@ -93,9 +132,17 @@ def readlines(data, npoints):
     return np.array(values)
 
 
-def theta_pv2(start_time):
+def theta_pv2(infile):
+    """Load equivalent latitude data on 2 PVU
+
+    Args:
+        infile (str): NetCDF file holding equivalent latitudes
+
+    Returns:
+        eqlats_cube (iris.cube.Cube):
+    """
     # Load the equivalent latitude data on PV2
-    cubes = iris.load(directory + 'eqlats/eqlats_' + start_time + '.nc')
+    cubes = iris.load(infile)
 
     # phi(t, theta, q)
     eqlats_cube = convert.calc('equivalent_latitude', cubes)
@@ -110,37 +157,36 @@ def theta_pv2(start_time):
     return eqlats_cube, theta, eqlats
 
 
-def thetapv2_hemisphere(start_time):
-    """Re-arrange the data as theta(time, grid_lat, grid_lon)
+def thetapv2_hemisphere(infile):
+    """Re-arrange the data as theta(time, longitude)
     """
     # Load the equivalent latitude data on PV2
-    eqlats_cube, theta, eqlats = theta_pv2(start_time)
+    eqlats_cube, theta, eqlats = theta_pv2(infile)
 
     # Create a coordinate for latitude
-    nlats = 91
-    lat = np.linspace(0, 90, nlats)
+    nlats = 81
+    lat = np.linspace(10, 90, nlats)
 
     # Initialise the output
     ntimes, ntheta = eqlats.shape
     output = np.zeros([ntimes, nlats])
 
+    # Search downward for the equivalent latitude value
+    # Start at theta=400 K
+    k_start = np.abs(theta - 400).argmin()
     for n in range(ntimes):
         print(n)
         for j in range(nlats):
-            # Search upward for the equivalent latitude value
-            k = ntheta - 2
-            while eqlats[n, k] > lat[j] and k > 0:
-                k -= 1
+            # Search downward
+            k = k_start
+            while eqlats[n, k] < lat[j] and k < ntheta:
+                k += 1
 
-            if k > 0:
-                # Linearly interpolate to find theta
-                alpha = ((lat[j] - eqlats[n, k]) /
-                         (eqlats[n, k + 1] - eqlats[n, k]))
+            # Linearly interpolate to find theta
+            alpha = ((lat[j] - eqlats[n, k]) /
+                     (eqlats[n, k] - eqlats[n, k - 1]))
 
-                output[n, j] = (alpha * theta[k + 1] + (1 - alpha) * theta[k])
-
-            else:
-                output[n, j] = theta[k]
+            output[n, j] = (alpha * theta[k] + (1 - alpha) * theta[k - 1])
 
     output = iris.cube.Cube(
         output, long_name='potential_temperature', units='K',
@@ -148,17 +194,17 @@ def thetapv2_hemisphere(start_time):
                              (iris.coords.DimCoord(lat, long_name='latitude',
                                                    units='degrees'), 1)])
 
-    iris.save(output, directory + 'eqlats/theta_2pvu_' + start_time + '.nc')
+    return output
 
 
-def thetapv2_nae(start_time):
+def thetapv2_nae(infile):
     """Re-arrange the data as theta(time, grid_lat, grid_lon)
     """
     # Load the equivalent latitude data on PV2
-    eqlats_cube, theta, eqlats = theta_pv2(start_time)
+    eqlats_cube, theta, eqlats = theta_pv2(infile)
 
     # Load the NAE grid
-    cubes = iris.load(directory + 'xjjhq/xjjhqa_036.pp')
+    cubes = iris.load(directory + '../iop5/diagnostics_024.nc')
     lat = grid.true_coords(cubes[0])[1]
 
     # Initialise the output
@@ -166,23 +212,23 @@ def thetapv2_nae(start_time):
     ny, nx = lat.shape
     output = np.zeros([nt, ny, nx])
 
+    # Search downward for the equivalent latitude value
+    # Start at theta=400 K
+    k_start = np.abs(theta - 400).argmin()
     for n in range(nt):
         print(n)
         for j in range(ny):
             for i in range(nx):
-                # Search upward for the equivalent latitude value
-                k = ntheta - 2
-                while eqlats[n, k] > lat[j, i]:
-                    k -= 1
+                # Search downward
+                k = k_start
+                while eqlats[n, k] < lat[j, i] and k < ntheta:
+                    k += 1
 
-                if k > 0:
-                    # Linearly interpolate to find theta
-                    alpha = ((lat[j, i] - eqlats[n, k]) /
-                             (eqlats[n, k + 1] - eqlats[n, k]))
-                    output[n, j, i] = (alpha * theta[k + 1] +
-                                       (1 - alpha) * theta[k])
-                else:
-                    output[n, j, i] = theta[k]
+                # Linearly interpolate to find theta
+                alpha = ((lat[j, i] - eqlats[n, k]) /
+                         (eqlats[n, k] - eqlats[n, k - 1]))
+                output[n, j, i] = (alpha * theta[k] +
+                                   (1 - alpha) * theta[k - 1])
 
     output = iris.cube.Cube(
         output, long_name='potential_temperature', units='K',
@@ -190,10 +236,17 @@ def thetapv2_nae(start_time):
                              (cubes[0].coord('grid_latitude'), 1),
                              (cubes[0].coord('grid_longitude'), 2)])
 
-    iris.save(output,
-              directory + 'eqlats/theta_2pvu_nae_' + start_time + '.nc')
+    return output
+
+
+def plot_summary(cube, vmin=250, vmax=400, cmap='plasma', **kwargs):
+    """Plot background theta on 2PVU vs latitude for full period
+    """
+    plot.pcolormesh(cube, vmin=vmin, vmax=vmax, cmap=cmap, **kwargs)
+
+    return
 
 if __name__ == '__main__':
-    start_time = '2011_11'
-    thetapv2_hemisphere(start_time)
-    thetapv2_nae(start_time)
+    #main('2009', '11', '01', '00')
+    #main('2011', '11', '23', '00')
+    main('2013', '11', '01', '00')
