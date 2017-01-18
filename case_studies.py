@@ -2,6 +2,7 @@
 """
 from datetime import datetime, timedelta
 from mymodule.forecast import Forecast
+from mymodule.user_variables import datadir
 
 
 def generate_forecast(start_time, lead_times, job_id, filenames, suffix='.nc'):
@@ -15,10 +16,21 @@ def generate_forecast(start_time, lead_times, job_id, filenames, suffix='.nc'):
 def make_filenames(job_id, filenames, n, suffix):
     names = []
     for filename in filenames:
-        names.append('datadir/' + job_id + '/' +
+        names.append(datadir + job_id + '/' +
                      filename + str(n).zfill(3) + suffix)
 
     return names
+
+
+def generate_season_forecast(YYYY, MM, DD):
+    start_time = datetime(YYYY, MM, DD)
+    lead_times = range(0, 61, 6)
+    mapping = {start_time + timedelta(hours=dt):
+               datadir + '/season/' + str(start_time)[0:10].replace('-', '') +
+               '_T+' + str(dt).zfill(2) + '.nc'
+               for dt in lead_times}
+
+    return Forecast(start_time, mapping)
 
 
 # DIAMET IOP5
