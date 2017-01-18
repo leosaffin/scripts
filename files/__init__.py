@@ -22,24 +22,25 @@ def redo_cubes(cubes, basis_cube, stash_maps=[], slices=None, time=None):
 
     newcubelist = CubeList()
     for cube in cubes:
+        newcube = cube.copy()
         # Remove unneccessary time coordinates
         for coord in ['forecast_period', 'forecast_reference_time']:
             try:
-                cube.remove_coord(coord)
+                newcube.remove_coord(coord)
             except iris.exceptions.CoordinateNotFoundError:
                 pass
 
-        if cube.ndim == 3:
+        if newcube.ndim == 3:
             # Use the hybrid height coordinate as the main vertical coordinate
             try:
-                cube.remove_coord('model_level_number')
+                newcube.remove_coord('model_level_number')
             except iris.exceptions.CoordinateNotFoundError:
                 pass
-            cube.coord('level_height').rename(z.name())
-            iris.util.promote_aux_coord_to_dim_coord(cube, z.name())
+            newcube.coord('level_height').rename(z.name())
+            iris.util.promote_aux_coord_to_dim_coord(newcube, z.name())
 
             # Remap the cubes to theta points
-            newcube = interpolate.remap_3d(cube, basis_cube, z.name())
+            newcube = interpolate.remap_3d(newcube, basis_cube, z.name())
 
         # Convert the main time coordinate
         if time is not None:
@@ -55,8 +56,8 @@ def derived(cubes):
     u = cubes.extract('x_wind')[0]
     v = cubes.extract('y_wind')[0]
     w = cubes.extract('upward_air_velocity')[0]
-    theta = cubes.extract('air_potential_temperature')[0]
-    rho = cubes.extract('air_density')[0]
+    theta = convert.calc('air_potential_temperature', cubes)
+    rho = convert.calc('air_density', cubes)
 
     # Vorticity
     xi_i, xi_j, xi_k = variable.vorticity(u, v, w)
