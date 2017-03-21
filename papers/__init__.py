@@ -1,0 +1,1 @@
+plotdir = '/home/lsaffin/Documents/meteorology/'
