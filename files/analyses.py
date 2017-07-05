@@ -9,34 +9,16 @@ from iris.util import squeeze
 from mymodule import constants, grid
 import files
 
-# Filename parameters
-# IOP5
-"""
-path = '/projects/diamet/lsaffi/iop5/'
-time = 'hours since 2011-11-28 12:00:00'
-file_pairs = [(path + '20111129_qwqy12.nc',
-               path + 'analysis_024.nc')]
-"""
-
-# Systematic Forecasts
-path = '/projects/diamet/lsaffi/season/'
-time = 'hours since 2013-11-01 00:00:00'
-t_0 = datetime.datetime(2013, 11, 1)
-times = [t_0 + datetime.timedelta(dt) for dt in range(92)]
-file_pairs = [(path + str(t)[0:10].replace('-', '') + '_qwqy00.nc',
-               path + str(t)[0:10].replace('-', '') + '_analysis.nc')
-              for t in times]
-
 # Define which area of grid to subset
 slices = slice(0, 50), slice(15, 345), slice(15, 585)
 
 # Load basis cube
-basis_cube = iris.load_cube(path + '../temp/prognostics_001.nc',
+basis_cube = iris.load_cube('/projects/diamet/lsaffi/temp/prognostics_001.nc',
                             'air_potential_temperature')
 lat = grid.extract_dim_coord(basis_cube, 'y')
 lon = grid.extract_dim_coord(basis_cube, 'x')
 
-basis_raw_cubes = iris.load(path + '../temp/xliba.analysis')
+basis_raw_cubes = iris.load('/projects/diamet/lsaffi/temp/xliba.analysis')
 
 # Define how to rename variables
 name_pairs = [('DENSITY*R*R AFTER TIMESTEP', 'air_density'),
@@ -50,7 +32,7 @@ units = [('air_density', 'kg m-3'),
          ('mass_fraction_of_cloud_liquid_water_in_air', '1')]
 
 
-def main():
+def main(file_pairs, time):
     for infile, outfile in file_pairs:
         print(infile, outfile)
         cubes = iris.load(infile)
@@ -93,7 +75,8 @@ def main():
         files.derived(cubes)
 
         # Put the cubes in standard format on grid
-        newcubes = files.redo_cubes(cubes, basis_cube, slices=slices)
+        newcubes = files.redo_cubes(
+            cubes, basis_cube, slices=slices, time=time)
 
         iris.save(newcubes, outfile)
 
@@ -135,5 +118,64 @@ def add_hybrid_height(cube, sigma, z_0):
     grid.add_hybrid_height(cube)
 
 
+def generate_file_pairs(t_0, dt, nt, path):
+    """
+
+    Args:
+        t_0 (datetime.datetime): Time of first analysis file
+
+        dt (datetime.timedelta): Time spacing between analysis files
+
+        nt (int): Number of analysis files
+
+        path (str): Directory containing analysis files
+
+    Returns:
+        file_pairs (list): List of tuples containing infile and outfile
+    """
+    file_pairs = []
+    for n in range(nt):
+        time = t_0 + n * dt
+        YYYYMMDD, HH = time2str(time)
+        file_pairs.append((path + YYYYMMDD + '_qwqy' + HH + '.nc',
+                           path + YYYYMMDD + '_analysis' + HH + '.nc'))
+    return file_pairs
+
+
+def time2str(t):
+    """Extract two string of YYYYMMDD and HH from a datetime object
+
+    Args:
+        t (datetime.datetime)
+    """
+    YYYYMMDD = str(t)[0:10].replace('-', '')
+    HH = str(t)[11:13]
+    return YYYYMMDD, HH
+
 if __name__ == '__main__':
-    main()
+    # IOP5
+    t_0 = datetime.datetime(2011, 11, 28, 12)
+    dt = datetime.timedelta(hours=6)
+    nt = 7
+    path = '/projects/diamet/lsaffi/iop5/'
+    file_pairs = generate_file_pairs(t_0, dt, nt, path)
+    time = 'hours since 2011-11-28 12:00:00'
+    main(file_pairs, time)
+
+    # IOP8
+    t_0 = datetime.datetime(2011, 12, 7, 12)
+    dt = datetime.timedelta(hours=6)
+    nt = 7
+    path = '/projects/diamet/lsaffi/iop8/'
+    file_pairs = generate_file_pairs(t_0, dt, nt, path)
+    time = 'hours since 2011-12-07 12:00:00'
+    main(file_pairs, time)
+
+    # Systematic Forecasts
+    t_0 = datetime.datetime(2013, 11, 1)
+    dt = datetime.timedelta(days=1)
+    nt = 92
+    path = '/projects/diamet/lsaffi/season/'
+    file_pairs = generate_file_pairs(t_0, dt, nt, path)
+    time = 'hours since 2013-11-01 00:00:00'
+    main(file_pairs, time)
