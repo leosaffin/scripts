@@ -13,6 +13,18 @@ def generate_forecast(start_time, lead_times, job_id, filenames, suffix='.nc'):
     return Forecast(start_time, mapping)
 
 
+def generate_analyses(start_time, dt, nt):
+    dt = timedelta(hours=dt)
+    mapping = {}
+    for n in range(nt):
+        time = start_time + n * dt
+        mapping[time] = (datadir + job_id + '/' +
+                         str(time)[0:10].replace('-', '') +
+                         '_analysis' + str(time)[11:13] + '.nc')
+
+    return Forecast(start_time, mapping)
+
+
 def make_filenames(job_id, filenames, n, suffix):
     names = []
     for filename in filenames:
@@ -55,6 +67,9 @@ iop5b = generate_forecast(start_time, lead_times, job_id, filenames)
 filenames = ['prognostics_', 'diagnostics_', 'pv_tracer_mono_']
 iop5_mono = generate_forecast(start_time, lead_times, job_id, filenames)
 
+# Analyses
+iop5_analyses = generate_analyses(start_time, 6, 7)
+
 # Theta tracers
 filenames = ['prognostics_', 'diagnostics_', 'theta_tracers_']
 iop5_theta = generate_forecast(start_time, lead_times, job_id, filenames)
@@ -68,3 +83,4 @@ job_id = 'iop8'
 # increments
 filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_']
 iop8 = generate_forecast(start_time, lead_times, job_id, filenames)
+iop8_analyses = generate_analyses(start_time, 6, 7)
