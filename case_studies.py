@@ -67,20 +67,30 @@ iop5b = generate_forecast(start_time, lead_times, job_id, filenames)
 filenames = ['prognostics_', 'diagnostics_', 'pv_tracer_mono_']
 iop5_mono = generate_forecast(start_time, lead_times, job_id, filenames)
 
-# Analyses
-iop5_analyses = generate_analyses(start_time, 6, 7)
-
 # Theta tracers
 filenames = ['prognostics_', 'diagnostics_', 'theta_tracers_']
 iop5_theta = generate_forecast(start_time, lead_times, job_id, filenames)
 
+# Analyses
+iop5_analyses = generate_analyses(start_time, 6, 7)
+
+# IOP5 with start time 12-hours earlies
+job_id = 'iop5_early'
+start_time = datetime(2011, 11, 28)
+lead_times = [timedelta(hours=n) for n in range(1, 49)]
+filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_']
+iop5_early = generate_forecast(start_time, lead_times, job_id, filenames)
+
+# IOP5 global
+job_id = 'iop5_global'
+iop5_global = generate_forecast(start_time, lead_times, job_id, filenames)
+
 # DIAMET IOP8
+job_id = 'iop8'
 start_time = datetime(2011, 12, 7, 12)
 lead_times = [timedelta(hours=n) for n in range(1, 37)]
-job_id = 'iop8'
 
 # Dynamics-tracer inconsistency using basic diagnostic without pressure solver
 # increments
-filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_']
 iop8 = generate_forecast(start_time, lead_times, job_id, filenames)
 iop8_analyses = generate_analyses(start_time, 6, 7)
