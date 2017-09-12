@@ -94,3 +94,7 @@ lead_times = [timedelta(hours=n) for n in range(1, 37)]
 # increments
 iop8 = generate_forecast(start_time, lead_times, job_id, filenames)
 iop8_analyses = generate_analyses(start_time, 6, 7)
+
+# IOP8 with long-wave radiation increments set to zero
+job_id = 'iop8_no_lw'
+iop8_no_lw = generate_forecast(start_time, lead_times, job_id, filenames)
