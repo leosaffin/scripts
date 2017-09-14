@@ -87,6 +87,7 @@ iop5_global = generate_forecast(start_time, lead_times, job_id, filenames)
 
 # DIAMET IOP8
 job_id = 'iop8'
+filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_', 'theta_tracers_']
 start_time = datetime(2011, 12, 7, 12)
 lead_times = [timedelta(hours=n) for n in range(1, 37)]
 
