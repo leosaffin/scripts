@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
+from mymodule import convert, plot, user_variables
 from scripts import case_studies
 
 # Vertical coordinates
@@ -43,7 +43,7 @@ tracers = ['short_wave_radiation_pv',
            'dynamics_tracer_inconsistency',
            'residual_pv']
 
-directory = '/home/lsaffin/Documents/meteorology/output/iop8/overview/'
+directory = user_variables.plotdir + 'output/iop8/overview/'
 
 
 def main(cubes):

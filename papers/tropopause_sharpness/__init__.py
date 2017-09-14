@@ -1,4 +1,6 @@
-plotdir = '/home/lsaffin/Documents/meteorology/project/tropopause/'
+from scripts.papers import plotdir
+
+plotdir = plotdir + 'project/tropopause/'
 
 
 def add_labels_6_panel(fig):

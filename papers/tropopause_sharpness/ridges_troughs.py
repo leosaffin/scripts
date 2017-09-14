@@ -6,12 +6,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
-from mymodule import convert, grid, interpolate, plot
+from mymodule import convert, grid, interpolate, plot, user_variables
 from mymodule.detection import rossby_waves
 from scripts import case_studies
+from scripts.papers.tropopause_sharpness import plotdir
 
-path = '/home/lsaffin/Documents/meteorology/data/'
-plots = '/home/lsaffin/Documents/meteorology/project/tropopause/'
+path = user_variables.datadir
 
 start_time = datetime.datetime(2013, 11, 1)
 end_time = datetime.datetime(2014, 2, 1)
@@ -43,14 +43,14 @@ def main(cubes):
     # Forecast theta on tropopause
     ax = plt.subplot2grid((2, 2), (1, 0))
     theta, lon, lat = forecast_theta(cubes)
-    plot.multilabel(ax, 2)
+    #plot.multilabel(ax, 2)
 
     # Anomaly of theta on tropopause
     ax = plt.subplot2grid((2, 2), (1, 1))
     theta_anomaly(theta, lon, lat)
-    plot.multilabel(ax, 3)
+    #plot.multilabel(ax, 3)
 
-    plt.savefig(plots + 'ridges_troughs.pdf')
+    plt.savefig(plotdir + 'ridges_troughs.pdf')
     plt.show()
 
     return
@@ -127,7 +127,7 @@ def forecast_theta(cubes):
 
     cb = plt.colorbar(orientation='horizontal')
     cb.set_label('K')
-    plt.title(r'$\theta (\lambda, \phi, q=2)$')
+    plt.title('(c)'.ljust(30) + r'$\theta (\lambda, \phi, q=2)$'.ljust(60))
 
     lon, lat = grid.true_coords(theta)
     lon = theta.copy(data=lon)
@@ -150,7 +150,8 @@ def theta_anomaly(theta, lon, lat):
     cb.set_label('K')
     iplt.contour(theta_anomaly, [0], colors='k')
     plt.gca().coastlines()
-    plt.title(r'$\theta^{\prime} (\lambda, \phi, q=2)$')
+    plt.title(
+        '(d)'.ljust(30) + r'$\theta^{\prime} (\lambda, \phi, q=2)$'.ljust(65))
 
     add_gridlines(lon, lat)
 

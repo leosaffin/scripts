@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
 from systematic_forecasts import second_analysis
+from scripts.papers.tropopause_sharpness import plotdir
 
-plotdir = '/home/lsaffin/Documents/meteorology/project/tropopause/'
 coords = ['distance_from_dynamical_tropopause',
           'distance_from_advection_only_tropopause']
 name = 'dynamics_tracer_inconsistency'
