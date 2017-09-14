@@ -1,3 +1,3 @@
 from scripts.papers.thesis import plotdir
 
-plotdir = plotdir + 'ch4_experiments/case_studies/'
+plotdir = plotdir + 'ch3_methods/case_studies/'
