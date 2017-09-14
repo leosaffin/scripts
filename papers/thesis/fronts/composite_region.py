@@ -67,7 +67,7 @@ def main(cubes):
             else:
                 ax.set_xlim(-1, 1)
 
-            plot.multilabel(ax, 3 * n + m, yreversed=True)
+            plot.multilabel(ax, 3 * n + m, yreversed=True, fontsize=25)
 
             if n == 0:
                 plt.axhline(z_cold, color='k', linestyle='--')
@@ -154,19 +154,21 @@ def add_trimmings(ax, n, m):
     # plt.gca().invert_yaxis()
     plt.axvline(color='k')
     ax.set_ylim(950, 500)
-    plot.legend(ax, key=second_analysis.get_idx,
-                loc='best', ncol=2, bbox_to_anchor=(0.9, -0.2))
+    if n == 1:
+        plot.legend(ax, key=second_analysis.get_idx,
+                    loc='best', ncol=2, bbox_to_anchor=(0.9, -0.2),
+                    fontsize=25)
 
     return
 
 
 def add_figlabels(fig):
     fig.text(0.075, 0.55, 'Pressure (hPa)',
-             va='center', rotation='vertical')
+             va='center', rotation='vertical', fontsize=25)
     fig.text(0.05, 0.75, 'Warm',
-             va='center', rotation='vertical')
+             va='center', rotation='vertical', fontsize=25)
     fig.text(0.05, 0.35, 'Cold',
-             va='center', rotation='vertical')
+             va='center', rotation='vertical', fontsize=25)
     fig.subplots_adjust(bottom=0.2)
     return
 

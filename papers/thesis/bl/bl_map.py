@@ -35,24 +35,24 @@ def main(cubes, levels, *args, **kwargs):
         cube = convert.calc(name, cubes, levels=levels)[0]
         im = iplt.pcolormesh(cube, *args, **kwargs)
         plot._add_map()
-        plt.title(second_analysis.all_diagnostics[name].symbol)
+        plt.title(second_analysis.all_diagnostics[name].symbol, fontsize=30)
 
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n)
+        plot.multilabel(ax, n, fontsize=25)
 
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',
                         fraction=0.05, spacing='proportional')
     cbar.set_label('PVU')
     # cbar.set_ticks(np.array(levels)[::2])
 
-    plt.savefig(plotdir + 'iop5_bl_map.png')
+    plt.savefig(plotdir + '../../iop8_bl_map.png')
     # plt.show()
 
     return
 
 if __name__ == '__main__':
-    forecast = case_studies.iop5b.copy()
-    cubes = forecast.set_lead_time(hours=24)
+    forecast = case_studies.iop8.copy()
+    cubes = forecast.set_lead_time(hours=18)
     z_bl = convert.calc('boundary_layer_height', cubes)
     levels = ('altitude', z_bl.data[None, :, :])
-    main(cubes, levels, vmin=-10, vmax=10, cmap='coolwarm')
+    main(cubes, levels, vmin=-5, vmax=5, cmap='coolwarm')

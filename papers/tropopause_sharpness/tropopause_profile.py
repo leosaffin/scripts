@@ -63,7 +63,8 @@ def main():
 
             else:
                 plot.legend(ax, key=second_analysis.get_idx,
-                            loc='best', ncol=2, bbox_to_anchor=(0.9, -0.2))
+                            loc='best', ncol=2, bbox_to_anchor=(1.0, -0.2),
+                            fontsize=25)
                 if m == 1:
                     ax.set_xlabel('PV (PVU)')
             # Y-axis - Same for all plots
@@ -75,11 +76,11 @@ def main():
             plot.multilabel(ax, n * 3 + m)
 
     fig.text(0.075, 0.55, 'Vertical distance from tropopause (km)',
-             va='center', rotation='vertical')
+             va='center', rotation='vertical', fontsize=20)
     fig.text(0.05, 0.75, 'Ridges',
-             va='center', rotation='vertical')
+             va='center', rotation='vertical', fontsize=20)
     fig.text(0.05, 0.35, 'Troughs',
-             va='center', rotation='vertical')
+             va='center', rotation='vertical', fontsize=20)
 
     plt.savefig(plotdir + 'tropopause_profile_new.pdf')
     # plt.show()
