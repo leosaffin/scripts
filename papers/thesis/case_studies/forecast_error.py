@@ -1,5 +1,6 @@
 """Plot PV on 320K for the forecast and analysis
 """
+from string import ascii_lowercase
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
@@ -19,28 +20,30 @@ def main(dt):
     z_0 = convert.calc('altitude', cubes_f)[0]
 
     make_plots(cubes_f, cubes_a, 'air_potential_temperature',
-               ('air_pressure', [90000]), 'K', plot.even_cscale(5, 11),
+               ('air_pressure', [90000]), 'K',
+               plot.even_cscale(10, 11),
                np.linspace(270, 300, 13))
-    #plt.savefig(plotdir + 'iop5_T_error.pdf')
-
+    plt.savefig(plotdir + 'iop5_T_error.pdf')
     """
+
     # Low-level pressure
     fig = plt.figure(figsize=(18, 8))
     ax = plt.subplot2grid((1, 2), (0, 0))
     make_plot(cubes_f, cubes_a, 'air_pressure', None, 'hPa',
               plot.even_cscale(5, 11), np.linspace(950, 1050, 11),
               mask=z_0.data != 20)
-    plt.title('p(20 m)')
+    plt.title('(a)'.ljust(30) + 'p(20 m)'.ljust(35))
 
     # Geopotential height
     ax = plt.subplot2grid((1, 2), (0, 1))
     make_plot(cubes_f, cubes_a, 'altitude', ('air_pressure', [50000]), 'm',
               plot.even_cscale(50, 11), np.linspace(5000, 6000, 11))
-    plt.title('z(500 hPa)')
+    plt.title('(b)'.ljust(30) + 'z(500 hPa)'.ljust(35))
 
-    plt.savefig(plotdir + 'iop5_errors.pdf')
-    """
+    plt.savefig(plotdir + 'iop8_errors.pdf')
+
     plt.show()
+    """
 
     return
 
@@ -76,7 +79,7 @@ def make_plot(forecast, analysis, variable, levels, units, errlevs, clevs,
 
 
 def make_plots(forecast, analysis, variable, levels, units, errlevs, clevs,
-               cmap='coolwarm', mask=None):
+               cmap1='plasma', cmap='coolwarm', mask=None):
     # Extract data and errors
     f = convert.calc(variable, forecast, levels=levels)[0]
     a = convert.calc(variable, analysis, levels=levels)[0]
@@ -90,25 +93,32 @@ def make_plots(forecast, analysis, variable, levels, units, errlevs, clevs,
             cube.data = np.ma.masked_where(mask, cube.data)
 
     # Initialise the plot
-    fig = plt.figure(figsize=(18, 15))
-    axes = []
+    plt.figure(figsize=(18, 15))
 
     # Plot absolute values
-    axes.append(plt.subplot2grid((25, 4), (0, 0), colspan=2, rowspan=10))
-    im = iplt.contourf(f, clevs, extend='both')
+    plt.subplot2grid((25, 4), (0, 0), colspan=2, rowspan=10)
+    im = iplt.contourf(f, clevs, extend='both', cmap=cmap1)
+    #iplt.contour(f, [2], colors='k')
+    plt.title('(a)'.ljust(28) + 'Forecast'.ljust(35))
     plot._add_map()
 
-    axes.append(plt.subplot2grid((25, 4), (0, 2), colspan=2, rowspan=10))
-    im = iplt.contourf(a, clevs, extend='both')
+    plt.subplot2grid((25, 4), (0, 2), colspan=2, rowspan=10)
+    im = iplt.contourf(a, clevs, extend='both', cmap=cmap1)
+    #iplt.contour(a, [2], colors='k', linestyles='--')
+    plt.title('(b)'.ljust(28) + 'Analysis'.ljust(35))
     plot._add_map()
 
     ax = plt.subplot2grid((25, 4), (10, 1), colspan=2, rowspan=1)
     cbar = plt.colorbar(im, cax=ax, orientation='horizontal')
     cbar.set_label(units)
+    # cbar.set_ticks(range(11))
 
     # Plot error
-    axes.append(plt.subplot2grid((25, 4), (13, 1), colspan=2, rowspan=10))
+    plt.subplot2grid((25, 4), (13, 1), colspan=2, rowspan=10)
     im = iplt.contourf(err, errlevs, cmap=cmap, extend='both')
+    #iplt.contour(f, [2], colors='k')
+    #iplt.contour(a, [2], colors='k', linestyles='--')
+    plt.title('(c)'.ljust(20) + 'Forecast Minus Analysis.'.ljust(38))
     plot._add_map()
 
     ax = plt.subplot2grid((25, 4), (23, 1), colspan=2, rowspan=1)
@@ -117,9 +127,6 @@ def make_plots(forecast, analysis, variable, levels, units, errlevs, clevs,
     errlevs.append(0)
     cbar.set_ticks(errlevs)
     cbar.set_label(units)
-
-    for n, ax in enumerate(axes):
-        plot.multilabel(ax, n)
 
     return
 
@@ -156,7 +163,7 @@ def pv(forecast, analysis, variable, levels, **kwargs):
     cbar = plt.colorbar(im, cax=ax, orientation='horizontal')
 
     for n, ax in enumerate(axes):
-        plot.multilabel(ax, n)
+        ax.set_title(ascii_lowercase[n].ljust(20))
     plt.show()
 
 
