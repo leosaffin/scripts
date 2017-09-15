@@ -74,12 +74,16 @@ iop5_theta = generate_forecast(start_time, lead_times, job_id, filenames)
 # Analyses
 iop5_analyses = generate_analyses(start_time, 6, 7)
 
-# IOP5 with start time 12-hours earlies
+# IOP5 with start time 12-hours earlier
 job_id = 'iop5_early'
 start_time = datetime(2011, 11, 28)
 lead_times = [timedelta(hours=n) for n in range(1, 49)]
 filenames = ['prognostics_', 'diagnostics_', 'pv_tracers_']
 iop5_early = generate_forecast(start_time, lead_times, job_id, filenames)
+
+# IOP5 early start time with extended domain
+job_id = 'iop5_extended'
+iop5_extended = generate_forecast(start_time, lead_times, job_id, filenames)
 
 # IOP5 global
 job_id = 'iop5_global'
