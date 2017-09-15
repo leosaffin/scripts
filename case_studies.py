@@ -106,4 +106,5 @@ iop8_no_lw = generate_forecast(start_time, lead_times, job_id, filenames)
 
 # IOP8 with latent heat set to small numbers
 job_id = 'iop8_no_microphysics'
-iop8_no_lw = generate_forecast(start_time, lead_times, job_id, filenames)
+iop8_no_microphysics = generate_forecast(
+    start_time, lead_times, job_id, filenames)
