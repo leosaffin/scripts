@@ -103,3 +103,7 @@ iop8_analyses = generate_analyses(start_time, 6, 7)
 # IOP8 with long-wave radiation increments set to zero
 job_id = 'iop8_no_lw'
 iop8_no_lw = generate_forecast(start_time, lead_times, job_id, filenames)
+
+# IOP8 with latent heat set to small numbers
+job_id = 'iop8_no_microphysics'
+iop8_no_lw = generate_forecast(start_time, lead_times, job_id, filenames)
