@@ -1,4 +1,5 @@
 import iris
+from iris.analysis import Linear
 from iris.cube import CubeList
 from iris.util import squeeze
 from mymodule import calculus, convert, interpolate, grid, variable
@@ -22,6 +23,7 @@ def redo_cubes(cubes, basis_cube, stash_maps=[], slices=None, time=None):
 
     newcubelist = CubeList()
     for cube in cubes:
+        print cube
         newcube = cube.copy()
         # Remove unneccessary time coordinates
         for coord in ['forecast_period', 'forecast_reference_time']:
@@ -41,6 +43,11 @@ def redo_cubes(cubes, basis_cube, stash_maps=[], slices=None, time=None):
 
             # Remap the cubes to theta points
             newcube = interpolate.remap_3d(newcube, basis_cube, z.name())
+
+        else:
+            # Regrid in the horizontal
+            newcube = newcube.regrid(basis_cube, Linear())
+
 
         # Convert the main time coordinate
         if time is not None:
