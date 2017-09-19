@@ -7,29 +7,41 @@ import iris
 from iris.cube import CubeList
 from iris.util import squeeze
 from mymodule import constants, grid
-import files
+from scripts import files
 
 # Define which area of grid to subset
-slices = slice(0, 50), slice(15, 345), slice(15, 585)
+slices = slice(0, 50), slice(15, 485), slice(15, 685)
 
 # Load basis cube
-basis_cube = iris.load_cube('/projects/diamet/lsaffi/temp/prognostics_001.nc',
+#basis_cube = iris.load_cube('/projects/diamet/lsaffi/iop5/prognostics_001.nc',
+#                            'air_potential_temperature')
+basis_cube = iris.load_cube('/projects/diamet/lsaffi/iop5_extended/prognostics_001.nc',
                             'air_potential_temperature')
 lat = grid.extract_dim_coord(basis_cube, 'y')
 lon = grid.extract_dim_coord(basis_cube, 'x')
 
-basis_raw_cubes = iris.load('/projects/diamet/lsaffi/temp/xliba.analysis')
+raw_cubes = iris.load('/projects/diamet/lsaffi/xjjhl/xjjhl.astart')
 
 # Define how to rename variables
-name_pairs = [('DENSITY*R*R AFTER TIMESTEP', 'air_density'),
-              ('eastward_wind', 'x_wind'),
-              ('northward_wind', 'y_wind')]
+name_pairs = [
+    ('u', 'x_wind'),
+    ('v', 'y_wind'),
+    ('dz_dt', 'upward_air_velocity'),
+    ('theta', 'air_potential_temperature'),
+    ('unspecified', 'air_density'),
+    ('field7', 'dimensionless_exner_function'),
+    ('q', 'specific_humidity'),
+    ('QCL', 'mass_fraction_of_cloud_liquid_water_in_air'),
+    ('QCF', 'mass_fraction_of_cloud_ice_in_air')
+    ]
 
 # Correct units for some cubes
-units = [('air_density', 'kg m-3'),
-         ('dimensionless_exner_function', '1'),
-         ('mass_fraction_of_cloud_ice_in_air', '1'),
-         ('mass_fraction_of_cloud_liquid_water_in_air', '1')]
+units = [
+    ('x_wind', 'm s-1'),
+    ('y_wind', 'm s-1'),
+    ('upward_air_velocity', 'm s-1'),
+    ('air_potential_temperature', 'K'),
+    ('air_density', 'kg m-3')]
 
 
 def main(file_pairs, time):
@@ -38,38 +50,33 @@ def main(file_pairs, time):
         cubes = iris.load(infile)
 
         # Extract and remove surface altitude
-        z_0 = cubes.extract('surface_altitude', [0])
+        z_0 = cubes.extract('ht', [0])
         cubes.remove(z_0)
-        z_0 = grid.make_coord(squeeze(z_0))
 
         # Correct analysis oddities
         cubes = correct_analyses(cubes)
 
-        # Add hybrid height coordinates to variables
-        for name in ('x_wind', 'y_wind', 'upward_air_velocity',
-                     'air_potential_temperature'):
-            cube = cubes.extract(name)[0]
-            cube_0 = basis_raw_cubes.extract(name)[0]
-            sigma = cube_0.coord('sigma')
-            z_surf = cube_0.coord('surface_altitude')
-            add_hybrid_height(cube, sigma, z_surf)
-
-        # Use field on rho levels for density
-        rho = cubes.extract('air_density')[0]
-        cube_0 = basis_raw_cubes.extract('x_wind')[0]
-        sigma = cube_0.coord('sigma')
-        add_hybrid_height(rho, sigma, z_0)
-
-        # Convert density to true density
-        z_rho = rho.coord('altitude')
-        r = z_rho.points + constants.r.data
-        rho.data = rho.data / r ** 2
-
+        # Add auxilliary coordinates
+        for cube in cubes:
+            if cube.name() == 'air_density':
+                raw_cube = raw_cubes.extract('dimensionless_exner_function')[0][:70]
+            else:
+                raw_cube = raw_cubes.extract(cube.name())[0]
+            z_0 = raw_cube.coord('surface_altitude')
+            sigma = raw_cube.coord('sigma')
+            add_hybrid_height(cube, sigma, z_0)
+            
         # Remove the bottom level from w
         w = cubes.extract('upward_air_velocity')[0]
         cubes.remove(w)
         w = w[1:]
         cubes.append(w)
+ 
+        # Convert density to true density
+        rho = cubes.extract('air_density')[0]
+        z_rho = rho.coord('altitude')
+        r = z_rho.points + constants.r.data
+        rho.data = rho.data / r ** 2
 
         # Calculate derived variables
         files.derived(cubes)
@@ -92,12 +99,20 @@ def correct_analyses(cubes):
         newcube.coord('t').rename('time')
 
         # Correct dimensional coordinates
-        newcube.coord('Hybrid height').units = 'm'
-        newcube.coord('Hybrid height').attributes = {'positive': 'up'}
-        newcube.coord('Hybrid height').rename('level_height')
-        newcube.coord('grid_latitude').coord_system = lat.coord_system
-        newcube.coord('grid_longitude').coord_system = lon.coord_system
+        z, y, x, t = newcube.coords()
 
+        z.rename('level_height')
+        z.units = 'm'
+        z.attributes = {'positive': 'up'}
+        
+        y.rename('latitude')
+        y.coord_system = lat.coord_system
+        y.units = lat.units
+
+        x.rename('longitude')
+        x.coord_system = lon.coord_system
+        x.units = lon.units
+        
         newcubes.append(newcube)
 
     # Correct cube names
@@ -137,7 +152,8 @@ def generate_file_pairs(t_0, dt, nt, path):
     for n in range(nt):
         time = t_0 + n * dt
         YYYYMMDD, HH = time2str(time)
-        file_pairs.append((path + YYYYMMDD + '_qwqy' + HH + '.nc',
+        file_pairs.append((#path + YYYYMMDD + '_qwqg' + HH + '.nc',
+                           path + 'xjjhl/xjjhl.nc',
                            path + YYYYMMDD + '_analysis' + HH + '.nc'))
     return file_pairs
 
