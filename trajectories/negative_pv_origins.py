@@ -55,7 +55,7 @@ def get_startpoints(cubes):
     altitude = np.array([height[idx] for idx in indices[0]])
 
     # Make start points array
-    start_points = np.array([lons, lats, altitude]).transpose
+    start_points = np.array([lons, lats, altitude]).transpose()
 
     return start_points
 
