@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import iris.plot as iplt
-from cartopy import crs
 from lagranto import trajectory
 from mymodule import convert, plot
 from mymodule.user_variables import datadir, plotdir
 from scripts import case_studies
+
 
 def main():
     job = 'iop5_extended'
@@ -15,7 +15,7 @@ def main():
 
     cluster = None
     levels = ('air_potential_temperature', [315])
-    
+
     plot(cubes, job, name, levels, cluster, vmin=0, vmax=12000, cmap='summer')
 
     return
@@ -24,7 +24,7 @@ def main():
 def plot(cubes, job, name, levels, cluster, **kwargs):
     plt.figure(figsize=(12, 10))
     plotname = plotdir + job + '_' + name + '_map'
-    
+
     # Plot a map at verification time
     pv = convert.calc('ertel_potential_vorticity', cubes, levels=levels)[0]
     dtheta = convert.calc('total_minus_advection_only_theta', cubes,
@@ -47,9 +47,9 @@ def plot(cubes, job, name, levels, cluster, **kwargs):
 
     # Select individual clusters of trajectories
     if cluster is not None:
-        plotname += '_cluster' + str(cluster) 
-        clusters = np.load(datadir + job + '/' +  name + '_clusters.npy')
-        indices = np.where(clusters==cluster)
+        plotname += '_cluster' + str(cluster)
+        clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
+        indices = np.where(clusters == cluster)
         trajectories = trajectory.TrajectoryEnsemble(
             trajectories.data[indices], trajectories.times, trajectories.names)
 
@@ -67,7 +67,7 @@ def plot(cubes, job, name, levels, cluster, **kwargs):
     plt.scatter(x[:, -1], y[:, -1], c=c[:, -1],
                 linewidths=0.1, zorder=5, **kwargs)
     plt.colorbar()
-    
+
     plt.savefig(plotname + '.png')
 
     return

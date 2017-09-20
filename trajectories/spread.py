@@ -11,7 +11,7 @@ def main(filename):
     name = 'forward_trajectories_from_low_levels_gt600hpa'
     variable = 'air_potential_temperature'
     cluster = 3
-    plotname = datadir + job + '_' + name + '_spread_' +  variable
+    plotname = datadir + job + '_' + name + '_spread_' + variable
 
     # Load the trajectories
     trajectories = trajectory.load(datadir + job + '/' + name + '.pkl')
@@ -20,19 +20,19 @@ def main(filename):
     # Only include trajectories that stay in the domain
     trajectories = trajectories.select('air_pressure', '>', 0)
     print(len(trajectories))
-    
+
     # Composite trajectory clusters
     if cluster is not None:
         plotname += '_cluster' + str(cluster)
-        clusters = np.load(path + job + '/' +  name + '_clusters.npy')
-        indices = np.where(clusters==cluster)
+        clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
+        indices = np.where(clusters == cluster)
         trajectories = trajectory.TrajectoryEnsemble(
             trajectories.data[indices], trajectories.times, trajectories.names)
-    
+
     plot(trajectories, variable, cluster=cluster)
     plt.savefig(plotname + '.png')
     plt.show()
-    
+
     return
 
 
@@ -40,7 +40,7 @@ def plot(trajectories, variable):
     times = trajectories.times
 
     # Calculate percentiles of selected variable
-    c=second_analysis.all_diagnostics[variable]
+    c = second_analysis.all_diagnostics[variable]
     x = trajectories[variable]
     xMed = np.median(x, axis=0)
     xMean = x.mean(axis=0)
@@ -67,4 +67,3 @@ def plot(trajectories, variable):
 
 if __name__ == '__main__':
     main()
-

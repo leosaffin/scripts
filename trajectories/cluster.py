@@ -2,26 +2,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, fcluster, linkage
 from scipy.cluster.vq import kmeans, vq
-from iris.analysis.cartography import rotate_pole
 from lagranto import trajectory
 from mymodule.user_variables import datadir, plotdir
 
 styles = ['-bo', '-gx', '-rx', '-cx', '-mx', '-yx',
           '-bx', '-go', '-ro', '-co', '-mo', '-yo']
 
+
 def main():
     job = 'iop5_extended'
     name = 'forward_trajectories_from_low_levels_gt600hpa'
     trajectories = trajectory.load(datadir + job + '/' + name + '.pkl')
     trajectories = trajectories.select('air_pressure', '>', 0)
-    
+
     # Perform the clustering
     cluster_array = make_cluster_array(trajectories)
     clusters = perform_clustering(cluster_array)
     plt.savefig(plotdir + job + '_' + name + '_cluster_info.png')
-    #np.save(datadir + job + '/' + name + '_clusters.npy', clusters)
-    #clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
-    
+    # np.save(datadir + job + '/' + name + '_clusters.npy', clusters)
+    # clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
+
     # Display output
     nclusters = len(set(clusters))
     print('Number of clusters', nclusters)
@@ -46,7 +46,7 @@ def make_cluster_array(trajectories):
     for n in range(ntim):
         for m, obs in enumerate(observations):
             cluster_array[:, n + m * ntim] = obs[:, n]
-            
+
     return cluster_array
 
 
@@ -81,10 +81,10 @@ def plot_clusters(trajectories, clusters):
 
 def hierarchical(cluster_array, method='ward', max_dist=None):
     cluster_info = linkage(cluster_array, method)
-    
+
     difference = np.diff(cluster_info[:, 2], 2)
     if max_dist is None:
-        max_dist = 1.05*cluster_info[difference.argmax(), 2]
+        max_dist = 1.05 * cluster_info[difference.argmax(), 2]
 
     # Show dendrogram and distance
     plt.figure(figsize=[12, 15])

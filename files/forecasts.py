@@ -3,26 +3,26 @@
 
 import iris
 from mymodule import convert
-import files
+from mymodule.user_variables import datadir
+from scripts import files
 from files import stash_maps
 
 
 # Filename parameters
-path = '/projects/diamet/lsaffi/'
 strlen = 3
-inpath = path + 'xkcqa/xkcqaa_p'
-outpath = path + 'iop8/'
+inpath = datadir + 'xkcqa/xkcqaa_p'
+outpath = datadir + 'iop8/'
 time = 'hours since 2011-12-07 12:00:00'
 nt = 36
 
 # Surface altitude file
-surf = '/projects/diamet/lsaffi/nae_orography.nc'
+surf = datadir + 'nae_orography.nc'
 
 # Define which area of grid to subset
 slices = slice(0, 50), slice(15, 345), slice(15, 585)
 
 # Load basis cube
-basis_cube = iris.load_cube(path + 'temp/prognostics_001.nc',
+basis_cube = iris.load_cube(datadir + 'temp/prognostics_001.nc',
                             'air_potential_temperature')
 
 # NDDiag names to extract

@@ -1,12 +1,13 @@
 import datetime
-from mymodule import datadir
+from mymodule.user_variables import datadir
 from lagranto import trajectory
+
 
 def main():
     job = 'iop5_extended'
     name = 'forward_trajectories_from_low_levels'
     filename = datadir + job + '/' + name + '.pkl'
-    
+
     trajectories = select_wcb(filename)
     trajectories.save(datadir + job + '/' + name + '_gt600hpa.pkl')
 

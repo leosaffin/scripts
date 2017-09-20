@@ -7,20 +7,21 @@ import iris
 from iris.cube import CubeList
 from iris.util import squeeze
 from mymodule import constants, grid
+from mymodule.user_variables import datadir
 from scripts import files
 
 # Define which area of grid to subset
 slices = slice(0, 50), slice(15, 485), slice(15, 685)
 
 # Load basis cube
-#basis_cube = iris.load_cube('/projects/diamet/lsaffi/iop5/prognostics_001.nc',
+# basis_cube = iris.load_cube(datadir + 'iop5/prognostics_001.nc',
 #                            'air_potential_temperature')
-basis_cube = iris.load_cube('/projects/diamet/lsaffi/iop5_extended/prognostics_001.nc',
+basis_cube = iris.load_cube(datadir + '/iop5_extended/prognostics_001.nc',
                             'air_potential_temperature')
 lat = grid.extract_dim_coord(basis_cube, 'y')
 lon = grid.extract_dim_coord(basis_cube, 'x')
 
-raw_cubes = iris.load('/projects/diamet/lsaffi/xjjhl/xjjhl.astart')
+raw_cubes = iris.load(datadir + 'xjjhl/xjjhl.astart')
 
 # Define how to rename variables
 name_pairs = [
@@ -33,7 +34,7 @@ name_pairs = [
     ('q', 'specific_humidity'),
     ('QCL', 'mass_fraction_of_cloud_liquid_water_in_air'),
     ('QCF', 'mass_fraction_of_cloud_ice_in_air')
-    ]
+]
 
 # Correct units for some cubes
 units = [
@@ -59,19 +60,20 @@ def main(file_pairs, time):
         # Add auxilliary coordinates
         for cube in cubes:
             if cube.name() == 'air_density':
-                raw_cube = raw_cubes.extract('dimensionless_exner_function')[0][:70]
+                raw_cube = raw_cubes.extract(
+                    'dimensionless_exner_function')[0][:70]
             else:
                 raw_cube = raw_cubes.extract(cube.name())[0]
             z_0 = raw_cube.coord('surface_altitude')
             sigma = raw_cube.coord('sigma')
             add_hybrid_height(cube, sigma, z_0)
-            
+
         # Remove the bottom level from w
         w = cubes.extract('upward_air_velocity')[0]
         cubes.remove(w)
         w = w[1:]
         cubes.append(w)
- 
+
         # Convert density to true density
         rho = cubes.extract('air_density')[0]
         z_rho = rho.coord('altitude')
@@ -104,7 +106,7 @@ def correct_analyses(cubes):
         z.rename('level_height')
         z.units = 'm'
         z.attributes = {'positive': 'up'}
-        
+
         y.rename('latitude')
         y.coord_system = lat.coord_system
         y.units = lat.units
@@ -112,7 +114,7 @@ def correct_analyses(cubes):
         x.rename('longitude')
         x.coord_system = lon.coord_system
         x.units = lon.units
-        
+
         newcubes.append(newcube)
 
     # Correct cube names
@@ -152,9 +154,9 @@ def generate_file_pairs(t_0, dt, nt, path):
     for n in range(nt):
         time = t_0 + n * dt
         YYYYMMDD, HH = time2str(time)
-        file_pairs.append((#path + YYYYMMDD + '_qwqg' + HH + '.nc',
-                           path + 'xjjhl/xjjhl.nc',
-                           path + YYYYMMDD + '_analysis' + HH + '.nc'))
+        file_pairs.append((  # path + YYYYMMDD + '_qwqg' + HH + '.nc',
+            path + 'xjjhl/xjjhl.nc',
+            path + YYYYMMDD + '_analysis' + HH + '.nc'))
     return file_pairs
 
 
@@ -173,7 +175,7 @@ if __name__ == '__main__':
     t_0 = datetime.datetime(2011, 11, 28, 12)
     dt = datetime.timedelta(hours=6)
     nt = 7
-    path = '/projects/diamet/lsaffi/iop5/'
+    path = datadir + 'iop5/'
     file_pairs = generate_file_pairs(t_0, dt, nt, path)
     time = 'hours since 2011-11-28 12:00:00'
     main(file_pairs, time)
@@ -182,7 +184,7 @@ if __name__ == '__main__':
     t_0 = datetime.datetime(2011, 12, 7, 12)
     dt = datetime.timedelta(hours=6)
     nt = 7
-    path = '/projects/diamet/lsaffi/iop8/'
+    path = datadir + 'iop8/'
     file_pairs = generate_file_pairs(t_0, dt, nt, path)
     time = 'hours since 2011-12-07 12:00:00'
     main(file_pairs, time)
@@ -191,7 +193,7 @@ if __name__ == '__main__':
     t_0 = datetime.datetime(2013, 11, 1)
     dt = datetime.timedelta(days=1)
     nt = 92
-    path = '/projects/diamet/lsaffi/season/'
+    path = datadir + 'season/'
     file_pairs = generate_file_pairs(t_0, dt, nt, path)
     time = 'hours since 2013-11-01 00:00:00'
     main(file_pairs, time)
