@@ -1,50 +1,77 @@
 import matplotlib.pyplot as plt
-import pandas as pd
+import numpy as np
+import iris.plot as iplt
+from cartopy import crs
+from lagranto import trajectory
 from mymodule import convert, plot
+from mymodule.user_variables import datadir, plotdir
 from scripts import case_studies
 
-path = '/home/lsaffin/Documents/meteorology/'
-name = 'forward_trajectories'
-levels = ('air_potential_temperature', [320])
+def main():
+    job = 'iop5_extended'
+    name = 'isentropic_backward_trajectories_from_outflow_air_mass'
+    forecast = case_studies.iop5_extended.copy()
+    cubes = forecast.set_lead_time(hours=48)
+
+    cluster = None
+    levels = ('air_potential_temperature', [315])
+    
+    plot(cubes, job, name, levels, cluster, vmin=0, vmax=12000, cmap='summer')
+
+    return
 
 
-def main(cubes, filename):
+def plot(cubes, job, name, levels, cluster, **kwargs):
+    plt.figure(figsize=(12, 10))
+    plotname = plotdir + job + '_' + name + '_map'
+    
     # Plot a map at verification time
     pv = convert.calc('ertel_potential_vorticity', cubes, levels=levels)[0]
-    theta_adv = convert.calc('advection_only_theta', cubes, levels=levels)[0]
+    dtheta = convert.calc('total_minus_advection_only_theta', cubes,
+                          levels=levels)[0]
+    mslp = convert.calc('air_pressure_at_sea_level', cubes)
+    mslp.convert_units('hPa')
 
-    plot.pcolormesh(theta_adv, vmin=300, vmax=340, cmap='coolwarm', pv=pv)
+    plot.pcolormesh(dtheta, vmin=-20, vmax=20, cmap='coolwarm', pv=pv)
+    cs = iplt.contour(mslp, range(950, 1050, 5), colors='k', linewidths=1)
+    plt.clabel(cs, fmt='%1.0f')
 
     # Load the trajectories
-    trajectories = pd.read_pickle(filename)
+    filename = datadir + job + '/' + name + '.pkl'
+    trajectories = trajectory.load(filename)
+    print len(trajectories)
 
-    # Plot every trajectory that stays in the domain
-    for T in trajectories:
-        if (T.altitude.values > 0).all():
-            x, y, color = T.grid_longitude, T.grid_latitude, T.altitude
-            lc = plot.colored_line_plot(
-                x - 360, y, color / 1000, vmin=5, vmax=12, cmap='viridis')
+    # Only plot trajectories that stay in the domain
+    trajectories = trajectories.select('air_pressure', '>', 0)
+    print len(trajectories)
 
-    cbar = plt.colorbar(lc)
-    cbar.set_label('km')
-    cbar.set_ticks(range(5, 13))
+    # Select individual clusters of trajectories
+    if cluster is not None:
+        plotname += '_cluster' + str(cluster) 
+        clusters = np.load(datadir + job + '/' +  name + '_clusters.npy')
+        indices = np.where(clusters==cluster)
+        trajectories = trajectory.TrajectoryEnsemble(
+            trajectories.data[indices], trajectories.times, trajectories.names)
+
+    x = trajectories.x - 360
+    y = trajectories.y
+    c = trajectories['altitude']
+
+    # Plot each individual trajectory
+    for n in range(len(trajectories)):
+        plot.colored_line_plot(x[n], y[n], c[n], **kwargs)
 
     # Mark the start and end point of trajectories
-    plt.scatter(trajectories.values[:, 0, 0], trajectories.values[:, 0, 1],
-                color='k', marker='x', linewidths=1, zorder=2)
-    plt.scatter(trajectories.values[:, -1, 0], trajectories.values[:, -1, 1],
-                color='k', marker='x', linewidths=1, zorder=2)
-
-    plt.title(r'$\theta_{adv}$')
-    plt.savefig(path + 'output/' + name + '.png')
-    plt.show()
+    plt.scatter(x[:, 0], y[:, 0], c=c[:, 0],
+                linewidths=0.1, zorder=5, **kwargs)
+    plt.scatter(x[:, -1], y[:, -1], c=c[:, -1],
+                linewidths=0.1, zorder=5, **kwargs)
+    plt.colorbar()
+    
+    plt.savefig(plotname + '.png')
 
     return
 
 
 if __name__ == '__main__':
-    forecast = case_studies.iop5b.copy()
-    cubes = forecast.set_lead_time(hours=24)
-
-    filename = path + 'data/iop5/' + name + '.pkl'
-    main(cubes, filename)
+    main()
