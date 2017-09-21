@@ -1,3 +1,4 @@
+from datetime import timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 import iris.plot as iplt
@@ -5,23 +6,26 @@ from lagranto import trajectory
 from mymodule import convert, plot
 from mymodule.user_variables import datadir, plotdir
 from scripts import case_studies
+from scripts.trajectories.cluster import select_cluster
 
 
 def main():
     job = 'iop5_extended'
-    name = 'isentropic_backward_trajectories_from_outflow_air_mass'
+    name = 'forward_trajectories_from_low_levels_gt600hpa'
     forecast = case_studies.iop5_extended.copy()
     cubes = forecast.set_lead_time(hours=48)
 
+    theta_level = None
     cluster = None
     levels = ('air_potential_temperature', [315])
 
-    plot(cubes, job, name, levels, cluster, vmin=0, vmax=12000, cmap='summer')
+    make_plot(cubes, job, name, levels, theta_level, cluster,
+              vmin=0, vmax=12000, cmap='summer')
 
     return
 
 
-def plot(cubes, job, name, levels, cluster, **kwargs):
+def make_plot(cubes, job, name, levels, theta_level, cluster, **kwargs):
     plt.figure(figsize=(12, 10))
     plotname = plotdir + job + '_' + name + '_map'
 
@@ -47,11 +51,18 @@ def plot(cubes, job, name, levels, cluster, **kwargs):
 
     # Select individual clusters of trajectories
     if cluster is not None:
+        path = datadir + job + '/' + name
+        select_cluster(cluster, trajectories, path)
         plotname += '_cluster' + str(cluster)
-        clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
-        indices = np.where(clusters == cluster)
-        trajectories = trajectory.TrajectoryEnsemble(
-            trajectories.data[indices], trajectories.times, trajectories.names)
+
+    if theta_level is not None:
+        plotname += '_' + str(theta_level) + 'K'
+        dt = timedelta(hours=48)
+        trajectories = trajectories.select(
+            'air_potential_temperature', '>', theta_level-2.5, time=[dt])
+        trajectories = trajectories.select(
+            'air_potential_temperature', '<=', theta_level+2.5, time=[dt])
+        print len(trajectories)
 
     x = trajectories.x - 360
     y = trajectories.y

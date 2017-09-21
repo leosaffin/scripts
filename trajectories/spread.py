@@ -1,17 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mymodule import plot
-from mymodule.user_variables import datadir
+from mymodule.user_variables import datadir, plotdir
 from lagranto import trajectory
 from systematic_forecasts import second_analysis
+from scripts.trajectories.cluster import select_cluster
 
 
-def main(filename):
+def main():
     job = 'iop5_extended'
     name = 'forward_trajectories_from_low_levels_gt600hpa'
     variable = 'air_potential_temperature'
-    cluster = 3
-    plotname = datadir + job + '_' + name + '_spread_' + variable
+    cluster = None
+    plotname = plotdir + job + '_' + name + '_spread_' + variable
 
     # Load the trajectories
     trajectories = trajectory.load(datadir + job + '/' + name + '.pkl')
@@ -23,20 +24,18 @@ def main(filename):
 
     # Composite trajectory clusters
     if cluster is not None:
+        path = datadir + job + '/' + name + '_clusters.npy'
+        trajectories = select_cluster(cluster, trajectories, path)
         plotname += '_cluster' + str(cluster)
-        clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
-        indices = np.where(clusters == cluster)
-        trajectories = trajectory.TrajectoryEnsemble(
-            trajectories.data[indices], trajectories.times, trajectories.names)
 
-    plot(trajectories, variable, cluster=cluster)
+    make_plot(trajectories, variable)
     plt.savefig(plotname + '.png')
     plt.show()
 
     return
 
 
-def plot(trajectories, variable):
+def make_plot(trajectories, variable):
     times = trajectories.times
 
     # Calculate percentiles of selected variable

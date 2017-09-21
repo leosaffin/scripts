@@ -19,7 +19,7 @@ def main():
     cluster_array = make_cluster_array(trajectories)
     clusters = perform_clustering(cluster_array)
     plt.savefig(plotdir + job + '_' + name + '_cluster_info.png')
-    # np.save(datadir + job + '/' + name + '_clusters.npy', clusters)
+    np.save(datadir + job + '/' + name + '_clusters.npy', clusters)
     # clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
 
     # Display output
@@ -119,6 +119,14 @@ def normalise(x):
     x_norm = x / delta_x_rms
 
     return x_norm
+
+def select_cluster(cluster_number, trajectories, path):
+    clusters = np.load(path + '_clusters.npy')
+    indices = np.where(clusters == cluster_number)
+    trajectories = trajectory.TrajectoryEnsemble(
+        trajectories.data[indices], trajectories.times, trajectories.names)
+    
+    return trajectories
 
 
 if __name__ == '__main__':
