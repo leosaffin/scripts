@@ -1,3 +1,4 @@
+from datetime import timedelta
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, fcluster, linkage
@@ -11,16 +12,25 @@ styles = ['-bo', '-gx', '-rx', '-cx', '-mx', '-yx',
 
 def main():
     job = 'iop5_extended'
-    name = 'forward_trajectories_from_low_levels_gt600hpa'
+    name = 'backward_trajectories_from_outflow_coarse'
     trajectories = trajectory.load(datadir + job + '/' + name + '.pkl')
     trajectories = trajectories.select('air_pressure', '>', 0)
+    dt = timedelta(hours=0)
+
+    theta_level = 320
+    trajectories = trajectories.select(
+        'air_potential_temperature', '>', theta_level-2.5, time=[dt])
+    trajectories = trajectories.select(
+        'air_potential_temperature', '<', theta_level+2.5, time=[dt])
+    print len(trajectories)
+
 
     # Perform the clustering
-    cluster_array = make_cluster_array(trajectories)
-    clusters = perform_clustering(cluster_array)
-    plt.savefig(plotdir + job + '_' + name + '_cluster_info.png')
-    np.save(datadir + job + '/' + name + '_clusters.npy', clusters)
-    # clusters = np.load(datadir + job + '/' + name + '_clusters.npy')
+    #cluster_array = make_cluster_array(trajectories)
+    #clusters = perform_clustering(cluster_array, max_dist=4)
+    #plt.savefig(plotdir + job + '_' + name + '_cluster_info.png')
+    #np.save(datadir + job + '/' + name + '_' + str(theta_level) + 'K_clusters.npy', clusters)
+    clusters = np.load(datadir + job + '/' + name + '_' + str(theta_level) + 'K_clusters.npy')
 
     # Display output
     nclusters = len(set(clusters))
@@ -63,13 +73,14 @@ def perform_clustering(cluster_array, method='average', max_dist=None,
 
 def plot_clusters(trajectories, clusters):
     plt.figure()
-    xdata = trajectories.x
-    ydata = trajectories.y
+    xdata = trajectories['grid_longitude']
+    ydata = trajectories['grid_latitude']
 
     # Plot each trajectory coloured by cluster
     for n, i in enumerate(clusters):
         plt.plot(xdata[n], ydata[n], styles[i % 12], zorder=5)
-
+        
+    
     # Plot the cluster averages
     for n in set(clusters):
         xm = np.median(xdata[clusters == n], axis=0)
