@@ -1,3 +1,10 @@
+"""Calculate integrals following an isentropic circuit
+
+Calculate length and circulation around the isentropic circuit.
+Calculate area/volume/mass/pv substance of the enclosed area of the isentropic
+circuit.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
@@ -30,10 +37,6 @@ def main(theta_level):
     trajectories = trajectory.load(filename)
     print len(trajectories)
 
-    # Only include trajectories that stay in the domain
-    # trajectories = trajectories.select('air_pressure', '>', 0)
-    # print(len(trajectories))
-
     # Select an individual theta level
     trajectories = trajectories.select(
         'air_potential_temperature', '==', theta_level)
@@ -65,15 +68,18 @@ def main(theta_level):
         v = trajectories['y_wind'][:, -(n + 2)]
         w = trajectories['upward_air_velocity'][:, -(n + 2)]
         
+        # Integrals are invalid once trajectories leave the domain but we don't
+        # want to stop the script so just print out the number of trajectories
+        # that have left the domain
         leftflag = (trajectories['air_pressure'][:, -(n+2)] < 0).astype(int)
         leftcount = np.count_nonzero(leftflag)
-        
         print leftcount
 
         # Calculate enclosed area integrals
         integrals = mass_integrals(cubes, x, y, glat, gridpoints,
                                    theta_level, dtheta)
         for icube in integrals:
+            # Set integrals to zero if trajectories have left the domain
             if leftcount > 0:
                 icube.data = 0.
             results.append(icube)
@@ -106,6 +112,20 @@ def main(theta_level):
 
 
 def get_geographic_coordinates(u, v, x, y, cs):
+    """Convert winds and positions from a rotated grid to an unrotated grid
+    
+    Args:
+        u, v (np.Array): Wind fields on rotated grid
+        x, y (np.Array): Trajectory longitude and latitude positions on
+            rotated grid
+        cs (iris.coord_systems.CoordSystem): The coordinate system of the
+            rotated longitude/latitude grid
+            
+    Returns
+        u_wind, v_wind (np.Array): Wind fields on unrotated grid
+        lon, lat (np.Array): Trajectory positions
+    """
+    # Place input information in to iris cubes to perform to rotation
     rlon = AuxCoord(x, standard_name='grid_longitude', units='degrees',
                     coord_system=cs)
     rlat = AuxCoord(y, standard_name='grid_latitude', units='degrees',
@@ -120,8 +140,11 @@ def get_geographic_coordinates(u, v, x, y, cs):
              aux_coords_and_dims=[(rlon, 0), (rlat, 1)])
     v = Cube(v, standard_name='y_wind', units='m s-1',
              aux_coords_and_dims=[(rlon, 0), (rlat, 1)])
+    
+    # Calculate unrotated winds and postitions
     u, v = rotate_winds(u, v, GeogCS(a))
     
+    # Extract information from the unrotated cubes
     u_wind, v_wind, lon, lat = [], [], [], []
     lons = u.coord('projection_x_coordinate').points
     lats = u.coord('projection_y_coordinate').points
@@ -154,7 +177,7 @@ def circuit_integral_rotated(u, v, w, lon, lat, z):
     """
     circ_u, circ_v, circ_w = (0, 0, 0)
     # Elements 0, -1 and -2 are identical
-    for n in range(1, len(u)-1):
+    for n in range(len(u)-1):
         # u.r.cos(phi).dlambda
         dx = (a+z[n]) * np.cos(lat[n]) * (lon[n+1] - lon[n-1])/2
         circ_u += u[n] * dx
