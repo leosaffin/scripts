@@ -1,3 +1,4 @@
+from datetime import timedelta
 import numpy as np
 import matplotlib.pyplot as plt
 from mymodule import plot
@@ -9,9 +10,10 @@ from scripts.trajectories.cluster import select_cluster
 
 def main():
     job = 'iop5_extended'
-    name = 'forward_trajectories_from_low_levels_gt600hpa'
-    variable = 'air_potential_temperature'
-    cluster = None
+    name = 'backward_trajectories_from_outflow_coarse'
+    variable = 'total_minus_advection_only_pv'
+    theta_level = 320
+    cluster = 3
     plotname = plotdir + job + '_' + name + '_spread_' + variable
 
     # Load the trajectories
@@ -22,10 +24,23 @@ def main():
     trajectories = trajectories.select('air_pressure', '>', 0)
     print(len(trajectories))
 
+    if theta_level is not None:
+        dt = timedelta(hours=0)
+        trajectories = trajectories.select(
+            'air_potential_temperature', '>', theta_level-2.5, time=[dt])
+        trajectories = trajectories.select(
+            'air_potential_temperature', '<', theta_level+2.5, time=[dt])
+        print len(trajectories)
+
     # Composite trajectory clusters
     if cluster is not None:
-        path = datadir + job + '/' + name + '_clusters.npy'
+        if theta_level is not None:
+            path = datadir + job + '/' + name + '_' + str(theta_level) + 'K'
+            plotname += '_' + str(theta_level) + 'K'
+        else:
+            path = datadir + job + '/' + name
         trajectories = select_cluster(cluster, trajectories, path)
+        print len(trajectories)
         plotname += '_cluster' + str(cluster)
 
     make_plot(trajectories, variable)
