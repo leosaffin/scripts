@@ -5,25 +5,22 @@ import iris
 from mymodule import convert
 from mymodule.user_variables import datadir
 from scripts import files
-from files import stash_maps
+from scripts.files import stash_maps
 
 
 # Filename parameters
 strlen = 3
-inpath = datadir + 'xkcqa/xkcqaa_p'
-outpath = datadir + 'iop8/'
-time = 'hours since 2011-12-07 12:00:00'
-nt = 36
-
-# Surface altitude file
-surf = datadir + 'nae_orography.nc'
+inpath = datadir + 'xjjhl/xjjhla_p'
+outpath = datadir + 'iop5_extended/'
+time = 'hours since 2011-11-28 00:00:00'
+nt = 48
 
 # Define which area of grid to subset
-slices = slice(0, 50), slice(15, 345), slice(15, 585)
+slices = slice(0, 50), slice(15, -15), slice(15, -15)
 
 # Load basis cube
-basis_cube = iris.load_cube(datadir + 'temp/prognostics_001.nc',
-                            'air_potential_temperature')
+basis_cube = iris.load_cube(datadir + 'xjjhl/basis_cube.nc',
+                            'air_temperature')
 
 # NDDiag names to extract
 nddiag_names = ['x_wind', 'y_wind', 'upward_air_velocity',
@@ -40,6 +37,7 @@ diag_names = ['boundary_layer_type', 'air_pressure_at_sea_level',
 def main():
     for n in range(nt):
         print n
+        """
         # Tracers
         infile = inpath + 'a' + str(n).zfill(strlen)
         outfile = outpath + 'pv_tracers_' + str(n + 1).zfill(strlen)
@@ -51,7 +49,8 @@ def main():
         progs_name = inpath + 'c' + str(n).zfill(strlen)
         outfile = outpath + 'prognostics_' + str(n + 1).zfill(strlen)
         prognostics(nddiag_name, progs_name, outfile, slices=slices, time=time)
-
+        """
+        
         # Diagnostics
         infile = inpath + 'd' + str(n).zfill(strlen)
         outfile = outpath + 'diagnostics_' + str(n + 1).zfill(strlen)

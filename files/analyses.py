@@ -11,13 +11,11 @@ from mymodule.user_variables import datadir
 from scripts import files
 
 # Define which area of grid to subset
-slices = slice(0, 50), slice(15, 485), slice(15, 685)
+slices = slice(0, 50), slice(15, -15), slice(15, -15)
 
 # Load basis cube
-# basis_cube = iris.load_cube(datadir + 'iop5/prognostics_001.nc',
-#                            'air_potential_temperature')
-basis_cube = iris.load_cube(datadir + '/iop5_extended/prognostics_001.nc',
-                            'air_potential_temperature')
+basis_cube = iris.load_cube(datadir + 'xjjhl/basis_cube.nc',
+                            'air_temperature')
 lat = grid.extract_dim_coord(basis_cube, 'y')
 lon = grid.extract_dim_coord(basis_cube, 'x')
 
@@ -155,7 +153,7 @@ def generate_file_pairs(t_0, dt, nt, path):
         time = t_0 + n * dt
         YYYYMMDD, HH = time2str(time)
         file_pairs.append((  # path + YYYYMMDD + '_qwqg' + HH + '.nc',
-            path + 'xjjhl/xjjhl.nc',
+            path + '../xjjhl/xjjhl.nc',
             path + YYYYMMDD + '_analysis' + HH + '.nc'))
     return file_pairs
 
@@ -171,6 +169,7 @@ def time2str(t):
     return YYYYMMDD, HH
 
 if __name__ == '__main__':
+    """
     # IOP5
     t_0 = datetime.datetime(2011, 11, 28, 12)
     dt = datetime.timedelta(hours=6)
@@ -179,7 +178,18 @@ if __name__ == '__main__':
     file_pairs = generate_file_pairs(t_0, dt, nt, path)
     time = 'hours since 2011-11-28 12:00:00'
     main(file_pairs, time)
+    """
 
+    # IOP5 Early
+    t_0 = datetime.datetime(2011, 11, 28)
+    dt = datetime.timedelta(hours=6)
+    nt = 1
+    path = datadir + 'iop5_extended/'
+    file_pairs = generate_file_pairs(t_0, dt, nt, path)
+    time = 'hours since 2011-11-28 00:00:00'
+    main(file_pairs, None)
+    
+    """
     # IOP8
     t_0 = datetime.datetime(2011, 12, 7, 12)
     dt = datetime.timedelta(hours=6)
@@ -197,3 +207,4 @@ if __name__ == '__main__':
     file_pairs = generate_file_pairs(t_0, dt, nt, path)
     time = 'hours since 2013-11-01 00:00:00'
     main(file_pairs, time)
+    """
