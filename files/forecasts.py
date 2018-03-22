@@ -37,7 +37,6 @@ diag_names = ['boundary_layer_type', 'air_pressure_at_sea_level',
 def main():
     for n in range(nt):
         print n
-        """
         # Tracers
         infile = inpath + 'a' + str(n).zfill(strlen)
         outfile = outpath + 'pv_tracers_' + str(n + 1).zfill(strlen)
@@ -49,7 +48,6 @@ def main():
         progs_name = inpath + 'c' + str(n).zfill(strlen)
         outfile = outpath + 'prognostics_' + str(n + 1).zfill(strlen)
         prognostics(nddiag_name, progs_name, outfile, slices=slices, time=time)
-        """
         
         # Diagnostics
         infile = inpath + 'd' + str(n).zfill(strlen)
