@@ -18,7 +18,7 @@ def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
     Uses matplotlib colourscales to define the mapping to RGB values.
 
     Args:
-        cube (np.array): 4d array with shape (t,z,y,x). Can also be input with
+        data (np.array): 4d array with shape (t,z,y,x). Can also be input with
             a 3d array which will be copied into a 4d array with t-dimension 1.
 
         vmin, vmax (scalar): Maximum and minimum for the colorscale
@@ -54,7 +54,7 @@ def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
     # Main loop
     clock = pygame.time.Clock()
     running = True
-    while(running):
+    while running:
         clock.tick(frames_per_second)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -103,4 +103,4 @@ if __name__ == '__main__':
     forecast = case_studies.iop5()
     cubes = forecast.set_lead_time(hours=36)
     cube = convert.calc('ertel_potential_vorticity', cubes)
-    main(cube, vmin=0, vmax=10, cmap='plasma')
+    pcolor(cube.data, vmin=0, vmax=10, cmap='plasma')
