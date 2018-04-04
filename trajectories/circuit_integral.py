@@ -12,7 +12,7 @@ import iris
 import iris.plot as iplt
 import iris.quickplot as qplt
 from iris.analysis import SUM
-from iris.analysis.cartography import unrotate_pole, rotate_winds
+from iris.analysis.cartography import rotate_winds
 from iris.coords import AuxCoord
 from iris.coord_systems import GeogCS
 from iris.cube import Cube
@@ -25,11 +25,12 @@ from scripts import case_studies
 a = 6378100
 
 
-def main(theta_level):
-    # IOP5 (early start)
+def main():
+    # Define parameters
     forecast = case_studies.iop5_extended.copy()
     job = 'iop5_extended'
     name = 'isentropic_backward_trajectories_from_outflow_boundary'
+    theta_level = 320
     dtheta = 1
 
     # Load trajectories
@@ -37,6 +38,16 @@ def main(theta_level):
     trajectories = trajectory.load(filename)
     print len(trajectories)
 
+    # Do the calculations over the forecast and save the result
+    calc_circulation(trajectories, forecast, theta_level, dtheta)
+
+    # Load in saved output and produce plots
+    load_from_files(str(theta_level))
+
+    return
+
+
+def calc_circulation(trajectories, forecast, theta_level, dtheta):
     # Select an individual theta level
     trajectories = trajectories.select(
         'air_potential_temperature', '==', theta_level)
@@ -365,5 +376,4 @@ def plot_timeseries(cubes, theta):
 
 
 if __name__ == '__main__':
-    main(325)
-    load_from_files('325')
+    main()
