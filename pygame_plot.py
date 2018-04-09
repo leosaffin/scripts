@@ -6,6 +6,17 @@ from matplotlib import cm
 frames_per_second = 60
 
 
+def main():
+    from mymodule import convert
+    from scripts import case_studies
+    forecast = case_studies.iop8()
+    cubes = forecast.set_lead_time(hours=48)
+    cube = convert.calc('ertel_potential_vorticity', cubes)
+    pcolor(cube.data, vmin=0, vmax=10)
+
+    return
+
+
 def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
     """Quickly navigate a 4d array using arrow keys
 
@@ -79,6 +90,8 @@ def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
 
     pygame.quit()
 
+    return
+
 
 def make_mapping(vmin, vmax, cmap):
     """Create an object for mapping from values to colours
@@ -98,9 +111,4 @@ def copy_array_to_pixels(array, surface, mapping):
 
 
 if __name__ == '__main__':
-    from mymodule import convert
-    from scripts import case_studies
-    forecast = case_studies.iop5()
-    cubes = forecast.set_lead_time(hours=36)
-    cube = convert.calc('ertel_potential_vorticity', cubes)
-    pcolor(cube.data, vmin=0, vmax=10, cmap='plasma')
+    main()
