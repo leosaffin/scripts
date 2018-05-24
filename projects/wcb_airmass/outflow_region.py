@@ -5,7 +5,6 @@ Contour of 2-PVU shows tropopause, highlighting ridge area
 Trajectory start and end points show warm conveyor belt transport into outflow
 """
 from math import cos
-import time
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -29,22 +28,23 @@ def main():
                           levels=levels)[0]
     pv = convert.calc('ertel_potential_vorticity', cubes, levels=levels)[0]
 
-    closed_loop, points = get_points(dtheta)
+    closed_loop, points = get_points(dtheta.copy(), pv.copy())
     closed_loop = increase_circuit_resolution(closed_loop, 25000)
 
-    plt.clf()
     make_plot(dtheta, pv, closed_loop, vmin=-20, vmax=20, cmap='coolwarm')
 
     return
 
 
-def get_points(dtheta):
-    # Smooth the theta_adv data first
-    dtheta.data = filters.median_filter(dtheta.data, size=25)
+def get_points(dtheta, pv):
+    # Smooth the theta_adv and pv data first
+    dtheta.data = filters.gaussian_filter(dtheta.data, sigma=10, truncate=4)
+    pv.data = filters.median_filter(pv.data, size=20)
 
     # Extract the contour surrounding the outflow region
-    plot.pcolormesh(dtheta, vmin= -20, vmax=20, cmap='coolwarm')
-    cs = iplt.contour(dtheta, [0])
+    criteria = np.logical_and(pv.data < 2, dtheta.data > 0)
+    pv.data = criteria.astype(int)
+    cs = iplt.contour(pv, [0.5])
     contours = tropopause_contour.get_contour_verts(cs)
     closed_loop = tropopause_contour.get_tropopause_contour(contours[0])
     path = mpl.path.Path(closed_loop)
