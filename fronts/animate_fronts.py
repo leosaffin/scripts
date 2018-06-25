@@ -3,16 +3,16 @@ import matplotlib.pyplot as plt
 import iris
 import iris.quickplot as qplt
 from mymodule import files, convert
+from mymodule.user_variables import datadir, plotdir
 
-plotdir = '/home/lsaffi/plots/iop5/'
 
-
-def main(forecast, dt, con):
+def main():
     """
     """
+    cs = iris.Constraint(pressure=900)
     for i in xrange(1, 37):
         # Load the front variables
-        cubes = files.load('datadir/xjjhq/xjjhq_fronts' +
+        cubes = files.load(datadir + '/xjjhq/xjjhq_fronts' +
                            str(i).zfill(3) + '.pp')
         loc = convert.calc('front_locator_parameter_thw', cubes)
         m1 = convert.calc('thermal_front_parameter_thw', cubes)
@@ -21,7 +21,7 @@ def main(forecast, dt, con):
         # Apply the masking criteria
         mask = np.logical_or(m1.data < 4 * 0.3e-10, m2.data < 4 * 1.35e-5)
         loc.data = np.ma.masked_where(mask, loc.data)
-        loc = con.extract(loc)
+        loc = cs.extract(loc)
 
         # Plot the locating variable
         qplt.contour(loc, [0], colors='k')
@@ -32,5 +32,4 @@ def main(forecast, dt, con):
 
 
 if __name__ == '__main__':
-    con = iris.Constraint(pressure=900)
-    main(con)
+    main()

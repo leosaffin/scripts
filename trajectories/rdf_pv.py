@@ -4,9 +4,22 @@ from scipy.interpolate import griddata
 from iris.analysis.cartography import rotate_pole, get_xy_grids
 from mymodule.trajectory import load as trload
 from mymodule import convert, files, plot
+from mymodule.user_variables import datadir
 
 
-def main(data_in, data_out, forecast, name, pole_lon, pole_lat, domain):
+def main():
+    name = 'advection_only_pv'
+    pole_lon = 177.5
+    pole_lat = 37.5
+    domain = [328.3, 390.35, -17.97, 17.77]
+    data_in = datadir + 'iop5/trajectories/trace_500hpa_35h.1'
+    data_out = datadir + 'iop5/trajectories/rdf_pv_500hpa_35h'
+
+    rdf_pv(data_in, data_out, name, pole_lon, pole_lat, domain)
+    return
+
+
+def rdf_pv(data_in, data_out, name, pole_lon, pole_lat, domain):
     # Load the trajectories
     trajectories = trload.raw(data_in)
 
@@ -28,6 +41,8 @@ def main(data_in, data_out, forecast, name, pole_lon, pole_lat, domain):
 
     # Save the field
     files.save([cube], data_out + '.nc')
+
+    return
 
 
 def in_domain(trajectory, pole_lon, pole_lat, domain):
@@ -85,15 +100,13 @@ def rdf(name, trajectories, pole_lon, pole_lat):
     # Loop over all trajectories
     for n, trajectory in enumerate(trajectories):
         if n % 10000 == 0:
-            print n
+            print(n)
         # Extract the position at the last trajectory point
         time = trajectory.variable('time')[-1]
         lon = trajectory.variable('lon')[-1]
         lat = trajectory.variable('lat')[-1]
         p = trajectory.variable('p')[-1]
         pv = trajectory.variable('PV')[-1]
-        rlon, rlat = rotate_pole(np.array(lon), np.array(lat),
-                                 pole_lon, pole_lat)
 
         # Extract the data from the forecast
         if n == 1:
@@ -129,12 +142,4 @@ def regular_grid(field, lons, lats, grid_lon, grid_lat):
 
 
 if __name__ == '__main__':
-    name = 'advection_only_pv'
-    pole_lon = 177.5
-    pole_lat = 37.5
-    domain = [328.3, 390.35, -17.97, 17.77]
-    data_in = '/home/lsaffi/data/iop5/trajectories/trace_500hpa_35h.1'
-    data_out = '/home/lsaffi/data/iop5/trajectories/rdf_pv_500hpa_35h'
-    with open('/home/lsaffi/data/forecasts/iop5.pkl', 'r') as infile:
-        forecast = pickle.load(infile)
-    main(data_in, data_out, forecast, name, pole_lon, pole_lat, domain)
+    main()

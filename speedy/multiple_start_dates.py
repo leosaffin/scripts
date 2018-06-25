@@ -11,16 +11,15 @@ from iris.time import PartialDateTime
 from iris.analysis import STD_DEV, MEAN
 from iris.analysis.cartography import cosine_latitude_weights
 from mymodule import plot
-from scripts.speedy import plotdir
-from scripts.speedy import rms_diff
-
-datadir = '/home/saffin/cirrus/speedy/'
+from mymodule.user_variables import datadir
+from scripts.speedy import plotdir, rms_diff
 
 
 def main():
     # Parameters to compare between forecasts
     name = 'Temperature [K]'
     pressure = 500
+    path = datadir + 'cirrus/'
     cs = iris.Constraint(
         name=name, pressure=pressure, forecast_reference_time=(
             lambda cell: (PartialDateTime(year=1982) < cell <
@@ -28,10 +27,10 @@ def main():
 
     # Load full precision reference forecast
     with iris.FUTURE.context(cell_datetime_objects=True):
-        fp = iris.load_cube(datadir + '1982-1991_p52.nc', cs)
+        fp = iris.load_cube(path + '1982-1991_p52.nc', cs)
 
         # Compare with reduced precision forecasts
-        rp = iris.load(datadir + '*_10-30.nc', cs)
+        rp = iris.load(path + '*_10-30.nc', cs)
         rp = rp.concatenate_cube()
 
     weights = cosine_latitude_weights(rp)
@@ -40,7 +39,7 @@ def main():
     std_dev = diff.collapsed('forecast_reference_time', STD_DEV)
     std_dev = (std_dev /
                np.sqrt(len(diff.coord('forecast_reference_time').points)))
-    
+
     for mean_slice, std_slice in zip(mean.slices(['precision']),
                                      std_dev.slices(['precision'])):
         plot.errorbar(mean_slice, yerr=std_slice, marker='x')

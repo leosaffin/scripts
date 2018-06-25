@@ -2,7 +2,7 @@ from iris.analysis import MEAN, STD_DEV
 from mymodule.user_variables import datadir, plotdir
 
 datadir = datadir + 'speedy/'
-plotdir = plotdir + '../project/oxford/speedy_precision/'
+plotdir = plotdir + 'speedy/'
 
 
 def ensemble_std_dev(cube, weights=None):

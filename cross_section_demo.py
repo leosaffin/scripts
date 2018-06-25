@@ -5,11 +5,15 @@ import iris.quickplot as qplt
 from mymodule import files, convert
 from mymodule.plot.interactive import CrossSection as CS
 from mymodule.plot.interactive import CrossSectionPlotter as CSP
+from mymodule.user_variables import datadir
 
 
-def main(cubes):
+def main():
     """
     """
+    filename = datadir + 'iop5_36h.pp'
+    cubes = files.load(filename)
+
     theta = convert.calc('air_potential_temperature', cubes)
 
     plotter = CSP(False, qplt.contourf, theta, np.linspace(270, 350, 15),
@@ -22,7 +26,6 @@ def main(cubes):
 
     plt.show()
 
+
 if __name__ == '__main__':
-    filename = '/home/lsaffin/Documents/meteorology/programming/iop5_36h.pp'
-    cubes = files.load(filename)
-    main(cubes)
+    main()

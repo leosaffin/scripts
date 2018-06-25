@@ -1,6 +1,16 @@
 from datetime import timedelta as dt
 from mymodule import convert, grid
+from mymodule.user_variables import datadir
 from scripts import case_studies
+
+
+def main():
+    forecast = case_studies.iop5()
+    cubes = forecast.set_lead_time(dt(hours=36))
+    output_file = datadir + 'iop5/trajectories/start_320k_35h.1'
+    create_startf(cubes, 320, output_file)
+
+    return
 
 
 def create_startf(cubes, theta_level, output_file):
@@ -39,7 +49,4 @@ def create_startf(cubes, theta_level, output_file):
 
 
 if __name__ == '__main__':
-    forecast = case_studies.iop5()
-    cubes = forecast.set_lead_time(dt(hours=36))
-    output_file = '/home/lsaffi/data/iop5/trajectories/start_320k_35h.1'
-    create_startf(cubes, 320, output_file)
+    main()

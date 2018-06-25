@@ -1,12 +1,22 @@
 import numpy as np
 from mymodule import convert, grid, diagnostic, files
+from mymodule.user_variables import datadir
 from scripts import case_studies
 import tropopause
 
-path = '/home/lsaffi/data/iop8/dipole/acc_dipole_'
+
+def main():
+    path = datadir + 'iop8/dipole/acc_dipole_'
+    forecast = case_studies.iop8.copy()
+    names = ['total_minus_advection_only_pv']
+    bins = np.linspace(0, 8, 33)
+
+    calc_dipole(forecast, names, bins, path)
+
+    return
 
 
-def main(forecast, names, bins):
+def calc_dipole(forecast, names, bins, path):
     # Loop over all lead times in the forecast
     for n, cubes in enumerate(forecast):
         print(n)
@@ -29,8 +39,4 @@ def main(forecast, names, bins):
 
 
 if __name__ == '__main__':
-    forecast = case_studies.iop8.copy()
-    names = ['total_minus_advection_only_pv']
-    bins = np.linspace(0, 8, 33)
-
-    main(forecast, names, bins)
+    main()
