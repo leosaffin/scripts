@@ -1,3 +1,4 @@
+import os
 import datetime as dt
 import pandas as pd
 import iris
@@ -7,8 +8,8 @@ from scripts.speedy import datadir
 
 
 def main():
-    path = '/home/lsaffin/temp/'
-    prefix = 'tendencies'
+    path = os.path.expanduser('~/temp/')
+    prefix = 'output'
     t0 = dt.datetime(1982, 1, 1)
     t1 = dt.datetime(1982, 1, 1)
     pmin, pmax = 5, 23
