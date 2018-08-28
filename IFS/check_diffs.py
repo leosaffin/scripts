@@ -2,15 +2,17 @@
 broken the model.
 """
 
+import numpy as np
 import iris
+from scripts import statistics
 from scripts.IFS import datadir
 
 
 def main():
-    path = datadir + 't21test/output/'
-    forecast1 = 'full_precision/ICMGG_prognostics.nc'
-    forecast2 = 'rpe_new/ICMGG_prognostics.nc'
-    variable = 'Geopotential'
+    path = datadir + 't21test/'
+    forecast1 = 'prognostics_pressure_ref_rp.nc'
+    forecast2 = 'prognostics_pressure_ref.nc'
+    variable = 'geopotential'
 
     cs = iris.Constraint(name=variable)
     diffminmax(path+forecast1, path+forecast2, cs)
@@ -31,7 +33,11 @@ def diffminmax(forecast1, forecast2, cs):
 
     diff = z1 - z2
 
-    print(diff.data.min(), diff.data.max())
+    rms_diff = statistics.rms_diff(z1, z2)
+    mean_diff = statistics.mean_diff(z1, z2)
+
+    print(diff.data.min(), diff.data.max(),
+          np.squeeze(mean_diff.data), np.squeeze(rms_diff.data))
 
     return
 
