@@ -2,7 +2,8 @@ import numpy as np
 from scipy.ndimage import filters
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, diagnostic, plot
+from mymodule import convert, diagnostic
+from mymodule.plot.util import legend
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 
@@ -45,7 +46,7 @@ def main():
 
     plt.axvline(color='k')
     plt.axhline(color='k')
-    plot.legend(key=second_analysis.get_idx, loc='best', ncol=2)
+    legend(key=second_analysis.get_idx, loc='best', ncol=2)
 
     plt.show()
 

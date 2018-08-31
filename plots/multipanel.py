@@ -2,8 +2,8 @@ from math import ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, grid, plot
-from mymodule.plot.util import add_map
+from mymodule import convert, grid
+from mymodule.plot.util import multilabel, add_map, even_cscale
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.fronts import plotdir
 from systematic_forecasts import second_analysis
@@ -60,7 +60,7 @@ def main(cubes, levels, *args, **kwargs):
         iplt.contourf(rh, [0.8, 2], colors='None', hatches=['.'])
 
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',
                         fraction=0.05, spacing='proportional')
@@ -79,5 +79,5 @@ if __name__ == '__main__':
     cubes = forecast.set_lead_time(hours=24)
     for p in [60000, 75000, 90000]:
         levels = ('air_pressure', [p])
-        main(cubes, levels, plot.even_cscale(2), cmap='coolwarm',
+        main(cubes, levels, even_cscale(2), cmap='coolwarm',
              extend='both')

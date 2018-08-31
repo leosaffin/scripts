@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import MEAN
-from mymodule import convert, plot
+from mymodule import convert
+from mymodule.plot.util import multilabel, legend
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.bl import plotdir
 
@@ -45,9 +46,9 @@ def main():
             ax.set_title('IOP8')
 
         plt.axvline(color='k')
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
-    plot.legend(ax, loc='upper left', ncol=2, bbox_to_anchor=(-0.6, -0.2))
+    legend(ax, loc='upper left', ncol=2, bbox_to_anchor=(-0.6, -0.2))
     fig.subplots_adjust(bottom=0.4)
 
     fig.savefig(plotdir + 'theta_profiles.pdf')

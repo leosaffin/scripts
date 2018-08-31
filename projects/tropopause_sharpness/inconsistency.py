@@ -3,7 +3,8 @@
 
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
+from mymodule import convert
+from mymodule.plot.util import multilabel, even_cscale
 from systematic_forecasts import second_analysis
 from myscripts.projects.tropopause_sharpness import plotdir
 
@@ -25,7 +26,7 @@ def main(**kwargs):
                 cube, 'forecast_index')
 
             ax = plt.subplot2grid((2, 2), (n, m))
-            im = iplt.contourf(mean, plot.even_cscale(0.18), cmap='coolwarm')
+            im = iplt.contourf(mean, even_cscale(0.18), cmap='coolwarm')
 
             # X-axis - Same for both columns
             ax.set_xticks([0, 12, 24, 36, 48, 60])
@@ -45,7 +46,7 @@ def main(**kwargs):
     fig.text(0.5, 0.2, 'Forecast Lead Time (hours)', ha='center')
 
     for n, axis in enumerate(fig.axes):
-        plot.multilabel(axis, n)
+        multilabel(axis, n)
 
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',
                         fraction=0.05, spacing='proportional')

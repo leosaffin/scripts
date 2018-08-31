@@ -5,8 +5,8 @@ from string import ascii_uppercase
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, grid, plot
-from mymodule.plot.util import add_map
+from mymodule import convert, grid
+from mymodule.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.fronts import plotdir
 from myscripts.projects.thesis.bl.low_level_cancellation_cs import cs_cube
@@ -61,7 +61,7 @@ def main(cubes, **kwargs):
         count += 1
         plt.text(xf, yf, ascii_uppercase[count], color='k', fontsize=20)
         count += 1
-    plot.multilabel(plt.gca(), 0)
+    multilabel(plt.gca(), 0)
 
     theta = convert.calc('equivalent_potential_temperature', cubes)
     # Plot cross sections
@@ -83,9 +83,9 @@ def main(cubes, **kwargs):
 
         if xs > xf:
             ax.invert_xaxis()
-            plot.multilabel(ax, n, xreversed=True)
+            multilabel(ax, n, xreversed=True)
         else:
-            plot.multilabel(ax, n)
+            multilabel(ax, n)
 
         ax.set_title(titles[n - 1])
         ax.set_ylabel('Height (km)')

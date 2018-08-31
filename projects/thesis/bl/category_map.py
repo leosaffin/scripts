@@ -3,8 +3,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import iris.plot as iplt
-from mymodule import convert, plot
-from mymodule.plot.util import add_map
+from mymodule import convert
+from mymodule.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.bl import plotdir
 
@@ -33,7 +33,7 @@ def bl_categories():
         elif n == 1:
             plt.title('IOP8')
 
-        plot.multilabel(ax, n + 2)
+        multilabel(ax, n + 2)
 
         bl_type = convert.calc('boundary_layer_type', cubes)
         cmap = mpl.colors.ListedColormap([t[1] for t in types])
@@ -81,7 +81,7 @@ def bl_heights(**kwargs):
         elif n == 1:
             plt.title('IOP8')
 
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
     # Add BL Height colourscale
     cbar = plt.colorbar(im, ax=fig.axes, fraction=0.05,

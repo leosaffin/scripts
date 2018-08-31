@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
-from mymodule import convert, grid, interpolate, plot, user_variables
+from mymodule import convert, grid, interpolate, user_variables
+from mymodule.plot.util import multilabel
 from mymodule.detection import rossby_waves
 from myscripts.models.um import case_studies
 from myscripts.projects.tropopause_sharpness import plotdir
@@ -33,22 +34,22 @@ def main(cubes):
     # Background state eqlats vs theta
     ax = plt.subplot2grid((2, 2), (0, 0))
     background_eqlats()
-    plot.multilabel(ax, 0)
+    multilabel(ax, 0)
 
     # Background state theta vs latitude vs time
     ax = plt.subplot2grid((2, 2), (0, 1))
     background_theta()
-    plot.multilabel(ax, 1)
+    multilabel(ax, 1)
 
     # Forecast theta on tropopause
     ax = plt.subplot2grid((2, 2), (1, 0))
     theta, lon, lat = forecast_theta(cubes)
-    #plot.multilabel(ax, 2)
+    #multilabel(ax, 2)
 
     # Anomaly of theta on tropopause
     ax = plt.subplot2grid((2, 2), (1, 1))
     theta_anomaly(theta, lon, lat)
-    #plot.multilabel(ax, 3)
+    #multilabel(ax, 3)
 
     plt.savefig(plotdir + 'ridges_troughs.pdf')
     plt.show()

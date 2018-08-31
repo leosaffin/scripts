@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 import iris
 from iris.analysis import MEAN
-from mymodule import plot
+from mymodule.plot.util import multilabel, legend
 from systematic_forecasts import second_analysis
 from myscripts.projects.tropopause_sharpness import plotdir
 
@@ -53,7 +53,7 @@ def main():
                     ax.set_title('Physics PV tracers')
 
             else:
-                plot.legend(ax, key=second_analysis.get_idx,
+                legend(ax, key=second_analysis.get_idx,
                             loc='best', ncol=2, bbox_to_anchor=(1.0, -0.2),
                             fontsize=25)
                 if m == 1:
@@ -74,7 +74,7 @@ def main():
             else:
                 ax.set_ylim(-0.05, 0.25)
 
-            plot.multilabel(ax, n * 3 + m)
+            multilabel(ax, n * 3 + m)
 
     fig.text(0.075, 0.55, 'PV (PVU)', va='center', rotation='vertical',
              fontsize=20)

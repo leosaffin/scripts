@@ -3,7 +3,8 @@
 
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
+from mymodule import convert
+from mymodule.plot.util import multilabel, legend
 from systematic_forecasts import second_analysis
 from myscripts.projects.tropopause_sharpness import plotdir
 
@@ -64,9 +65,9 @@ def humidity_gradients():
             ax.set_xlabel(r'Mass Fraction (g kg$^{-1}$)')
 
         plt.axhline(color='k')
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
-    plot.legend(ax=fig.axes[0], loc='best')
+    legend(ax=fig.axes[0], loc='best')
     fig.text(0.075, 0.5, 'Vertical distance from tropopause (km)',
              va='center', rotation='vertical')
 

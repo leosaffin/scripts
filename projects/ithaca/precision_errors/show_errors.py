@@ -2,7 +2,7 @@
 """
 import matplotlib.pyplot as plt
 import iris
-from mymodule import plot
+from mymodule.plot.util import legend
 from myscripts.models.speedy import datadir, physics_schemes
 from myscripts.projects.ithaca.precision_errors import decode_name
 
@@ -28,7 +28,7 @@ def main():
     plt.xlabel('Precision (sbits)')
     plt.ylabel('RMSE ({})'.format(units))
     plt.title('{} at {}hPa at T+{}h'.format(variable, pressure, lead_time))
-    plot.legend(key=lambda x: physics_schemes[x[0]].idx)
+    legend(key=lambda x: physics_schemes[x[0]].idx)
     plt.show()
 
     return

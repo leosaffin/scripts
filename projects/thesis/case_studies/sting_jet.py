@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
-from mymodule.plot.util import add_map
+from mymodule.plot.util import add_map, even_cscale
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.case_studies import plotdir
 
 levels = ('altitude', [1000])
 levs = np.linspace(0, 50, 21)
-errlevs = plot.even_cscale(25, levels=21)
+errlevs = even_cscale(25, levels=21)
 
 
 def main(dt):

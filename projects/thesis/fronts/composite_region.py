@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 import iris.quickplot as qplt
 from mymodule import convert, diagnostic, interpolate, grid, plot
+from mymodule.plot.util import multilabel, legend
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.fronts import plotdir
@@ -67,7 +68,7 @@ def main(cubes):
             else:
                 ax.set_xlim(-1, 1)
 
-            plot.multilabel(ax, 3 * n + m, yreversed=True, fontsize=25)
+            multilabel(ax, 3 * n + m, yreversed=True, fontsize=25)
 
             if n == 0:
                 plt.axhline(z_cold, color='k', linestyle='--')
@@ -155,7 +156,7 @@ def add_trimmings(ax, n, m):
     plt.axvline(color='k')
     ax.set_ylim(950, 500)
     if n == 1:
-        plot.legend(ax, key=second_analysis.get_idx,
+        legend(ax, key=second_analysis.get_idx,
                     loc='best', ncol=2, bbox_to_anchor=(0.9, -0.2),
                     fontsize=25)
 

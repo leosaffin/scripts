@@ -4,8 +4,8 @@ from string import ascii_lowercase
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
-from mymodule.plot.util import add_map
+from mymodule import convert
+from mymodule.plot.util import add_map, even_cscale
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.case_studies import plotdir
 
@@ -22,7 +22,7 @@ def main(dt):
 
     make_plots(cubes_f, cubes_a, 'air_potential_temperature',
                ('air_pressure', [90000]), 'K',
-               plot.even_cscale(10, 11),
+               even_cscale(10, 11),
                np.linspace(270, 300, 13))
     plt.savefig(plotdir + 'iop5_T_error.pdf')
     """
@@ -31,14 +31,14 @@ def main(dt):
     fig = plt.figure(figsize=(18, 8))
     ax = plt.subplot2grid((1, 2), (0, 0))
     make_plot(cubes_f, cubes_a, 'air_pressure', None, 'hPa',
-              plot.even_cscale(5, 11), np.linspace(950, 1050, 11),
+              even_cscale(5, 11), np.linspace(950, 1050, 11),
               mask=z_0.data != 20)
     plt.title('(a)'.ljust(30) + 'p(20 m)'.ljust(35))
 
     # Geopotential height
     ax = plt.subplot2grid((1, 2), (0, 1))
     make_plot(cubes_f, cubes_a, 'altitude', ('air_pressure', [50000]), 'm',
-              plot.even_cscale(50, 11), np.linspace(5000, 6000, 11))
+              even_cscale(50, 11), np.linspace(5000, 6000, 11))
     plt.title('(b)'.ljust(30) + 'z(500 hPa)'.ljust(35))
 
     plt.savefig(plotdir + 'iop8_errors.pdf')

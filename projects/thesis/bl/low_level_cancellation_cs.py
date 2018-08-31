@@ -5,8 +5,8 @@ from math import ceil, floor
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, interpolate, plot
-from mymodule.plot.util import add_map
+from mymodule import convert, interpolate
+from mymodule.plot.util import multilabel, add_map, even_cscale
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.bl import plotdir
@@ -102,7 +102,7 @@ def bottom_level(tracers, mslp, fig, **kwargs):
 
     # Add letter labels to panels
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
     # Add colorbar at bottom of figure
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',
@@ -124,7 +124,7 @@ def cross_sections(tracers, theta, rh, z_bl, fig):
         coords = ['grid_longitude', 'altitude']
 
         # Make the plot
-        im = iplt.contourf(cube, plot.even_cscale(2), coords=coords,
+        im = iplt.contourf(cube, even_cscale(2), coords=coords,
                            cmap='coolwarm', extend='both')
         cs = iplt.contour(theta, theta_levs, coords=coords,
                           colors='k', linewidths=2)
@@ -143,7 +143,7 @@ def cross_sections(tracers, theta, rh, z_bl, fig):
 
     # Add letter labels to panels
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
     # Add colorbar at bottom of figure
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',

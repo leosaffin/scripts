@@ -4,6 +4,7 @@ from matplotlib.widgets import RectangleSelector
 import iris.quickplot as qplt
 import iris.plot as iplt
 from mymodule import convert, plot, calculus
+from mymodule.plot.util import even_cscale
 from mymodule.plot.interactive import CrossSection as CS
 from mymodule.plot.interactive import CrossSectionPlotter as CSP
 from myscripts.models.um import case_studies
@@ -28,7 +29,7 @@ def main(cubes):
         cube.coord('altitude').convert_units('km')
         cube.coord('atmosphere_hybrid_height_coordinate').convert_units('km')
         cube.coord('surface_altitude').convert_units('km')
-        plotter1 = CSP(True, qplt.contourf, cube, plot.even_cscale(5),
+        plotter1 = CSP(True, qplt.contourf, cube, even_cscale(5),
                        cmap='coolwarm', extend='both')
         plotter2 = CSP(False, iplt.contour, pv, [2], colors='k')
         plotter3 = CSP(False, iplt.contour, adv, [2], colors='k',

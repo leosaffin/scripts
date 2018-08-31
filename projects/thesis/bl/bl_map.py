@@ -2,8 +2,8 @@ from math import ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
-from mymodule.plot.util import add_map
+from mymodule import convert
+from mymodule.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.bl import plotdir
@@ -39,7 +39,7 @@ def main(cubes, levels, *args, **kwargs):
         plt.title(second_analysis.all_diagnostics[name].symbol, fontsize=30)
 
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n, fontsize=25)
+        multilabel(ax, n, fontsize=25)
 
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',
                         fraction=0.05, spacing='proportional')

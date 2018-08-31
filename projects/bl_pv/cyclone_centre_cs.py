@@ -5,8 +5,8 @@ from math import ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, interpolate, plot, user_variables
-from mymodule.plot.util import add_map
+from mymodule import convert, interpolate, user_variables
+from mymodule.plot.util import multilabel, add_map, even_cscale
 from myscripts.models.um import case_studies
 from myscripts.projects.bl_pv import plotdir
 from systematic_forecasts import second_analysis
@@ -107,7 +107,7 @@ def overview():
 
 def plot_overview(mslp, pv):
     iplt.contourf(
-        pv, plot.even_cscale(2), cmap='coolwarm', spacing='proportional',
+        pv, even_cscale(2), cmap='coolwarm', spacing='proportional',
         extend='both')
     add_map()
     cbar = plt.colorbar(
@@ -165,7 +165,7 @@ def plot_cross_sections(tracers, pv, theta, theta_e, rh, z_bl, fig, ylims):
 
     # Add letter labels to panels
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
     # Add colorbar at bottom of figure
     cbar = plt.colorbar(im, ax=fig.axes, orientation='horizontal',
@@ -183,10 +183,10 @@ def plot_cross_section(cube, pv, theta, theta_e, z_bl, rh,
                        ax, n, ylims):
     # Make the plot
     if cube.units == 'K':
-        im = iplt.contourf(cube, plot.even_cscale(20), coords=coords,
+        im = iplt.contourf(cube, even_cscale(20), coords=coords,
                            cmap='coolwarm', extend='both')
     elif cube.units == 'PVU':
-        im = iplt.contourf(cube, plot.even_cscale(2), coords=coords,
+        im = iplt.contourf(cube, even_cscale(2), coords=coords,
                            cmap='coolwarm', extend='both')
     else:
         print(cube.units)

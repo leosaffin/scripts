@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import iris
-from mymodule import convert, plot
+from mymodule import plot
+from mymodule.plot.util import multilabel, legend
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis import plotdir
 
@@ -43,7 +44,7 @@ def tropopause_profile():
             plt.title(title[n])
             ax.set_xlim(*xlims[n])
             ax.set_ylim(*ylim)
-            plot.legend(ax, key=second_analysis.get_idx,
+            legend(ax, key=second_analysis.get_idx,
                         loc='best', ncol=2, bbox_to_anchor=(0.9, -0.2))
 
             if n == 0:
@@ -66,7 +67,7 @@ def tropopause_profile():
         #    ax.set_ylim(ax.get_ylim()[::-1])
 
     for n, ax in enumerate(fig.axes):
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
     fig.subplots_adjust(bottom=0.4)
 

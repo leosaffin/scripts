@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import iris
 from mymodule import plot
+from mymodule.plot.util import multilabel, legend
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis import plotdir
 
@@ -71,7 +72,7 @@ def profile(coord, mappings, domains, title, xlabel, ylabel, xlims, ylims):
                 ax.set_title('')
 
             if m == nrows - 1:
-                plot.legend(ax, key=second_analysis.get_idx, loc='upper left',
+                legend(ax, key=second_analysis.get_idx, loc='upper left',
                             ncol=2, bbox_to_anchor=(0.05, -0.25))
             else:
                 ax.get_xaxis().set_ticklabels([])
@@ -97,7 +98,7 @@ def profile(coord, mappings, domains, title, xlabel, ylabel, xlims, ylims):
             if coord == 'air_pressure':
                 ax.set_ylim(ax.get_ylim()[::-1])
 
-            plot.multilabel(ax, n + m * ncols)
+            multilabel(ax, n + m * ncols)
 
     fig.subplots_adjust(bottom=0.4)
 

@@ -2,8 +2,8 @@ from math import ceil, floor
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-import iris.quickplot as qplt
-from mymodule import convert, plot
+from mymodule import convert
+from mymodule.plot.util import multilabel, even_cscale
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis import plotdir
 
@@ -39,7 +39,7 @@ def main(*args, **kwargs):
 
         ax.set_title(second_analysis.all_diagnostics[name].symbol,
                      fontsize=25)
-        plot.multilabel(ax, n)
+        multilabel(ax, n)
 
         if row == 1 and col == 0:
             ax.set_ylabel('Height (km)')
@@ -64,4 +64,4 @@ def main(*args, **kwargs):
 
 
 if __name__ == '__main__':
-    main(plot.even_cscale(0.1, 17), cmap='coolwarm', extend='both')
+    main(even_cscale(0.1, 17), cmap='coolwarm', extend='both')
