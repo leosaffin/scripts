@@ -2,6 +2,7 @@
 
 """
 import iris
+from iris.coords import AuxCoord
 from iris.util import unify_time_units
 from iris.exceptions import ConstraintMismatchError
 from mymodule import grid
@@ -14,16 +15,40 @@ def main():
     files_in = 'ICMGG' + exp_id + '+0000??.nc'
     file_out = 'ICMGG_prognostics.nc'
 
-    gather_files(path + files_in, path + file_out)
+    #cubes = gather_files(path + files_in)
+    cubes = multiple_precisions(path, files_in, range(9, 24))
+
+    print(cubes)
+    iris.save(cubes, path+file_out)
 
     return
 
 
-def gather_files(files_in, file_out):
+def multiple_precisions(path, files_in, precisions):
+    all_forecasts = iris.cube.CubeList()
+    for precision in precisions:
+        pcoord = AuxCoord(points=precision, long_name='precision')
+
+        cubes = gather_files(path + 'p' + str(precision) + '/' + files_in)
+        for cube in cubes:
+            cube.attributes = {}
+            cube.add_aux_coord(pcoord)
+
+        newcubes = cubes.concatenate()
+
+        for cube in newcubes:
+            all_forecasts.append(cube)
+
+    all_forecasts = all_forecasts.merge()
+    print(all_forecasts)
+
+    return all_forecasts
+
+
+def gather_files(files_in):
     """
     Args:
         files_in (str):
-        file_out (str):
     """
     cubes = iris.load(files_in)
     cubes.sort(key=lambda x: x.name())
@@ -36,10 +61,7 @@ def gather_files(files_in, file_out):
     # Remove hybrid height cubes and add as coordinates instead
     replace_hybrid_heights(cubes)
 
-    print(cubes)
-    iris.save(cubes, file_out)
-
-    return
+    return cubes
 
 
 def replace_hybrid_heights(cubes):
@@ -56,7 +78,8 @@ def replace_hybrid_heights(cubes):
 
             hybrid_coords.append(grid.make_coord(points, bounds=bounds))
         except ConstraintMismatchError:
-            pass
+            # If the cubelist doesn't have hybrid height just return
+            return
 
     for cube in cubes:
         cube_coords = [coord.name() for coord in cube.dim_coords]
