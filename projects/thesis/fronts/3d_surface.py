@@ -6,12 +6,11 @@
 Demonstrates a very basic plot of a 3D surface using a solid color.
 '''
 
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from mymodule import convert, diagnostic
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 
 """
 fig = plt.figure()

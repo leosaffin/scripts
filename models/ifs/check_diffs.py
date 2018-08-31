@@ -5,7 +5,7 @@ broken the model.
 import numpy as np
 import iris
 from myscripts import statistics
-from myscripts.IFS import datadir
+from myscripts.models.IFS import datadir
 
 
 def main():

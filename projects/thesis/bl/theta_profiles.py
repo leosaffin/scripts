@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import MEAN
 from mymodule import convert, plot
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 from myscripts.projects.thesis.bl import plotdir
 
 label = ['Stable', 'Well mixed', 'Cumulus capped', 'Shear driven']

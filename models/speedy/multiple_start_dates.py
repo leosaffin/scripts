@@ -12,7 +12,7 @@ from iris.analysis import STD_DEV, MEAN
 from mymodule import plot
 from mymodule.user_variables import datadir
 from myscripts.statistics import rms_diff
-from myscripts.speedy import plotdir
+from myscripts.models.speedy import plotdir
 
 
 def main():

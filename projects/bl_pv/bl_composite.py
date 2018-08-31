@@ -3,7 +3,7 @@ from scipy.ndimage import filters
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, diagnostic, plot
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 
 forecast = case_studies.iop8.copy()

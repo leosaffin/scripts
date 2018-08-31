@@ -5,7 +5,7 @@ co-ordinates.
 import numpy as np
 from mymodule import grid, convert, interpolate
 from lagranto.caltra import caltra
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 
 tracers = ['ertel_potential_vorticity', 'advection_only_pv',
            'air_pressure', 'air_potential_temperature',

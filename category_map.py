@@ -8,7 +8,7 @@ from mymodule import convert, grid
 from mymodule.user_variables import plotdir
 from mymodule.detection import rossby_waves
 from mymodule.detection.rossby_waves import tropopause_contour as tropoc
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 
 cmap = mpl.colors.ListedColormap(
     ['white', 'grey', 'red', 'blue', 'cyan', 'magenta', 'green'])

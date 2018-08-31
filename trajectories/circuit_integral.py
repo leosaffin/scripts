@@ -20,7 +20,7 @@ from mymodule import convert, grid
 from mymodule.user_variables import datadir, plotdir
 from mymodule.constants import omega
 from lagranto import trajectory
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 
 a = 6378100
 

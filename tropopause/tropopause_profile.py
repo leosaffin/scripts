@@ -1,9 +1,8 @@
 import tropopause
 import numpy as np
 import matplotlib.pyplot as plt
-import iris.quickplot as qplt
-from mymodule import forecast, convert, diagnostic, plot
-from myscripts import case_studies
+from mymodule import convert, diagnostic, plot
+from myscripts.models.um import case_studies
 
 
 def main(cubes, dz, names):

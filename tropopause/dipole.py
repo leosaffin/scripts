@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mymodule import convert, grid, diagnostic, plot
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 import tropopause
 
 

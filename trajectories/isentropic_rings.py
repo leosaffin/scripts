@@ -4,13 +4,11 @@ and show the points of the 3d trajectories calculated from the same region
 
 from datetime import timedelta
 import matplotlib.pyplot as plt
-import numpy as np
 import iris.plot as iplt
-from cartopy import crs
 from lagranto import trajectory
 from mymodule import convert, plot
 from mymodule.user_variables import datadir, plotdir
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 from myscripts.trajectories.cluster import select_cluster
 
 def main():

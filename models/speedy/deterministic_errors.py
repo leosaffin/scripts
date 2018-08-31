@@ -11,7 +11,7 @@ import iris
 import iris.quickplot as qplt
 from iris.analysis import Linear
 from myscripts.statistics import ensemble_std_dev, rms_diff
-from myscripts.speedy import datadir
+from myscripts.models.speedy import datadir
 
 
 def main():

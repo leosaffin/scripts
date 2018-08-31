@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
 from mymodule import convert
-from myscripts import case_studies
+from myscripts.models.um import case_studies
 
 
 def main(cubes):

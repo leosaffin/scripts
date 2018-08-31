@@ -6,8 +6,7 @@ import iris.plot as iplt
 from mymodule import convert, plot, calculus
 from mymodule.plot.interactive import CrossSection as CS
 from mymodule.plot.interactive import CrossSectionPlotter as CSP
-from myscripts import case_studies
-
+from myscripts.models.um import case_studies
 
 names = ['gravity_wave_drag_pv', 'convection_pv', 'boundary_layer_pv',
          'dynamics_tracer_inconsistency']
