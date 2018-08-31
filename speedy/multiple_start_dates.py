@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import iris
 from iris.time import PartialDateTime
 from iris.analysis import STD_DEV, MEAN
-from iris.analysis.cartography import cosine_latitude_weights
 from mymodule import plot
 from mymodule.user_variables import datadir
-from scripts.speedy import plotdir, rms_diff
+from myscripts.statistics import rms_diff
+from myscripts.speedy import plotdir
 
 
 def main():
@@ -33,15 +33,18 @@ def main():
         rp = iris.load(path + '*_10-30.nc', cs)
         rp = rp.concatenate_cube()
 
-    weights = cosine_latitude_weights(rp)
-    diff = rms_diff(rp, fp, weights)
+    # Calculate the global RMS error at each forecast lead time
+    diff = rms_diff(rp, fp)
+
+    # Calculate the mean error as a function of precision and the standard error
+    # of the mean for each lead time
     mean = diff.collapsed('forecast_reference_time', MEAN)
     std_dev = diff.collapsed('forecast_reference_time', STD_DEV)
-    std_dev = (std_dev /
+    std_err = (std_dev /
                np.sqrt(len(diff.coord('forecast_reference_time').points)))
 
     for mean_slice, std_slice in zip(mean.slices(['precision']),
-                                     std_dev.slices(['precision'])):
+                                     std_err.slices(['precision'])):
         plot.errorbar(mean_slice, yerr=std_slice, marker='x')
 
     plt.savefig(plotdir + 'average_errors' + '_' + name.split()[0].lower() +
