@@ -6,7 +6,7 @@ import iris
 from iris.analysis import MEAN
 from mymodule import plot
 from systematic_forecasts import second_analysis
-from scripts.projects.tropopause_sharpness import plotdir
+from myscripts.projects.tropopause_sharpness import plotdir
 
 
 def main():

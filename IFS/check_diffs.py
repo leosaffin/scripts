@@ -4,8 +4,8 @@ broken the model.
 
 import numpy as np
 import iris
-from scripts import statistics
-from scripts.IFS import datadir
+from myscripts import statistics
+from myscripts.IFS import datadir
 
 
 def main():

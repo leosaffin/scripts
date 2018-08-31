@@ -5,7 +5,7 @@ import iris.plot as iplt
 import iris.quickplot as qplt
 from mymodule import convert, plot
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis import plotdir
+from myscripts.projects.thesis import plotdir
 
 filename = plotdir + 'ch7_low/acc_tendencies_height.pdf'
 

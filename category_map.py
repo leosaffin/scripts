@@ -8,7 +8,7 @@ from mymodule import convert, grid
 from mymodule.user_variables import plotdir
 from mymodule.detection import rossby_waves
 from mymodule.detection.rossby_waves import tropopause_contour as tropoc
-from scripts import case_studies
+from myscripts import case_studies
 
 cmap = mpl.colors.ListedColormap(
     ['white', 'grey', 'red', 'blue', 'cyan', 'magenta', 'green'])
@@ -74,7 +74,7 @@ def main(cubes):
     else:
         plt.clf()
         plt.plot(tropopause_contour[:, 0], tropopause_contour[:, 1])
-        print 'Open contour'
+        print('Open contour')
 
     plt.show()
 

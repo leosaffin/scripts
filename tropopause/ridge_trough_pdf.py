@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mymodule import convert, grid
 from mymodule.detection import rossby_waves
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main(cubes, xbins, ybins, xlabel, ylabel, **kwargs):

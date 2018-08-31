@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis.bl import plotdir
+from myscripts.projects.thesis.bl import plotdir
 
 names = [
     'total_minus_advection_only_pv',
@@ -29,7 +29,7 @@ def main(cubes, levels, *args, **kwargs):
     for n, name in enumerate(names):
         row = n / ncols
         col = n - row * ncols
-        print row, col
+        print(row, col)
         ax = plt.subplot2grid((nrows, ncols), (row, col))
 
         cube = convert.calc(name, cubes, levels=levels)[0]

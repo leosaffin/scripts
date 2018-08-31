@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import MEAN
 from mymodule import convert, grid, plot
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts.second_analysis import all_diagnostics
-from scripts.projects.bl_pv import plotdir
+from myscripts.projects.bl_pv import plotdir
 
 
 def main():

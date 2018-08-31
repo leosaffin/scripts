@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from mymodule import convert, interpolate, plot
-from scripts import case_studies
+from myscripts import case_studies
 import tropopause
 
 

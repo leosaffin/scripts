@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from mymodule import convert, plot
 import iris.plot as iplt
 from iris.analysis import SUM
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main(cubes):

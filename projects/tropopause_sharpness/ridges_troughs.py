@@ -8,8 +8,8 @@ import iris
 import iris.plot as iplt
 from mymodule import convert, grid, interpolate, plot, user_variables
 from mymodule.detection import rossby_waves
-from scripts import case_studies
-from scripts.projects.tropopause_sharpness import plotdir
+from myscripts import case_studies
+from myscripts.projects.tropopause_sharpness import plotdir
 
 path = user_variables.datadir
 

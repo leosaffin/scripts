@@ -8,7 +8,7 @@ from iris.cube import CubeList
 from iris.util import squeeze
 from mymodule import constants, grid
 from mymodule.user_variables import datadir
-from scripts import files
+from myscripts import files
 
 # Define which area of grid to subset
 slices = slice(0, 50), slice(15, -15), slice(15, -15)
@@ -168,6 +168,7 @@ def time2str(t):
     HH = str(t)[11:13]
     return YYYYMMDD, HH
 
+
 if __name__ == '__main__':
     """
     # IOP5
@@ -188,7 +189,7 @@ if __name__ == '__main__':
     file_pairs = generate_file_pairs(t_0, dt, nt, path)
     time = 'hours since 2011-11-28 00:00:00'
     main(file_pairs, None)
-    
+
     """
     # IOP8
     t_0 = datetime.datetime(2011, 12, 7, 12)

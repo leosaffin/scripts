@@ -8,7 +8,7 @@ frames_per_second = 60
 
 def main():
     from mymodule import convert
-    from scripts import case_studies
+    from myscripts import case_studies
     forecast = case_studies.iop8()
     cubes = forecast.set_lead_time(hours=48)
     cube = convert.calc('ertel_potential_vorticity', cubes)

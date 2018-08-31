@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
 from systematic_forecasts import second_analysis
-from scripts.projects.tropopause_sharpness import plotdir
+from myscripts.projects.tropopause_sharpness import plotdir
 
 coords = ['distance_from_dynamical_tropopause',
           'distance_from_advection_only_tropopause']

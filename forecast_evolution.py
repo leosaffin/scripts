@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
 from mymodule.user_variables import plotdir
-from scripts import case_studies
+from myscripts import case_studies
 
 
 columns = 3
@@ -18,7 +18,7 @@ def main(forecast, name, levels, *args,  **kwargs):
     for n, cubes in enumerate(forecast):
         row = n / columns
         column = n - row * columns
-        print row, column
+        print(row, column)
         ax = plt.subplot2grid((rows, columns), (row, column))
 
         cube = convert.calc(name, cubes, levels=levels)[0]

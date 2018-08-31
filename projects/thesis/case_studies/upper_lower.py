@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main(cubes):

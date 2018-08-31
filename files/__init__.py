@@ -3,7 +3,7 @@ from iris.analysis import Linear
 from iris.cube import CubeList
 from iris.util import squeeze
 from mymodule import calculus, convert, interpolate, grid, variable
-from scripts.files import stash_maps
+from myscripts.files import stash_maps
 
 
 def load_cubes(filename, names):
@@ -23,7 +23,7 @@ def redo_cubes(cubes, basis_cube, stash_maps=[], slices=None, time=None):
 
     newcubelist = CubeList()
     for cube in cubes:
-        print cube
+        print(cube)
         newcube = cube.copy()
         # Remove unneccessary time coordinates
         for coord in ['forecast_period', 'forecast_reference_time']:

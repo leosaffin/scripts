@@ -11,7 +11,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
 from mymodule import convert, diagnostic
-from scripts import case_studies
+from myscripts import case_studies
 
 """
 fig = plt.figure()

@@ -5,7 +5,7 @@ from mymodule import calculus, convert, diagnostic, grid, interpolate, plot, \
     variable
 
 from mymodule.detection import rossby_waves
-from scripts import case_studies
+from myscripts import case_studies
 
 names = ['long_wave_radiation_pv', 'total_minus_advection_only_pv',
          'advection_only_pv', 'ertel_potential_vorticity']

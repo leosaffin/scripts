@@ -17,18 +17,18 @@ def main():
 def select_wcb(filename):
     # Load the trajectories
     trajectories = trajectory.load(filename)
-    print len(trajectories)
+    print(len(trajectories))
 
     # Select trajectories that stay in the domain
     trajectories = trajectories.select('air_pressure', '>', 0)
-    print len(trajectories)
+    print(len(trajectories))
 
     # Select trajectories that fulfill the ascent criteria
     dt1 = datetime.timedelta(hours=0)
     dt2 = datetime.timedelta(hours=48)
     trajectories = trajectories.select('air_pressure', '>', 60000,
                                        time=[dt1, dt2])
-    print len(trajectories)
+    print(len(trajectories))
 
     return trajectories
 

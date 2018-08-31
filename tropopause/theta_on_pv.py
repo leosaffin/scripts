@@ -1,7 +1,7 @@
 from datetime import timedelta as dt
 import matplotlib.pyplot as plt
 from mymodule import convert, plot
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main(cubes, **kwargs):

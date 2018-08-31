@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import iris
 from mymodule import plot
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis import plotdir
+from myscripts.projects.thesis import plotdir
 
 
 def main():
@@ -106,7 +106,7 @@ def profile(coord, mappings, domains, title, xlabel, ylabel, xlims, ylims):
 
 def profile_multi(cubes, axis, mapping, coord):
     for variable in mapping:
-        print variable
+        print(variable)
         # Extract the plot styles for the variable
         c = mapping[variable]
         # Load the cube

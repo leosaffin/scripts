@@ -1,3 +1,3 @@
-from scripts.projects import plotdir
+from myscripts.projects import plotdir
 
 plotdir = plotdir + 'project/wcb_airmass/'

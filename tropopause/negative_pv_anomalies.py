@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mymodule import convert, grid
-from scripts import case_studies
+from myscripts import case_studies
 import tropopause
 
 

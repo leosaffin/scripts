@@ -9,7 +9,7 @@ from iris.analysis import MEAN
 from scipy.optimize import curve_fit
 from systematic_forecasts import second_analysis
 from mymodule import convert, plot
-from scripts.projects.tropopause_sharpness import plotdir
+from myscripts.projects.tropopause_sharpness import plotdir
 
 
 variable = 'advection_only_pv'
@@ -90,7 +90,7 @@ def _single_fit(coord, subdomain, dz, function, **kwargs):
     pv = convert.calc(variable, cubes)
     x, y, dy = function(pv, coord, dz)
     popt, pcov, rmse = fit_curve(x, y, dy)
-    print popt, rmse
+    print(popt, rmse)
     plot_fit(x, y, dy, popt, **kwargs)
 
     return popt, rmse

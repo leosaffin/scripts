@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import iris.plot as iplt
 from mymodule import convert, plot
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis.bl import plotdir
+from myscripts.projects.thesis.bl import plotdir
 
 
 forecasts = [case_studies.iop5b.copy(), case_studies.iop8.copy()]

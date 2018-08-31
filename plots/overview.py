@@ -2,7 +2,7 @@ import os
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot, user_variables
-from scripts import case_studies
+from myscripts import case_studies
 
 # Vertical coordinates
 # Inlcude each coordinate interpolated to the other coordinates

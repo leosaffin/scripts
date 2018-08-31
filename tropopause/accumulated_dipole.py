@@ -1,7 +1,7 @@
 import numpy as np
 from mymodule import convert, grid, diagnostic, files
 from mymodule.user_variables import datadir
-from scripts import case_studies
+from myscripts import case_studies
 import tropopause
 
 

@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, grid, plot
-from scripts import case_studies
-from scripts.projects.thesis.fronts import plotdir
-from scripts.projects.thesis.bl.low_level_cancellation_cs import cs_cube
+from myscripts import case_studies
+from myscripts.projects.thesis.fronts import plotdir
+from myscripts.projects.thesis.bl.low_level_cancellation_cs import cs_cube
 
 # Contour levels to plot variables
 levels = ('air_pressure', [90000])

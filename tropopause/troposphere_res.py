@@ -3,12 +3,12 @@ import numpy as np
 import iris
 from iris.analysis import MEAN, STD_DEV
 from mymodule import convert, grid, files
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main(forecast, diagnostics, lead_times):
     for n, lead_time in enumerate(lead_times):
-        print n
+        print(n)
         cubes = forecast.set_lead_time(lead_time)
 
         # Extract required variables

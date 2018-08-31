@@ -4,7 +4,7 @@ import pandas as pd
 import iris
 from iris.coords import AuxCoord, DimCoord
 from cf_units import Unit
-from scripts.speedy import datadir
+from myscripts.speedy import datadir
 
 
 def main():

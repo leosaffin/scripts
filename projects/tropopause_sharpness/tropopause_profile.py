@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import iris
 from mymodule import convert, plot
 from systematic_forecasts import second_analysis
-from scripts.projects.tropopause_sharpness import plotdir
+from myscripts.projects.tropopause_sharpness import plotdir
 
 
 def main():

@@ -1,7 +1,7 @@
 import datetime
 import iris
-from scripts.IFS.check_diffs import diffminmax
-from scripts.speedy import datadir
+from myscripts.IFS.check_diffs import diffminmax
+from myscripts.speedy import datadir
 
 
 def main():

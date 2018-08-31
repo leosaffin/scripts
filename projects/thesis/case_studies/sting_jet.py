@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
-from scripts import case_studies
-from scripts.projects.thesis.case_studies import plotdir
+from myscripts import case_studies
+from myscripts.projects.thesis.case_studies import plotdir
 
 levels = ('altitude', [1000])
 levs = np.linspace(0, 50, 21)

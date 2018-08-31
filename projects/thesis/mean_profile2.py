@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import iris
 from mymodule import convert, plot
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis import plotdir
+from myscripts.projects.thesis import plotdir
 
 
 coord = 'altitude'

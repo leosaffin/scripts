@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, grid, plot
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis.fronts import plotdir
+from myscripts.projects.thesis.fronts import plotdir
 
 names = ['total_minus_advection_only_pv',
          #'short_wave_radiation_pv',

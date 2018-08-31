@@ -6,7 +6,7 @@ import iris.plot as iplt
 from iris.analysis import VARIANCE
 from mymodule import files, convert
 from mymodule.user_variables import datadir, plotdir
-from scripts.plot import linestyles, colors
+from myscripts.plot import linestyles, colors
 
 
 def main():

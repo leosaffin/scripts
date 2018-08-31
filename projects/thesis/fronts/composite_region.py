@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 import iris.quickplot as qplt
 from mymodule import convert, diagnostic, interpolate, grid, plot
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis.fronts import plotdir
+from myscripts.projects.thesis.fronts import plotdir
 
 
 mappings = [second_analysis.full, second_analysis.budget,

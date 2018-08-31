@@ -3,7 +3,7 @@ import iris.plot as iplt
 from iris.time import PartialDateTime as PDT
 from mymodule import convert, grid, plot
 from mymodule.detection import rossby_waves
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main(cubes, theta_value, **kwargs):

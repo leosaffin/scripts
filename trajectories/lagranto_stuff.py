@@ -1,7 +1,7 @@
 from datetime import timedelta as dt
 from mymodule import convert, grid
 from mymodule.user_variables import datadir
-from scripts import case_studies
+from myscripts import case_studies
 
 
 def main():

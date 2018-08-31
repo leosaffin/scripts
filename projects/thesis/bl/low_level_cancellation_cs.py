@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, interpolate, plot
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts import second_analysis
-from scripts.projects.thesis.bl import plotdir
+from myscripts.projects.thesis.bl import plotdir
 
 names = [
     'total_minus_advection_only_pv',

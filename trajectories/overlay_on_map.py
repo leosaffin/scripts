@@ -5,8 +5,8 @@ import iris.plot as iplt
 from lagranto import trajectory
 from mymodule import convert, plot
 from mymodule.user_variables import datadir, plotdir
-from scripts import case_studies
-from scripts.trajectories.cluster import select_cluster
+from myscripts import case_studies
+from myscripts.trajectories.cluster import select_cluster
 
 
 def main():
@@ -43,11 +43,11 @@ def make_plot(cubes, job, name, levels, theta_level, cluster, **kwargs):
     # Load the trajectories
     filename = datadir + job + '/' + name + '.pkl'
     trajectories = trajectory.load(filename)
-    print len(trajectories)
+    print(len(trajectories))
 
     # Only plot trajectories that stay in the domain
     trajectories = trajectories.select('air_pressure', '>', 0)
-    print len(trajectories)
+    print(len(trajectories))
 
     # Select individual clusters of trajectories
     if cluster is not None:
@@ -62,7 +62,7 @@ def make_plot(cubes, job, name, levels, theta_level, cluster, **kwargs):
             'air_potential_temperature', '>', theta_level-2.5, time=[dt])
         trajectories = trajectories.select(
             'air_potential_temperature', '<=', theta_level+2.5, time=[dt])
-        print len(trajectories)
+        print(len(trajectories))
 
     x = trajectories.x - 360
     y = trajectories.y

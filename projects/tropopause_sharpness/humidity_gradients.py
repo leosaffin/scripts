@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
 from systematic_forecasts import second_analysis
-from scripts.projects.tropopause_sharpness import plotdir
+from myscripts.projects.tropopause_sharpness import plotdir
 
 coord = 'distance_from_dynamical_tropopause'
 variables = ['specific_humidity',
@@ -25,7 +25,7 @@ def humidity_gradients():
     for n, variable in enumerate(variables):
         row = n / ncols
         col = n - row * ncols
-        print row, col
+        print(row, col)
         ax = plt.subplot2grid((nrows, ncols), (row, col))
         for subdomain, linestyle in [('ridges', '-'), ('troughs', '--')]:
             cubes = second_analysis.get_data(coord, subdomain)

@@ -10,8 +10,8 @@ from cartopy import crs
 from lagranto import trajectory
 from mymodule import convert, plot
 from mymodule.user_variables import datadir, plotdir
-from scripts import case_studies
-from scripts.trajectories.cluster import select_cluster
+from myscripts import case_studies
+from myscripts.trajectories.cluster import select_cluster
 
 def main():
     path = '/projects/diamet/lsaffi/'
@@ -21,13 +21,13 @@ def main():
     cluster = 3
     dt1 = timedelta(hours=0)
     dt2 = timedelta(hours=-48)
-    
+
     # Load the bounding isentropic trajectories
     name = 'isentropic_backward_trajectories_from_outflow_boundary'
     rings = trajectory.load(path + job + '/' + name + '.pkl')
     rings = rings.select('air_potential_temperature', '==', theta_level)
-    print len(rings)
-    
+    print(len(rings))
+
     # Load the 3d trajectories
     name = 'backward_trajectories_from_outflow_coarse'
     trajectories = trajectory.load(datadir + job + '/' + name + '.pkl')
@@ -39,7 +39,7 @@ def main():
 
     trajectories = trajectories.select(
         'air_potential_temperature', '==', theta_level-2.5, time=[dt1])
-    print len(trajectories)
+    print(len(trajectories))
 
     # Composite trajectory clusters
     if cluster is not None:
@@ -48,11 +48,11 @@ def main():
         else:
             path = datadir + job + '/' + name
         trajectories = select_cluster(cluster, trajectories, path)
-    print len(trajectories)
+    print(len(trajectories))
 
     plt.figure()
     for n, cubes in enumerate(forecast):
-        print n
+        print(n)
         plt.clf()
         make_plot(cubes, rings, trajectories, theta_level, n+2)
 
@@ -72,7 +72,7 @@ def make_plot(cubes, rings, wcb, theta_level, n):
     x = wcb['grid_longitude'] - 360
     y = wcb['grid_latitude']
     c = wcb['air_potential_temperature']
-    
+
     # Plot the 3d trajectory positions
     plt.scatter(x[:, -n], y[:, -n], c=c[:, -n],
                 vmin=300, vmax=340, cmap='coolwarm')

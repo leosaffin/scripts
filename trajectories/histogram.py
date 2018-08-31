@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mymodule.user_variables import datadir, plotdir
 from lagranto import trajectory
-from scripts.trajectories.cluster import select_cluster
+from myscripts.trajectories.cluster import select_cluster
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
         path = datadir + job + '/' + name
         trajectories = select_cluster(cluster, trajectories, path)
         plotname += '_cluster' + str(cluster)
-        print len(trajectories)
+        print(len(trajectories))
 
     make_plot(trajectories, variable)
     plt.savefig(plotname + '.png')
@@ -40,7 +40,7 @@ def make_plot(trajectories, variable):
     dx = (x[:, 0])
     xMed = np.median(dx)
     xMean = dx.mean()
-    
+
     hist, bin_edges = np.histogram(dx)
 
     # Make the plot

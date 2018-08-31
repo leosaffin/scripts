@@ -1,7 +1,7 @@
 import numpy as np
 from mymodule import convert, grid, interpolate
 from lagranto import caltra
-from scripts import case_studies
+from myscripts import case_studies
 
 tracers = ['advection_only_pv', 'ertel_potential_vorticity',
            'long_wave_radiation_pv', 'microphysics_pv',

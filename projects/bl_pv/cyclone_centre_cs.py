@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, interpolate, plot, user_variables
-from scripts import case_studies
+from myscripts import case_studies
 from systematic_forecasts import second_analysis
-from scripts.projects.bl_pv import plotdir
+from myscripts.projects.bl_pv import plotdir
 
 
 job = 'iop8_no_microphysics'
@@ -188,7 +188,7 @@ def plot_cross_section(cube, pv, theta, theta_e, z_bl, rh,
         im = iplt.contourf(cube, plot.even_cscale(2), coords=coords,
                            cmap='coolwarm', extend='both')
     else:
-        print cube.units
+        print(cube.units)
 
     iplt.contour(pv, [2], colors='k', coords=coords)
 

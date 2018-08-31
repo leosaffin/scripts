@@ -22,7 +22,7 @@ def main():
         'air_potential_temperature', '>', theta_level-2.5, time=[dt])
     trajectories = trajectories.select(
         'air_potential_temperature', '<', theta_level+2.5, time=[dt])
-    print len(trajectories)
+    print(len(trajectories))
 
 
     # Perform the clustering
@@ -79,8 +79,8 @@ def plot_clusters(trajectories, clusters):
     # Plot each trajectory coloured by cluster
     for n, i in enumerate(clusters):
         plt.plot(xdata[n], ydata[n], styles[i % 12], zorder=5)
-        
-    
+
+
     # Plot the cluster averages
     for n in set(clusters):
         xm = np.median(xdata[clusters == n], axis=0)
@@ -136,7 +136,7 @@ def select_cluster(cluster_number, trajectories, path):
     indices = np.where(clusters == cluster_number)
     trajectories = trajectory.TrajectoryEnsemble(
         trajectories.data[indices], trajectories.times, trajectories.names)
-    
+
     return trajectories
 
 

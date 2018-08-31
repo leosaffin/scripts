@@ -5,7 +5,7 @@ from mymodule import plot
 from mymodule.user_variables import datadir, plotdir
 from lagranto import trajectory
 from systematic_forecasts import second_analysis
-from scripts.trajectories.cluster import select_cluster
+from myscripts.trajectories.cluster import select_cluster
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
             'air_potential_temperature', '>', theta_level-2.5, time=[dt])
         trajectories = trajectories.select(
             'air_potential_temperature', '<', theta_level+2.5, time=[dt])
-        print len(trajectories)
+        print(len(trajectories))
 
     # Composite trajectory clusters
     if cluster is not None:
@@ -40,7 +40,7 @@ def main():
         else:
             path = datadir + job + '/' + name
         trajectories = select_cluster(cluster, trajectories, path)
-        print len(trajectories)
+        print(len(trajectories))
         plotname += '_cluster' + str(cluster)
 
     make_plot(trajectories, variable)

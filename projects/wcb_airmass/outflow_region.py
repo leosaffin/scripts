@@ -13,7 +13,7 @@ import iris.plot as iplt
 from mymodule import convert, grid, plot
 from mymodule.constants import r
 from mymodule.detection.rossby_waves import tropopause_contour
-from scripts import case_studies
+from myscripts import case_studies
 
 r = r.data
 

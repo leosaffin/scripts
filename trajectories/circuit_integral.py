@@ -20,7 +20,7 @@ from mymodule import convert, grid
 from mymodule.user_variables import datadir, plotdir
 from mymodule.constants import omega
 from lagranto import trajectory
-from scripts import case_studies
+from myscripts import case_studies
 
 a = 6378100
 
@@ -36,7 +36,7 @@ def main():
     # Load trajectories
     filename = datadir + job + '/' + name + '.pkl'
     trajectories = trajectory.load(filename)
-    print len(trajectories)
+    print(len(trajectories))
 
     # Do the calculations over the forecast and save the result
     calc_circulation(trajectories, forecast, theta_level, dtheta)
@@ -51,12 +51,12 @@ def calc_circulation(trajectories, forecast, theta_level, dtheta):
     # Select an individual theta level
     trajectories = trajectories.select(
         'air_potential_temperature', '==', theta_level)
-    print len(trajectories)
+    print(len(trajectories))
     levels = ('air_potential_temperature', [theta_level])
 
     results = iris.cube.CubeList()
     for n, cubes in enumerate(forecast):
-        print n
+        print(n)
         if n == 0:
             # Load grid parameters
             example_cube = convert.calc('upward_air_velocity', cubes,
@@ -78,13 +78,13 @@ def calc_circulation(trajectories, forecast, theta_level, dtheta):
         u = trajectories['x_wind'][:, -(n + 2)]
         v = trajectories['y_wind'][:, -(n + 2)]
         w = trajectories['upward_air_velocity'][:, -(n + 2)]
-        
+
         # Integrals are invalid once trajectories leave the domain but we don't
         # want to stop the script so just print out the number of trajectories
         # that have left the domain
         leftflag = (trajectories['air_pressure'][:, -(n+2)] < 0).astype(int)
         leftcount = np.count_nonzero(leftflag)
-        print leftcount
+        print(leftcount)
 
         # Calculate enclosed area integrals
         integrals = mass_integrals(cubes, x, y, glat, gridpoints,
@@ -124,14 +124,14 @@ def calc_circulation(trajectories, forecast, theta_level, dtheta):
 
 def get_geographic_coordinates(u, v, x, y, cs):
     """Convert winds and positions from a rotated grid to an unrotated grid
-    
+
     Args:
         u, v (np.Array): Wind fields on rotated grid
         x, y (np.Array): Trajectory longitude and latitude positions on
             rotated grid
         cs (iris.coord_systems.CoordSystem): The coordinate system of the
             rotated longitude/latitude grid
-            
+
     Returns
         u_wind, v_wind (np.Array): Wind fields on unrotated grid
         lon, lat (np.Array): Trajectory positions
@@ -151,10 +151,10 @@ def get_geographic_coordinates(u, v, x, y, cs):
              aux_coords_and_dims=[(rlon, 0), (rlat, 1)])
     v = Cube(v, standard_name='y_wind', units='m s-1',
              aux_coords_and_dims=[(rlon, 0), (rlat, 1)])
-    
+
     # Calculate unrotated winds and postitions
     u, v = rotate_winds(u, v, GeogCS(a))
-    
+
     # Extract information from the unrotated cubes
     u_wind, v_wind, lon, lat = [], [], [], []
     lons = u.coord('projection_x_coordinate').points
@@ -164,7 +164,7 @@ def get_geographic_coordinates(u, v, x, y, cs):
         v_wind.append(v.data[n,n])
         lon.append(lons[n, n])
         lat.append(lats[n, n])
-        
+
     u_wind = np.array(u_wind)
     v_wind = np.array(v_wind)
     lon = np.array(lon)
