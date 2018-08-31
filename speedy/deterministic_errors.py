@@ -1,58 +1,66 @@
 """
 Compare a set of runs with reduced precision to a reference double precision
-simulation. Each forecast uses the same random-number seed in the SPPT forcing
-so all errors are 'deterministic'.
+simulation. The forecasts use the same initial conditions and if SPPT is on each
+forecast uses the same random-number seed in the SPPT forcing so all errors are
+'deterministic'.
 """
 
+import os
 import matplotlib.pyplot as plt
 import iris
 import iris.quickplot as qplt
-from iris.analysis import STD_DEV, MEAN
-from iris.analysis.cartography import cosine_latitude_weights
-from scripts.speedy import datadir, plotdir, rms_diff
+from iris.analysis import Linear
+from myscripts.statistics import ensemble_std_dev, rms_diff
+from myscripts.speedy import datadir
 
 
 def main():
     filename = 'rp_prognostics_after'
+    path = datadir + 'stochastic/'
 
     # Parameters to compare between forecasts
     name = 'Geopotential Height [m]'
     pressure = 500
-    cs = iris.Constraint(name=name, pressure=pressure)
+    reference = 'fp'
+    lead_time = 7*24
 
-    # Load full precision reference forecast
-    with iris.FUTURE.context(cell_datetime_objects=True):
-        # Load full precision reference forecast
-        rp = iris.load_cube(datadir + 'deterministic/' +
-                            filename + '.nc', cs)
-        fp = rp.extract(iris.Constraint(precision=52))
+    # Load reference forecast
+    cs = iris.Constraint(name=name, pressure=pressure, precision=23,
+                         forecast_period=lead_time)
+    fp = iris.load_cube(path + 'rp_convection.nc', cs)
 
-    for fps, rps in zip(fp.slices_over('forecast_period'),
-                        rp.slices_over('forecast_period')):
-        plot_errors(fps, rps)
+    # Regrid other reference forecasts
+    if reference == 't39':
+        ref = iris.load_cube(datadir + 'output/exp_007/yyyymmddhh_p.nc', cs)
+        ref = ref.regrid(fp, Linear())
+        fp.data = ref.data
+
+    elif reference == 'sppt':
+        ref = iris.load_cube(datadir + 'output/exp_004/yyyymmddhh_p.nc', cs)
+        fp.data = ref.data
+
+    # Compare full precision with reduced precision forecasts
+    cs = iris.Constraint(name=name, pressure=pressure,
+                         forecast_period=lead_time)
+    for filename in os.listdir(path):
+        rp = iris.load_cube(path + filename, cs)
+        plot_errors(fp, rp, marker='x', label=filename.split('.')[0])
 
     # Plot ensemble spread as upper limit
-    fp = iris.load_cube(datadir + 'ensembles/yyyymmddhh_p52b.nc', cs)
-    std_dev = fp.collapsed('ensemble_member', STD_DEV)
-    weights = cosine_latitude_weights(std_dev)
-    std_dev = std_dev.collapsed(['longitude', 'latitude'],
-                                MEAN, weights=weights)
-
-    for n in range(0, 4*7*4+1, 4*7):
-        plt.axhline(2*std_dev.data[n], color='k', linestyle='--')
+    ensemble = iris.load_cube(datadir + 'ensembles/yyyymmddhh_p52b.nc', cs)
+    std_dev = ensemble_std_dev(ensemble)
+    plt.axhline(std_dev.data, color='k', linestyle='--')
 
     plt.ylabel('RMS Error')
     plt.title(name)
-    plt.savefig(plotdir + filename + '_' + name.split()[0].lower() +
-                '_' + str(pressure) + 'hpa.png')
+    plt.legend()
     plt.show()
 
     return
 
 
 def plot_errors(fp, rp, **kwargs):
-    weights = cosine_latitude_weights(rp)
-    rmse = rms_diff(rp, fp, weights=weights)
+    rmse = rms_diff(rp, fp)
 
     qplt.plot(rmse, **kwargs)
 
