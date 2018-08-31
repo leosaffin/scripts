@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.case_studies import plotdir
 
@@ -72,7 +73,7 @@ def wind_speed(cubes, levs, cubes_a=None, **kwargs):
 
     print(wind.data.max(), wind.data.min())
     im = iplt.contourf(wind, levs, **kwargs)
-    plot._add_map()
+    add_map()
     plot.overlay_winds(u, v, 33, 57, scale=1500)
 
     return im

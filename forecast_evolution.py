@@ -3,7 +3,8 @@
 
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
+from mymodule import convert
+from mymodule.plot.util import add_map
 from mymodule.user_variables import plotdir
 from myscripts.models.um import case_studies
 
@@ -22,7 +23,7 @@ def main(forecast, name, levels, *args,  **kwargs):
 
         cube = convert.calc(name, cubes, levels=levels)[0]
         im = iplt.pcolormesh(cube, *args, **kwargs)
-        plot._add_map()
+        add_map()
 
     ax = plt.subplot2grid((rows, columns), (row, column + 1))
     cbar = plt.colorbar(im, cax=ax, orientation='horizontal')

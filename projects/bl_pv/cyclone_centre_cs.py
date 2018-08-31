@@ -6,9 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, interpolate, plot, user_variables
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
-from systematic_forecasts import second_analysis
 from myscripts.projects.bl_pv import plotdir
+from systematic_forecasts import second_analysis
 
 
 job = 'iop8_no_microphysics'
@@ -108,7 +109,7 @@ def plot_overview(mslp, pv):
     iplt.contourf(
         pv, plot.even_cscale(2), cmap='coolwarm', spacing='proportional',
         extend='both')
-    plot._add_map()
+    add_map()
     cbar = plt.colorbar(
         orientation='horizontal', fraction=0.05, spacing='proportional')
     cbar.set_label('PVU')

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import iris.plot as iplt
 from mymodule import convert, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.bl import plotdir
 
@@ -40,7 +41,7 @@ def bl_categories():
 
         overlay_pressure(cubes)
 
-        plot._add_map()
+        add_map()
 
     # Add category map legend
     handles = []
@@ -73,7 +74,7 @@ def bl_heights(**kwargs):
         cs = overlay_pressure(cubes)
         plt.clabel(cs, fmt='%1.0f')
 
-        plot._add_map()
+        add_map()
 
         if n == 0:
             plt.title('IOP5')

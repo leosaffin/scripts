@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, grid, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.fronts import plotdir
 from myscripts.projects.thesis.bl.low_level_cancellation_cs import cs_cube
@@ -47,7 +48,7 @@ def main(cubes, **kwargs):
     # Plot overview
     ax1 = plt.subplot2grid((2, 2), (0, 0))
     iplt.contourf(theta, theta_levs, cmap='coolwarm', extend='both')
-    plot._add_map()
+    add_map()
     cs = iplt.contour(mslp, plevs, colors='k', linewidths=2)
     plt.clabel(cs, fmt='%1.0f')
     mask = theta.copy(data=areamask.astype(int))

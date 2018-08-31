@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
-from myscripts import case_studies
+from mymodule.plot.util import add_map
+from myscripts.models.um import case_studies
 
 
 levels = ('air_potential_temperature', [320])
@@ -19,7 +20,7 @@ def main(cubes):
         m = n / 2
         ax = plt.subplot2grid((2, 2), (n - 2 * m, m))
         iplt.contourf(cube, clevs, cmap=cmap)
-        plot._add_map()
+        add_map()
         iplt.contour(pv, [2], colors='k', linestyles='-')
         iplt.contour(adv, [2], colors='k', linestyles='-')
 

@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.case_studies import plotdir
 
@@ -64,7 +65,7 @@ def make_plot(forecast, analysis, variable, levels, units, errlevs, clevs,
 
     # Plot error
     iplt.contourf(err, errlevs, cmap=cmap, extend='both')
-    plot._add_map()
+    add_map()
     cbar = plt.colorbar(orientation='horizontal', spacing='proportional')
     errlevs.append(0)
     cbar.set_ticks(errlevs)
@@ -100,13 +101,13 @@ def make_plots(forecast, analysis, variable, levels, units, errlevs, clevs,
     im = iplt.contourf(f, clevs, extend='both', cmap=cmap1)
     #iplt.contour(f, [2], colors='k')
     plt.title('(a)'.ljust(28) + 'Forecast'.ljust(35))
-    plot._add_map()
+    add_map()
 
     plt.subplot2grid((25, 4), (0, 2), colspan=2, rowspan=10)
     im = iplt.contourf(a, clevs, extend='both', cmap=cmap1)
     #iplt.contour(a, [2], colors='k', linestyles='--')
     plt.title('(b)'.ljust(28) + 'Analysis'.ljust(35))
-    plot._add_map()
+    add_map()
 
     ax = plt.subplot2grid((25, 4), (10, 1), colspan=2, rowspan=1)
     cbar = plt.colorbar(im, cax=ax, orientation='horizontal')
@@ -119,7 +120,7 @@ def make_plots(forecast, analysis, variable, levels, units, errlevs, clevs,
     #iplt.contour(f, [2], colors='k')
     #iplt.contour(a, [2], colors='k', linestyles='--')
     plt.title('(c)'.ljust(20) + 'Forecast Minus Analysis.'.ljust(38))
-    plot._add_map()
+    add_map()
 
     ax = plt.subplot2grid((25, 4), (23, 1), colspan=2, rowspan=1)
     cbar = plt.colorbar(im, cax=ax, orientation='horizontal',
@@ -156,7 +157,7 @@ def pv(forecast, analysis, variable, levels, **kwargs):
     im = iplt.pcolormesh(err, vmin=-5, vmax=5, cmap='coolwarm')
     iplt.contour(pv_f, [2], colors='k', linewidths=2)
     iplt.contour(pv_a, [2], colors='k', linewidths=2, linestyles='--')
-    plot._add_map()
+    add_map()
     plt.title('Forecast Minus Analysis')
 
     ax = plt.subplot2grid((25, 4), (23, 1), colspan=2, rowspan=1)
@@ -170,7 +171,7 @@ def pv(forecast, analysis, variable, levels, **kwargs):
 def make_pv_plot(pv, **kwargs):
     im = iplt.pcolormesh(pv, **kwargs)
     iplt.contour(pv, [2], colors='k', linewidths=2)
-    plot._add_map()
+    add_map()
 
     return im
 

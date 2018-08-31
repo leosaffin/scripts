@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from lagranto import trajectory
 from mymodule import convert, plot
+from mymodule.plot.util import add_map
 from mymodule.user_variables import datadir, plotdir
 from myscripts.models.um import case_studies
 from myscripts.trajectories.cluster import select_cluster
@@ -64,7 +65,7 @@ def make_plot(cubes, rings, wcb, theta_level, n):
     pv = convert.calc('ertel_potential_vorticity', cubes, levels=levels)[0]
     plot.pcolormesh(pv, vmin=-2, vmax=2, cmap='coolwarm')
     iplt.contour(pv, [0, 2], colors='k', linewidths=2)
-    plot._add_map()
+    add_map()
 
     # Load the trajectories
     x = wcb['grid_longitude'] - 360

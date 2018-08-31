@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, interpolate, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.bl import plotdir
@@ -90,7 +91,7 @@ def bottom_level(tracers, mslp, fig, **kwargs):
         mslp.convert_units('hPa')
         cs = iplt.contour(mslp, plevs, colors='k', linewidths=2)
         plt.clabel(cs, fmt='%1.0f')
-        plot._add_map()
+        add_map()
         plt.title(second_analysis.all_diagnostics[cube.name()].symbol)
 
         # Label the cross section points

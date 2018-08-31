@@ -3,9 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from mymodule import convert, grid, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
-from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.fronts import plotdir
+from systematic_forecasts import second_analysis
+
 
 names = ['total_minus_advection_only_pv',
          #'short_wave_radiation_pv',
@@ -50,7 +52,7 @@ def main(cubes, levels, *args, **kwargs):
         im = iplt.contourf(cube, *args, **kwargs)
         #iplt.contour(pv, [2], colors='k', linewidths=2)
         iplt.contour(mask, [0.5], colors='k', linestyles='--')
-        plot._add_map()
+        add_map()
         plt.title(second_analysis.all_diagnostics[name].symbol)
 
         iplt.contour(theta, [300], colors='k', linewidths=2)

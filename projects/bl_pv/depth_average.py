@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import MEAN
 from mymodule import convert, grid, plot
+from mymodule.plot.util import add_map
 from myscripts.models.um import case_studies
-from systematic_forecasts.second_analysis import all_diagnostics
 from myscripts.projects.bl_pv import plotdir
+from systematic_forecasts.second_analysis import all_diagnostics
 
 
 def main():
@@ -68,7 +69,7 @@ def make_plot(cubes, name, mass, mask, **kwargs):
     pv_ave = pv.collapsed(z.name(), MEAN, weights=mass.data)
 
     im = iplt.pcolormesh(pv_ave, **kwargs)
-    plot._add_map()
+    add_map()
 
     return im
 
