@@ -1,6 +1,31 @@
-from mymodule.user_variables import datadir
+from mymodule.user_variables import datadir, plotdir
+from mymodule.plot.util import PlotParameter
 
 datadir = datadir + 'openIFS/'
+plotdir = plotdir + 'openIFS/'
+
+physics_schemes = {
+    'Physics':
+        PlotParameter(color='k', linestyle='-',  idx=0),
+    'Short-Wave Radiation':
+        PlotParameter(color='r', linestyle=':',  idx=1),
+    'Long-Wave Radiation':
+        PlotParameter(color='r', linestyle='--', idx=2),
+    'Radiation':
+        PlotParameter(color='r', linestyle='-',  idx=3),
+    'Vertical Diffusion':
+        PlotParameter(color='g', linestyle='-',  idx=4),
+    'Orographic Gravity-Wave Drag':
+        PlotParameter(color='g', linestyle='--', idx=5),
+    'Non-Orographic Gravity-Wave Drag':
+        PlotParameter(color='g', linestyle=':',  idx=6),
+    'Convection':
+        PlotParameter(color='b', linestyle='--', idx=7),
+    'Precipitation':
+        PlotParameter(color='b', linestyle='-',  idx=8),
+    'SPPT':
+        PlotParameter(color='k', linestyle='--', idx=9),
+}
 
 tendencies = {
     'var91': {'name': 'u_tendency_due_to_dynamics', 'units': 'm s-1'},
