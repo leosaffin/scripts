@@ -1,6 +1,6 @@
 import datetime
 import iris
-from myscripts.models.IFS.check_diffs import diffminmax
+from myscripts.models.ifs.check_diffs import diffminmax
 from myscripts.models.speedy import datadir
 
 

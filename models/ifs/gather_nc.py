@@ -6,7 +6,7 @@ from iris.coords import AuxCoord
 from iris.util import unify_time_units
 from iris.exceptions import ConstraintMismatchError
 from mymodule import grid
-from myscripts.models.IFS import datadir, replace_names
+from myscripts.models.ifs import datadir, replace_names
 
 
 def main():
