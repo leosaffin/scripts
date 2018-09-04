@@ -1,5 +1,6 @@
 import os
 import datetime as dt
+import parse
 import pandas as pd
 import iris
 from iris.coords import AuxCoord, DimCoord
@@ -60,6 +61,8 @@ def gather_data(path, prefix, t0, t1, pmin, pmax, nt):
             t0_dt(cubes)
 
             for cube in cubes:
+                set_units_from_name(cube)
+
                 if len(cube.coord('forecast_period').points) == nt:
                     all_cubes.append(cube)
 
@@ -87,6 +90,33 @@ def t0_dt(cubes):
         cube.add_aux_coord(start_time)
 
     return
+
+
+def set_units_from_name(cube):
+    """Set the units and name for a cube with a default name
+
+    Use `get_name_and_units` to extract the name and units from the cube named
+    by the .ctl file. Replace the name and units of the existing cube.
+
+    Args:
+        cube (iris.cube.Cube):
+    """
+    name, units = get_name_and_units(cube.name())
+    cube.rename(name)
+    cube.units = units
+
+    return
+
+
+def get_name_and_units(long_name):
+    """
+    For GrADS files the units cannot be encoded into the data or the .ctl file
+    so they are put into the variable name in square brackets. This function
+    returns the separated name and units from the original name.
+    """
+    name, units = parse.parse('{} [{}]', long_name)
+
+    return name, units
 
 
 if __name__ == '__main__':
