@@ -1,10 +1,11 @@
 """Calculate the forecast error relative to a reference forecast as a function
     of precision
 """
+import warnings
 import parse
 import iris
 from myscripts.statistics import rms_diff
-from myscripts.models.speedy import datadir
+from myscripts.models.ifs import datadir
 
 
 def main():
@@ -55,20 +56,18 @@ def decode_name(name):
 
     The string will follow the format:
 
-    `RMS error in {variable} [{units}] with {scheme} in reduced precision`
+    `RMS error in {variable} with {scheme} in reduced precision`
 
     Args:
         name (str): The variable name following the above format
 
     Returns
         variable (str): The variable name
-        units (str): The variable units
         scheme (str): The scheme that is in reduced precision
     """
-    variable, units, scheme = parse.parse(
-        'RMS error in {} [{}] with {} in reduced precision', name)
-
-    return variable, units, scheme
+    variable, scheme = parse.parse(
+        'RMS error in {} with {} in reduced precision', name)
+    return variable, scheme
 
 
 if __name__ == '__main__':

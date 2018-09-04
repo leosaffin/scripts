@@ -18,11 +18,12 @@ def main():
 
     for cube in cubes:
         print(cube.name())
-        variable, units, scheme = decode_name(cube.name())
+        variable, scheme = decode_name(cube.name())
         plp = physics_schemes[scheme]
         plp.plot(cube, label=scheme)
 
-    variable, units, scheme = decode_name(cubes[0].name())
+    variable, scheme = decode_name(cubes[0].name())
+    units = cubes[0].units
     pressure = int(cubes[0].coord('pressure').points[0])
 
     plt.xlabel('Precision (sbits)')
