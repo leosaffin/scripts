@@ -1,11 +1,10 @@
 """Calculate the forecast error relative to a reference forecast as a function
     of precision
 """
-import warnings
 import parse
 import iris
 from myscripts.statistics import rms_diff
-from myscripts.models.ifs import datadir
+from myscripts.models.speedy import datadir
 
 
 def main():
