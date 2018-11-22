@@ -15,19 +15,20 @@ def main():
     # Specify which files and variable to compare
     path = datadir + 'output/'
     factor = 0.01
+    variable = 'temperature'
 
     time_cs = iris.Constraint(forecast_period=14)
-    precision_cs = iris.Constraint(precision=5)
+    precision_cs = iris.Constraint(precision=10)
 
     # Create a two by two grid with shared x and y axes along rows and columns
     fig, axes = plt.subplots(nrows=2, ncols=2, sharex='col', sharey=True)
 
     # Deterministic
-    filename = 'precision_errors_temperature_500hpa.nc'
+    filename = 'precision_errors_{}_500hpa.nc'.format(variable)
     make_plot_pair(path + filename, time_cs, precision_cs, axes, 0, factor)
 
     # Stochastic
-    filename = 'precision_errors_temperature_500hpa_stochastic.nc'
+    filename = 'precision_errors_{}_500hpa_stochastic.nc'.format(variable)
     make_plot_pair(path + filename, time_cs, precision_cs, axes, 1, factor)
 
     plt.xlim(5, 23)
