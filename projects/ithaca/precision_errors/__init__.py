@@ -10,7 +10,7 @@ from myscripts.models.speedy import datadir
 def main():
     # Specify which files and variable to compare
     path = datadir + 'deterministic/sppt_off/'
-    name = 'Temperature [K]'
+    name = 'Temperature'
     pressure = 500
 
     filenames = {
@@ -43,7 +43,7 @@ def main():
         newcubes.append(diff)
 
     print(newcubes)
-    name = name.split(' [')[0].lower().replace(' ', '_')
+    name = name.lower().replace(' ', '_')
     filename = 'precision_errors_{}_{}hpa.nc'.format(name, pressure)
     iris.save(newcubes, datadir + filename)
 
