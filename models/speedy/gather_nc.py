@@ -9,14 +9,22 @@ from myscripts.models.speedy import datadir
 
 
 def main():
-    path = os.path.expanduser('~/temp/')
+    path = os.path.expanduser('~/tmp/')
     prefix = 'output'
-    t0 = dt.datetime(1982, 1, 1)
-    t1 = dt.datetime(1982, 1, 1)
+
+    # Start date range
+    t0, t1 = dt.datetime(1982, 1, 1), dt.datetime(1982, 1, 1)
+
+    # Precision Range
     pmin, pmax = 5, 23
+
+    # Number of ensemble members
+    nens = 20
+
+    # Expected number of timesteps (to check if forecast completed successfully)
     nt = 32
 
-    cubes = gather_data(path, prefix, t0, t1, pmin, pmax, nt)
+    cubes = gather_data(path, prefix, t0, t1, pmin, pmax, nens, nt)
     print(cubes)
     path = datadir
     iris.save(cubes, path + str(t0.year) + '-' + str(t1.year) + '_' +
@@ -25,7 +33,7 @@ def main():
     return
 
 
-def gather_data(path, prefix, t0, t1, pmin, pmax, nt):
+def gather_data(path, prefix, t0, t1, pmin, pmax, nens, nt):
     """
     Filenames follow the structure '{prefix}_{precision}.nc' where prefix is a
     generic prefix or the date in the format '{YYYYMMDDHH}'.
@@ -44,6 +52,8 @@ def gather_data(path, prefix, t0, t1, pmin, pmax, nt):
             cubes merged over new coordinates of start time and precision
     """
     all_cubes = iris.cube.CubeList()
+
+    # Loop over start dates
     for time in pd.date_range(t0, t1, freq='MS'):
         print(time)
 
@@ -52,21 +62,30 @@ def gather_data(path, prefix, t0, t1, pmin, pmax, nt):
         else:
             filename = path + prefix
 
+        # Loop over precisions
         for n in range(pmin, pmax+1):
-            cubes = iris.load(filename + '_' + str(n) + '.nc')
-            coord = iris.coords.AuxCoord(points=n, long_name='precision')
-            for cube in cubes:
-                cube.add_aux_coord(coord)
+            pcoord = AuxCoord(points=n, long_name='precision')
 
-            t0_dt(cubes)
+            # Loop over ensemble members
+            for m in range(1, nens+1):
+                print('{}.{}'.format(n, m))
+                mcoord = AuxCoord(points=m, long_name='ensemble_member')
+                cubes = iris.load('{}_p{}_e{}.nc'.format(filename, n, m))
 
-            for cube in cubes:
-                set_units_from_name(cube)
+                # Set the time coordinate as start_time and forecast_period
+                t0_dt(cubes)
 
-                if len(cube.coord('forecast_period').points) == nt:
-                    all_cubes.append(cube)
+                for cube in cubes:
+                    # Only include the cubes if the forecast successfully ran
+                    if len(cube.coord('forecast_period').points) == nt:
+                        # Add auxilliary forecast-identifier coordinates
+                        cube.add_aux_coord(pcoord)
+                        cube.add_aux_coord(mcoord)
+                        all_cubes.append(cube)
 
     cubes = all_cubes.merge()
+    for cube in cubes:
+        set_units_from_name(cube)
 
     return cubes
 
