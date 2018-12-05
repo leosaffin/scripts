@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
+from iris.analysis import SUM
 from myscripts.statistics import count
 from myscripts.models.speedy import datadir
 
@@ -13,20 +14,21 @@ def main():
     # Specify which files and variable to compare
     path = datadir + 'deterministic/'
     scheme = 'Vertical Diffusion'
-    string = 'Temperature Tendency due to '
-    lead_time = 2 / 3
-    pressure = 0.95
+    variable = 'Temperature'
+    forecast_period = 2/3
+    # sigma = 0.95, 0.835, 0.685, 0.51, 0.34, 0.2, 0.095, 0.025
+    sigma = [0.835, 0.685, 0.51, 0.34, 0.2]
 
     # Load the cubes
-    cs = iris.Constraint(cube_func=lambda x: string + scheme in x.name(),
-                         forecast_period=lead_time,
-                         pressure=pressure)
+    string = '{} Tendency due to {}'.format(variable, scheme)
+    cs = iris.Constraint(cube_func=lambda x: string in x.name(),
+                         forecast_period=forecast_period, sigma=sigma)
     rp = iris.load_cube(path + 'rp_*_tendencies.nc', cs)
     fp = iris.load_cube(path + 'fp_tendencies.nc', cs)
 
     plot_active(rp, fp)
     plt.xlabel('Precision (sbits)')
-    plt.ylabel('Number of active gridpoints')
+    plt.ylabel('Number of gridpoints')
     plt.title(scheme)
     plt.legend()
     plt.show()
@@ -38,9 +40,13 @@ def plot_active(rp, fp, **kwargs):
     # Count the number of gridboxes with nonzero tendencies
     n_active, n_activated, n_deactivated, n_zeros = \
         count_active_deactive(rp, fp)
-    iplt.plot(n_active, '-k', label='Active', **kwargs)
-    iplt.plot(n_activated, '--k', label='Activated', **kwargs)
-    iplt.plot(n_deactivated, ':k', label='Deactivated', **kwargs)
+
+    for linestyle, label, data in [('-k', 'Active', n_active),
+                                   ('--k', 'Activated', n_activated),
+                                   (':k', 'Deactivated', n_deactivated)]:
+
+        data = data.collapsed('sigma', SUM)
+        iplt.plot(data, linestyle, label=label, **kwargs)
 
     return
 
