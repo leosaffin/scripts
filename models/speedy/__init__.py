@@ -4,6 +4,9 @@ from mymodule.plot.util import PlotParameter
 datadir = datadir + 'speedy/'
 plotdir = plotdir + 'speedy/'
 
+sigma_levels = [0.95, 0.835, 0.685, 0.51, 0.34, 0.2, 0.095, 0.025]
+pressure_levels = [925, 850, 700, 500, 300, 200, 100, 30]
+
 physics_schemes = {
     'Physics':              PlotParameter(color='k',    linestyle='-',  idx=0),
     'Convection':           PlotParameter(color='b',    linestyle='--', idx=1),
