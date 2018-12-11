@@ -6,18 +6,7 @@ from matplotlib import cm
 frames_per_second = 60
 
 
-def main():
-    from mymodule import convert
-    from myscripts.models.um import case_studies
-    forecast = case_studies.iop8()
-    cubes = forecast.set_lead_time(hours=48)
-    cube = convert.calc('ertel_potential_vorticity', cubes)
-    pcolor(cube.data, vmin=0, vmax=10)
-
-    return
-
-
-def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
+def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0, scale=1):
     """Quickly navigate a 4d array using arrow keys
 
     When run a window will pop up showing a plot of an x-y cross section of the
@@ -39,6 +28,8 @@ def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
         k (int): Vertical level to show first (default is 0)
 
         t (int): Time index to show first (default is 0)
+
+        scale (int): Image size (pixels) = scale * data size
     """
     # Check the array is the correct dimension
     if data.ndim != 4:
@@ -56,10 +47,10 @@ def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
 
     # Start a pygame window
     pygame.init()
-    surface = pygame.display.set_mode([nx, ny])
+    surface = pygame.display.set_mode([nx*scale, ny*scale])
 
     # Show the initial array
-    copy_array_to_pixels(data[:, :, k, t], surface, mapping)
+    draw(data[:, :, k, t], surface, mapping, nx, ny, scale)
     pygame.display.update()
 
     # Main loop
@@ -85,7 +76,7 @@ def pcolor(data, vmin=None, vmax=None, cmap='cubehelix', k=0, t=0):
                     t = (t + 1) % nt
 
                 # Update the display pixels with the new level
-                copy_array_to_pixels(data[:, :, k, t], surface, mapping)
+                draw(data[:, :, k, t], surface, mapping, nx, ny, scale)
                 pygame.display.update()
 
     pygame.quit()
@@ -102,13 +93,15 @@ def make_mapping(vmin, vmax, cmap):
     return mapping
 
 
-def copy_array_to_pixels(array, surface, mapping):
-    pixelarray = pygame.surfarray.pixels3d(surface)
-    pixelarray[:, :] = mapping.to_rgba(array)[:, :, 0:3] * 255
-    surface.unlock()
+def draw(data, surface, mapping, nx, ny, scale):
+    # Create a surface with one pixel per point in data
+    unscaled_image = pygame.Surface([nx, ny])
+
+    # Set the colours of the pixel to the mapped data
+    pixelarray = pygame.surfarray.pixels3d(unscaled_image)
+    pixelarray[:, :] = mapping.to_rgba(data)[:, :, 0:3] * 255
+
+    # Scale the mapped data to the display image
+    pygame.transform.scale(unscaled_image, [scale*nx, scale*ny], surface)
 
     return
-
-
-if __name__ == '__main__':
-    main()
