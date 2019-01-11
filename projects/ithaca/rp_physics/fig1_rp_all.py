@@ -15,7 +15,7 @@ from myscripts.models.speedy import datadir
 def main():
     # Specify which files and variable to compare
     path = datadir + 'output/'
-    filename = 'precision_errors_temperature_500hpa.nc'
+    filename = 'precision_errors_geopotential_height_500hpa.nc'
     factor = 0.01
 
     # Set colour, linestyle and marker for each individual line
@@ -42,7 +42,7 @@ def main():
 
     # Load the cube with the rms errors
     cs = iris.Constraint(
-        name='RMS error in Temperature with Physics in reduced precision')
+        name='RMS error in Geopotential Height with Physics in reduced precision')
     cube = iris.load_cube(path + filename, cs)
     cube.coord('forecast_period').convert_units('days')
 
@@ -69,15 +69,13 @@ def main():
         make_plot(cube, lead_times, 'forecast_period')
         if n == 0:
             plt.legend(title='Lead Time [days]', ncol=2)
-            plt.ylim(0, 4)
         elif n == 1:
             plt.xlabel('Precision [sbits]')
-            #plt.ylim()
 
             # Put the second row of plots on a log scale
             plt.yscale('log')
 
-    fig.text(0.05, 0.5, 'RMS Error in Temperature [K]',
+    fig.text(0.05, 0.5, 'RMS Error in Geopotential Height [m]',
              va='center', rotation='vertical')
     plt.show()
 
