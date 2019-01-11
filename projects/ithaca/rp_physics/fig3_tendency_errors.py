@@ -6,79 +6,117 @@ this line also. Also print out errors as a function of machine epsilon to be
 shown in a table.
 """
 
-import parse
 import numpy as np
 import matplotlib.pyplot as plt
 import iris
+from iris.analysis import maths
 from mymodule.plot.util import legend, multilabel
-from myscripts.statistics import mean_diff, rms_diff
+from myscripts.statistics import global_mean
 from myscripts.models.speedy import datadir, physics_schemes
 
 
 def main():
     # Load cubes
     path = datadir + 'deterministic/'
-    cs = iris.Constraint(
-        cube_func=lambda x: 'Temperature Tendency' in x.name(),
-        forecast_period=2/3, pressure=0.95)
-    rp_cubes = iris.load(path + 'rp_*_tendencies.nc', cs)
-    fp_cubes = iris.load(path + 'fp_tendencies.nc', cs)
+    variable, units = 'Temperature', 'K/s'
+    forecast_period = 2/3
+    sigma = 0.95
 
-    # Create a two by one grid
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=[14.4, 5.4])
+    schemes = ['Convection', 'Condensation', 'Short-Wave Radiation',
+               'Long-Wave Radiation', 'Surface Fluxes', 'Vertical Diffusion']
+    filenames = {'Physics': 'physics',
+                 'Convection': 'convection',
+                 'Condensation': 'condensation',
+                 'Cloud': 'cloud',
+                 'Short-Wave Radiation': 'sw_radiation',
+                 'Long-Wave Radiation': 'lw_radiation',
+                 'Surface Fluxes': 'surface_fluxes',
+                 'Vertical Diffusion': 'vertical_diffusion'}
 
-    plt.axes(axes[0])
+    # Create a two by two grid
+    fig, axes = plt.subplots(nrows=2, ncols=2, sharex='all', sharey='row')
 
+    plt.axes(axes[0, 0])
     plt.yscale('log')
-    plt.xlabel('Precision [sbits]')
-    plt.ylabel('Temperature tendency error')
-    plt.title('Absolute Error')
 
-    plt.axes(axes[1])
+    plt.axes(axes[1, 0])
     plt.yscale('log')
-    plt.xlabel('Precision [sbits]')
-    plt.title('Relative Error')
 
     # Show the reference machine epsilon
     sbits = np.arange(5, 24)
     error = 2.0 ** -(sbits + 1)
-    plt.plot(sbits, error, '--k', label='Machine Epsilon')
+    for n in range(2):
+        plt.axes(axes[1, n])
+        plt.plot(sbits, error, '--k')
+
+    # Errors with respect to individual scheme
+    cs = iris.Constraint(forecast_period=forecast_period, sigma=sigma)
+    fp_cubes = iris.load(path + 'fp_tendencies.nc', cs)
+    rp_cubes = iris.load(path + 'rp_*_tendencies.nc', cs)
 
     # Loop over physics schemes
-    for rp in rp_cubes:
-        scheme, units = parse.parse('Temperature Tendency due to {} [{}]', rp.name())
-        if scheme == 'Large-Scale Condensation':
-            scheme = 'Condensation'
+    for scheme in schemes:
         plp = physics_schemes[scheme]
-        fp = fp_cubes.extract(iris.Constraint(name=rp.name()))[0]
 
-        # Ignore where tendencies are zero
-        rp.data = np.ma.masked_where(
-            np.logical_or(rp.data == 0, fp.data == 0), rp.data)
+        if scheme == 'Condensation':
+            name = '{} Tendency due to Large-Scale Condensation [{}]'.format(variable, units)
+        else:
+            name = '{} Tendency due to {} [{}]'.format(variable, scheme, units)
 
-        # Calculate absolute error
-        plt.axes(axes[0])
-        abs_error = rp.copy(data=np.abs(rp.data - fp.data))
-        abs_error = mean_diff(abs_error, 0)
-        plp.plot(abs_error, label=scheme)
+        fp = fp_cubes.extract_strict(iris.Constraint(name))
+        rp = rp_cubes.extract_strict(iris.Constraint(name))
 
-        # Calculate relative error
-        plt.axes(axes[1])
-        rel_error = rp.copy(data=np.abs((rp.data - fp.data)/fp.data))
-        rel_error = mean_diff(rel_error, 0.0)
-        plp.plot(rel_error)
+        rel_error = display_errors(rp, fp, axes, 0, plp)
 
-        # Print values
-        print('{} & {} & {}'.format(scheme, abs_error.data[5], (rel_error.data/error).mean()))
+        # Print errors
+        print(scheme, (rel_error/error).data.mean())
 
-    plt.axes(axes[0])
+    # Errors with respect to total physics tendency
+    schemes += ['Physics', 'Cloud']
+    path = datadir + 'stochastic/'
+
+    name = '{} Tendency due to all physics processes'.format(variable)
+    cs = iris.Constraint(name, lev=sigma, precision=52)
+    fp = iris.load_cube(path + 'rp_physics_tendencies.nc', cs)[1]
+
+    cs = iris.Constraint(name, lev=sigma, precision=lambda x: x < 24)
+    for scheme in filenames:
+        rp = iris.load_cube(path + 'rp_' + filenames[scheme] + '_tendencies.nc', cs)[:, 1]
+        plp = physics_schemes[scheme]
+        rel_error = display_errors(rp, fp, axes, 1, plp, label=scheme)
+        print(scheme, (rel_error / error).data.mean())
+
+    # Add dressing to the plot
+    plt.axes(axes[1, 1])
     legend(key=lambda x: physics_schemes[x[0]].idx, ncol=2,
            title='Physics Schemes')
-    multilabel(axes[0], 0, factor=0.01)
-    multilabel(axes[1], 1, factor=0.01)
+    multilabel(axes[0, 0], 0, factor=0.01)
+    multilabel(axes[0, 1], 1, factor=0.01)
+    multilabel(axes[1, 0], 2, factor=0.01)
+    multilabel(axes[1, 1], 3, factor=0.01)
     plt.show()
 
     return
+
+
+def display_errors(rp, fp, axes, n, plp, **kwargs):
+    # Ignore where tendencies are zero
+    rp.data = np.ma.masked_where(
+        np.logical_or(rp.data == 0, fp.data == 0), rp.data)
+
+    # Calculate absolute error
+    plt.axes(axes[0, n])
+    abs_error = maths.abs(rp - fp)
+    abs_error = global_mean(abs_error)
+    plp.plot(abs_error, **kwargs)
+
+    # Calculate relative error
+    plt.axes(axes[1, n])
+    rel_error = maths.abs((rp - fp) / fp)
+    rel_error = global_mean(rel_error)
+    plp.plot(rel_error, **kwargs)
+
+    return rel_error
 
 
 if __name__ == '__main__':
