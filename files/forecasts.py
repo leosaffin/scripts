@@ -2,8 +2,8 @@
 """
 
 import iris
-from mymodule import convert
-from mymodule.user_variables import datadir
+from irise import convert
+from myscripts import datadir
 from myscripts import files
 from myscripts.files import stash_maps
 

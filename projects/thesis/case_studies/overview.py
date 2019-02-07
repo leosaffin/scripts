@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import convert, plot
+from irise import convert, plot
 import iris.plot as iplt
 from iris.analysis import SUM
 from myscripts.models.um import case_studies

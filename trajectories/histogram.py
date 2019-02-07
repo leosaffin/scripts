@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule.user_variables import datadir, plotdir
+from myscripts import datadir, plotdir
 from lagranto import trajectory
 from myscripts.trajectories.cluster import select_cluster
 

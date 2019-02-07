@@ -8,8 +8,8 @@ import iris
 from iris.analysis import MEAN
 from scipy.optimize import curve_fit
 from systematic_forecasts import second_analysis
-from mymodule import convert
-from mymodule.plot.util import multilabel
+from irise import convert
+from irise.plot.util import multilabel
 from myscripts.projects.tropopause_sharpness import plotdir
 
 

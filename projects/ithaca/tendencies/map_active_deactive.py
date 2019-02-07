@@ -11,7 +11,7 @@ double-precision tendencies
 import numpy as np
 import matplotlib.pyplot as plt
 import iris
-from mymodule import plot
+from irise import plot
 from myscripts.models.speedy import datadir
 
 

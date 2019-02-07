@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert
-from mymodule.plot.util import add_map, even_cscale
+from irise import convert
+from irise.plot.util import add_map, even_cscale
 from myscripts.models.um import case_studies
 
 

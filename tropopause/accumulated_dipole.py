@@ -1,6 +1,6 @@
 import numpy as np
-from mymodule import convert, grid, diagnostic, files
-from mymodule.user_variables import datadir
+from irise import convert, grid, diagnostic, files
+from myscripts import datadir
 from myscripts.models.um import case_studies
 import tropopause
 

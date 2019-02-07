@@ -1,8 +1,8 @@
 from datetime import timedelta as dt
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import files, convert, plot
-from mymodule.user_variables import datadir
+from irise import files, convert, plot
+from myscripts import datadir
 from myscripts.models.um import case_studies
 
 

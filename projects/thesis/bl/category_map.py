@@ -3,8 +3,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import iris.plot as iplt
-from mymodule import convert
-from mymodule.plot.util import multilabel, add_map
+from irise import convert
+from irise.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.bl import plotdir
 

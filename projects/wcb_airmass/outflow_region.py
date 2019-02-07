@@ -10,9 +10,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.ndimage import filters
 import iris.plot as iplt
-from mymodule import convert, grid, plot
-from mymodule.constants import r
-from mymodule.detection.rossby_waves import tropopause_contour
+from irise import convert, grid, plot
+from irise.constants import r
+from irise.detection.rossby_waves import tropopause_contour
 from myscripts.models.um import case_studies
 
 r = r.data

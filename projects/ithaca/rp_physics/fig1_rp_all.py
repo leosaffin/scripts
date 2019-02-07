@@ -8,7 +8,7 @@ see similarities and differences.
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
-from mymodule.plot.util import multilabel
+from irise.plot.util import multilabel
 from myscripts.models.speedy import datadir
 
 

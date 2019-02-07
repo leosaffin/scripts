@@ -3,9 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 from lagranto import caltra
-from mymodule import convert, grid, interpolate, plot
-from mymodule.detection import rossby_waves
-from mymodule.user_variables import datadir
+from irise import convert, grid, interpolate, plot
+from irise.detection import rossby_waves
+from myscripts import datadir
 
 
 def main():

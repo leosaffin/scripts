@@ -6,7 +6,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import iris
-from mymodule import convert, interpolate, grid, plot, user_variables
+from irise import convert, interpolate, grid, plot, user_variables
 
 directory = user_variables.datadir + 'eqlats/'
 

@@ -1,6 +1,6 @@
 import numpy as np
-from mymodule import convert, diagnostic, grid
-from mymodule.detection import rossby_waves
+from irise import convert, diagnostic, grid
+from irise.detection import rossby_waves
 
 
 def ridges_troughs(cubes):

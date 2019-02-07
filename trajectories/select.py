@@ -1,5 +1,5 @@
 import datetime
-from mymodule.user_variables import datadir
+from myscripts import datadir
 from lagranto import trajectory
 
 

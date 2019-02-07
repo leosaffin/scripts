@@ -2,7 +2,7 @@ from datetime import timedelta as dt
 import numpy as np
 import iris
 from iris.analysis import MEAN, STD_DEV
-from mymodule import convert, grid, files
+from irise import convert, grid, files
 from myscripts.models.um import case_studies
 
 

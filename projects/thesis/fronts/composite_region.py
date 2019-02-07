@@ -5,8 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 import iris.quickplot as qplt
-from mymodule import convert, diagnostic, interpolate, grid, plot
-from mymodule.plot.util import multilabel, legend
+from irise import convert, diagnostic, interpolate, grid, plot
+from irise.plot.util import multilabel, legend
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.fronts import plotdir

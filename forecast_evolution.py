@@ -3,9 +3,9 @@
 
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert
-from mymodule.plot.util import add_map
-from mymodule.user_variables import plotdir
+from irise import convert
+from irise.plot.util import add_map
+from myscripts import plotdir
 from myscripts.models.um import case_studies
 
 columns = 3

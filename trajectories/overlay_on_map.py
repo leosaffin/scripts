@@ -2,8 +2,8 @@ from datetime import timedelta
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from lagranto import trajectory
-from mymodule import convert, plot
-from mymodule.user_variables import datadir, plotdir
+from irise import convert, plot
+from myscripts import datadir, plotdir
 from myscripts.models.um import case_studies
 from myscripts.trajectories.cluster import select_cluster
 

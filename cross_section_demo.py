@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector
 import iris.quickplot as qplt
-from mymodule import files, convert
-from mymodule.plot.interactive import CrossSection as CS
-from mymodule.plot.interactive import CrossSectionPlotter as CSP
-from mymodule.user_variables import datadir
+from irise import files, convert
+from irise.plot.interactive import CrossSection as CS
+from irise.plot.interactive import CrossSectionPlotter as CSP
+from myscripts import datadir
 
 
 def main():

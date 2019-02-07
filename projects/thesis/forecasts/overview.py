@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import iris
 import iris.quickplot as qplt
-from mymodule import convert
+from irise import convert
 from systematic_forecasts import second_analysis
 
 

@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import MEAN
-from mymodule import convert, grid
-from mymodule.plot.util import multilabel, add_map
+from irise import convert, grid
+from irise.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.bl_pv import plotdir
 from systematic_forecasts.second_analysis import all_diagnostics

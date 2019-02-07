@@ -1,5 +1,5 @@
-from mymodule.user_variables import datadir, plotdir
-from mymodule.plot.util import PlotParameter
+from myscripts import datadir, plotdir
+from irise.plot.util import PlotParameter
 
 datadir = datadir + 'speedy/'
 plotdir = plotdir + 'speedy/'

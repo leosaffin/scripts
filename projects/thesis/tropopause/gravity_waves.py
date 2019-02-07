@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import RectangleSelector
 import iris.quickplot as qplt
 import iris.plot as iplt
-from mymodule import convert, plot, calculus
-from mymodule.plot.util import even_cscale
-from mymodule.plot.interactive import CrossSection as CS
-from mymodule.plot.interactive import CrossSectionPlotter as CSP
+from irise import convert, plot, calculus
+from irise.plot.util import even_cscale
+from irise.plot.interactive import CrossSection as CS
+from irise.plot.interactive import CrossSectionPlotter as CSP
 from myscripts.models.um import case_studies
 
 names = ['gravity_wave_drag_pv', 'convection_pv', 'boundary_layer_pv',

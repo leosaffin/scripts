@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.time import PartialDateTime as PDT
-from mymodule import convert, grid, plot
-from mymodule.detection import rossby_waves
+from irise import convert, grid, plot
+from irise.detection import rossby_waves
 from myscripts.models.um import case_studies
 
 

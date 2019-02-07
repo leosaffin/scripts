@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, grid, plot
+from irise import convert, grid, plot
 from myscripts.models.um import case_studies
 
 

@@ -6,7 +6,7 @@ for one time. Repeat for SPPT off and on.
 
 import matplotlib.pyplot as plt
 import iris
-from mymodule.plot.util import legend, multilabel
+from irise.plot.util import legend, multilabel
 from myscripts.models.speedy import datadir, physics_schemes
 from myscripts.projects.ithaca.precision_errors import decode_name
 

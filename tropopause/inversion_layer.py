@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, diagnostic, variable
+from irise import convert, diagnostic, variable
 from myscripts.models.um import case_studies
 import tropopause
 

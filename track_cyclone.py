@@ -6,8 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import filters
 import iris
-from mymodule import grid, plot
-from mymodule.user_variables import datadir
+from irise import grid, plot
+from myscripts import datadir
 
 
 def main():

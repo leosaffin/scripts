@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, fcluster, linkage
 from scipy.cluster.vq import kmeans, vq
 from lagranto import trajectory
-from mymodule.user_variables import datadir, plotdir
+from myscripts import datadir, plotdir
 
 styles = ['-bo', '-gx', '-rx', '-cx', '-mx', '-yx',
           '-bx', '-go', '-ro', '-co', '-mo', '-yo']

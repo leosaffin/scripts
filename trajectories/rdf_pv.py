@@ -1,10 +1,12 @@
-import cPickle as pickle
+import pickle
+
 import numpy as np
 from scipy.interpolate import griddata
 from iris.analysis.cartography import rotate_pole, get_xy_grids
-from mymodule.trajectory import load as trload
-from mymodule import convert, files, plot
-from mymodule.user_variables import datadir
+
+from irise.trajectory import load as trload
+from irise import convert, files, plot
+from myscripts import datadir
 
 
 def main():

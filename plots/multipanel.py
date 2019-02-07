@@ -2,8 +2,8 @@ from math import ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, grid
-from mymodule.plot.util import multilabel, add_map, even_cscale
+from irise import convert, grid
+from irise.plot.util import multilabel, add_map, even_cscale
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.fronts import plotdir
 from systematic_forecasts import second_analysis

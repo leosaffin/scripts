@@ -2,8 +2,8 @@ from math import ceil, floor
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert
-from mymodule.plot.util import multilabel, even_cscale
+from irise import convert
+from irise.plot.util import multilabel, even_cscale
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis import plotdir
 

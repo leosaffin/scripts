@@ -6,8 +6,8 @@ import datetime
 import iris
 from iris.cube import CubeList
 from iris.util import squeeze
-from mymodule import constants, grid
-from mymodule.user_variables import datadir
+from irise import constants, grid
+from myscripts import datadir
 from myscripts import files
 
 # Define which area of grid to subset

@@ -2,7 +2,7 @@
 """
 import matplotlib.pyplot as plt
 import iris
-from mymodule.plot.util import legend
+from irise.plot.util import legend
 from myscripts.models.speedy import datadir, physics_schemes
 from myscripts.projects.ithaca.precision_errors import decode_name
 

@@ -1,6 +1,6 @@
 from datetime import timedelta as dt
 import matplotlib.pyplot as plt
-from mymodule import convert, plot
+from irise import convert, plot
 from myscripts.models.um import case_studies
 
 

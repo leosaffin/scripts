@@ -1,6 +1,6 @@
 from datetime import timedelta as dt
-from mymodule import convert, grid
-from mymodule.user_variables import datadir
+from irise import convert, grid
+from myscripts import datadir
 from myscripts.models.um import case_studies
 
 

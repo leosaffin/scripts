@@ -2,8 +2,8 @@ import numpy as np
 from scipy.ndimage import filters
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, diagnostic
-from mymodule.plot.util import legend
+from irise import convert, diagnostic
+from irise.plot.util import legend
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 

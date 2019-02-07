@@ -2,7 +2,7 @@
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import convert, grid, diagnostic, plot
+from irise import convert, grid, diagnostic, plot
 from myscripts.models.um import case_studies
 import tropopause
 

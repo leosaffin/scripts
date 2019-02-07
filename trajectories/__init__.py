@@ -1,5 +1,5 @@
 import numpy as np
-from mymodule import convert, grid
+from irise import convert, grid
 
 
 def create_startpoints(cubes, levels, stride=1):

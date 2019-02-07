@@ -5,8 +5,8 @@ from string import ascii_uppercase
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, grid
-from mymodule.plot.util import multilabel, add_map
+from irise import convert, grid
+from irise.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.fronts import plotdir
 from myscripts.projects.thesis.bl.low_level_cancellation_cs import cs_cube

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
+from irise import convert, plot
 from myscripts.models.um import case_studies
 
 

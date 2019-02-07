@@ -1,6 +1,6 @@
 import os
 import matplotlib.pyplot as plt
-from mymodule import convert, plot, user_variables
+from irise import convert, plot, user_variables
 from myscripts.models.um import case_studies
 
 # Vertical coordinates

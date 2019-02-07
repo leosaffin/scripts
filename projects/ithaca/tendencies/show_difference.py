@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
-from mymodule.plot.util import add_map
+from irise.plot.util import add_map
 from myscripts.models.speedy import datadir, plotdir
 
 

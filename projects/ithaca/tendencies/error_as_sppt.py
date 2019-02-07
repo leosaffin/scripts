@@ -10,8 +10,8 @@ from scipy.stats import norm
 import seaborn as sb
 import iris
 import iris.quickplot as qplt
-from mymodule import plot
-from mymodule.diagnostic import averaged_over
+from irise import plot
+from irise.diagnostic import averaged_over
 from myscripts.models.speedy import datadir
 
 

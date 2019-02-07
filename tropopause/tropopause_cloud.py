@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from mymodule import convert, grid, interpolate, plot
+from irise import convert, grid, interpolate, plot
 from myscripts.models.um import case_studies
 
 

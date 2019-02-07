@@ -16,7 +16,7 @@ def main():
     t0, t1 = dt.datetime(1982, 1, 1), dt.datetime(1982, 1, 1)
 
     # Precision Range
-    pmin, pmax = 5, 23
+    pmin, pmax = 9, 9
 
     # Number of ensemble members
     nens = 20

@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 import iris
 from iris.time import PartialDateTime
 from iris.analysis import STD_DEV, MEAN
-from mymodule import plot
-from mymodule.user_variables import datadir
+from irise import plot
+from myscripts import datadir
 from myscripts.statistics import rms_diff
 from myscripts.models.speedy import plotdir
 

@@ -2,7 +2,7 @@ import parse
 import numpy as np
 import matplotlib.pyplot as plt
 import iris
-from mymodule.plot.util import legend
+from irise.plot.util import legend
 from myscripts.statistics import mean_diff, rms_diff
 from myscripts.models.speedy import datadir, physics_schemes
 

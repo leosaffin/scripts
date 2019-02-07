@@ -16,9 +16,9 @@ from iris.analysis.cartography import rotate_winds
 from iris.coords import AuxCoord
 from iris.coord_systems import GeogCS
 from iris.cube import Cube
-from mymodule import convert, grid
-from mymodule.user_variables import datadir, plotdir
-from mymodule.constants import omega
+from irise import convert, grid
+from myscripts import datadir, plotdir
+from irise.constants import omega
 from lagranto import trajectory
 from myscripts.models.um import case_studies
 

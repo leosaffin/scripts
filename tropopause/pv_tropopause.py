@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import convert, interpolate, plot
+from irise import convert, interpolate, plot
 from myscripts.models.um import case_studies
 import tropopause
 

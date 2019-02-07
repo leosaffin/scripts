@@ -2,7 +2,7 @@ import iris
 from iris.analysis import Linear
 from iris.cube import CubeList
 from iris.util import squeeze
-from mymodule import calculus, convert, interpolate, grid, variable
+from irise import calculus, convert, interpolate, grid, variable
 from myscripts.files import stash_maps
 
 

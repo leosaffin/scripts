@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
-from mymodule import convert, grid, interpolate, user_variables
-from mymodule.plot.util import multilabel
-from mymodule.detection import rossby_waves
+from irise import convert, grid, interpolate, user_variables
+from irise.plot.util import multilabel
+from irise.detection import rossby_waves
 from myscripts.models.um import case_studies
 from myscripts.projects.tropopause_sharpness import plotdir
 

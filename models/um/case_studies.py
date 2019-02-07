@@ -1,8 +1,8 @@
 """Generate forecast objects for case studies
 """
 from datetime import datetime, timedelta
-from mymodule.forecast import Forecast
-from mymodule.user_variables import datadir
+from irise.forecast import Forecast
+from myscripts import datadir
 
 
 def generate_forecast(start_time, lead_times, job_id, filenames, suffix='.nc'):

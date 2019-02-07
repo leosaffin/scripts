@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import MEAN
-from mymodule import convert
-from mymodule.plot.util import multilabel, legend
+from irise import convert
+from irise.plot.util import multilabel, legend
 from myscripts.models.um import case_studies
 from myscripts.projects.thesis.bl import plotdir
 

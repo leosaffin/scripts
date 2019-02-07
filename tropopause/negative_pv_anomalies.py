@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import convert, grid
+from irise import convert, grid
 from myscripts.models.um import case_studies
 import tropopause
 

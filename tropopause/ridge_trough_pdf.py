@@ -1,8 +1,8 @@
 from datetime import timedelta as dt
 import numpy as np
 import matplotlib.pyplot as plt
-from mymodule import convert, grid
-from mymodule.detection import rossby_waves
+from irise import convert, grid
+from irise.detection import rossby_waves
 from myscripts.models.um import case_studies
 
 

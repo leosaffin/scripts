@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
-from mymodule import convert
+from irise import convert
 from myscripts.models.um import case_studies
 
 

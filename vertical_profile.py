@@ -4,8 +4,8 @@
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.analysis import VARIANCE
-from mymodule import files, convert
-from mymodule.user_variables import datadir, plotdir
+from irise import files, convert
+from myscripts import datadir, plotdir
 from myscripts.plot import linestyles, colors
 
 

@@ -1,4 +1,4 @@
-from mymodule.user_variables import plotdir, datadir
+from myscripts import plotdir, datadir
 
 plotdir = plotdir
 datadir = datadir

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import iris
-from mymodule import plot
-from mymodule.plot.util import multilabel, legend
+from irise import plot
+from irise.plot.util import multilabel, legend
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis import plotdir
 

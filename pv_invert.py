@@ -1,5 +1,5 @@
 import numpy as np
-from mymodule import grid, variable
+from irise import grid, variable
 import pvi
 
 omega = 7.2921e-5  # Coriolis Term

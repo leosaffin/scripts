@@ -9,7 +9,7 @@ Demonstrates a very basic plot of a 3D surface using a solid color.
 from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
-from mymodule import convert, diagnostic
+from irise import convert, diagnostic
 from myscripts.models.um import case_studies
 
 """

@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 from iris.analysis import maths
-from mymodule.plot.util import legend, multilabel
+from irise.plot.util import legend, multilabel
 from myscripts.statistics import global_mean
 from myscripts.models.speedy import datadir, physics_schemes
 

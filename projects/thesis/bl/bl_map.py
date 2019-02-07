@@ -2,8 +2,8 @@ from math import ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert
-from mymodule.plot.util import multilabel, add_map
+from irise import convert
+from irise.plot.util import multilabel, add_map
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
 from myscripts.projects.thesis.bl import plotdir

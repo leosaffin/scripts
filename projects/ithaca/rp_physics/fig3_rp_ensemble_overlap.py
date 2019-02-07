@@ -4,7 +4,7 @@ Plot the overlapping coefficient between ensemble forecasts
 
 import matplotlib.pyplot as plt
 import iris
-from mymodule.plot.util import legend
+from irise.plot.util import legend
 from myscripts.models.speedy import datadir, physics_schemes
 
 

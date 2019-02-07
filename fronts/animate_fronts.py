@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 import iris.quickplot as qplt
-from mymodule import files, convert
-from mymodule.user_variables import datadir, plotdir
+from irise import files, convert
+from myscripts import datadir, plotdir
 
 
 def main():

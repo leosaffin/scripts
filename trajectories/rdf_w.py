@@ -3,7 +3,7 @@ co-ordinates.
 """
 
 import numpy as np
-from mymodule import grid, convert, interpolate
+from irise import grid, convert, interpolate
 from lagranto.caltra import caltra
 from myscripts.models.um import case_studies
 

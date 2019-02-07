@@ -1,5 +1,5 @@
 import numpy as np
-from mymodule import convert, grid, interpolate
+from irise import convert, grid, interpolate
 from lagranto import caltra
 from myscripts.models.um import case_studies
 

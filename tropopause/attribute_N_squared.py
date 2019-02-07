@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from iris.analysis import Linear
-from mymodule import calculus, convert, diagnostic, grid, interpolate, plot, \
+from irise import calculus, convert, diagnostic, grid, interpolate, plot, \
     variable
 
-from mymodule.detection import rossby_waves
+from irise.detection import rossby_waves
 from myscripts.models.um import case_studies
 
 names = ['long_wave_radiation_pv', 'total_minus_advection_only_pv',

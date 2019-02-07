@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from mymodule import convert, plot
+from irise import convert, plot
 
 
 def wind_speed(u, v, w, vmin=0, vmax=70, cmap='BuPu', factor=20):
