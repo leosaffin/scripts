@@ -5,16 +5,17 @@ from math import ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from irise import convert, interpolate, user_variables
+from irise import convert, interpolate
 from irise.plot.util import multilabel, add_map, even_cscale
 from myscripts.models.um import case_studies
 from myscripts.projects.bl_pv import plotdir
+from myscripts import datadir
 from systematic_forecasts import second_analysis
 
 
 job = 'iop8_no_microphysics'
 forecast = case_studies.iop8_no_microphysics.copy()
-track = np.load(user_variables.datadir + job + '_cyclone_track.npy')
+track = np.load(datadir + job + '_cyclone_track.npy')
 
 names = [
     'total_minus_advection_only_pv',

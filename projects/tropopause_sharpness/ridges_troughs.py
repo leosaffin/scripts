@@ -6,13 +6,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
-from irise import convert, grid, interpolate, user_variables
+from irise import convert, grid, interpolate
 from irise.plot.util import multilabel
 from irise.detection import rossby_waves
 from myscripts.models.um import case_studies
 from myscripts.projects.tropopause_sharpness import plotdir
+from myscripts import datadir
 
-path = user_variables.datadir
+path = datadir
 
 start_time = datetime.datetime(2013, 11, 1)
 end_time = datetime.datetime(2014, 2, 1)

@@ -1,7 +1,8 @@
 import os
 import matplotlib.pyplot as plt
-from irise import convert, plot, user_variables
+from irise import convert, plot
 from myscripts.models.um import case_studies
+from myscripts import plotdir
 
 # Vertical coordinates
 # Inlcude each coordinate interpolated to the other coordinates
@@ -42,7 +43,7 @@ tracers = ['short_wave_radiation_pv',
            'dynamics_tracer_inconsistency',
            'residual_pv']
 
-directory = user_variables.plotdir + 'output/iop8/overview/'
+directory = plotdir + 'output/iop8/overview/'
 
 
 def main(cubes):

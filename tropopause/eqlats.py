@@ -6,9 +6,11 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 import iris
-from irise import convert, interpolate, grid, plot, user_variables
+from irise import convert, interpolate, grid, plot
 
-directory = user_variables.datadir + 'eqlats/'
+from myscripts import datadir
+
+directory = datadir + 'eqlats/'
 
 
 def main(YYYY, MM, DD, HH):
