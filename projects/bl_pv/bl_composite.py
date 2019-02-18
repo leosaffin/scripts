@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import filters
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from irise import convert, diagnostic
+from irise import convert, diagnostics
 from irise.plot.util import legend
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
@@ -36,7 +36,7 @@ def main():
     mask = zm > 20
 
     # Interpolate relative to boundary layer height
-    output = diagnostic.profile(x, surface, dz, mask=mask)
+    output = diagnostics.profile(x, surface, dz, mask=mask)
 
     # Plot the variables
     for cube in output:

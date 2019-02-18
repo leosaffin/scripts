@@ -1,8 +1,8 @@
 import numpy as np
-from irise import convert, grid, diagnostic, files
+from irise import convert, grid, diagnostics
+
 from myscripts import datadir
 from myscripts.models.um import case_studies
-import tropopause
 
 
 def main():
@@ -27,14 +27,15 @@ def calc_dipole(forecast, names, bins, path):
         mass = convert.calc('mass', cubes)
 
         # Make a tropopause and boundary layer mask
-        mask = tropopause.mask(cubes)
+        raise NotImplementedError('Tropopause Mask')
+
+        #mask = tropopause.mask(cubes)
 
         # Calculate the tropopause dipole for each diagnostic
-        diags = convert.calc(names)
-        output = diagnostic.averaged_over(diags, bins, pv, mass, mask=mask)
+        #diags = convert.calc(names)
+        #output = diagnostics.averaged_over(diags, bins, pv, mass, mask=mask)
 
-        files.save(output, path + str(n).zfill(3) + '.nc')
-
+        #iris.save(output, path + str(n).zfill(3) + '.nc')
     return
 
 

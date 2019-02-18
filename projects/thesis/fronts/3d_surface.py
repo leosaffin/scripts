@@ -9,7 +9,9 @@ Demonstrates a very basic plot of a 3D surface using a solid color.
 from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
-from irise import convert, diagnostic
+
+from irise import convert
+from irise.diagnostics import tropopause
 from myscripts.models.um import case_studies
 
 """
@@ -36,7 +38,7 @@ plt.show()
 def main(cubes):
     pv = convert.calc('ertel_potential_vorticity', cubes)
     q = convert.calc('specific_humidity', cubes)
-    ztrop, fold_t, fold_b = diagnostic.dynamical_tropopause(pv, q)
+    ztrop, fold_t, fold_b = tropopause.dynamical(pv, q)
 
     x = pv.coord('grid_longitude').points
     y = pv.coord('grid_latitude').points

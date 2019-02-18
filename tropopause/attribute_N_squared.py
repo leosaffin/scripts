@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from iris.analysis import Linear
-from irise import calculus, convert, diagnostic, grid, interpolate, plot, \
+from irise import calculus, convert, diagnostics, grid, interpolate, plot, \
     variable
 
-from irise.detection import rossby_waves
+from irise.diagnostics import rossby_waves
 from myscripts.models.um import case_studies
 
 names = ['long_wave_radiation_pv', 'total_minus_advection_only_pv',
@@ -47,7 +47,7 @@ def main(cubes, dz):
     pv = grid.make_coord(convert.calc('advection_only_pv', cubes))
     z.add_aux_coord(pv, [0, 1, 2])
     zpv = interpolate.to_level(z, advection_only_pv=[3.5])[0]
-    y = diagnostic.profile(nsq, zpv, dz, mask=troughs)
+    y = diagnostics.profile(nsq, zpv, dz, mask=troughs)
 
     # Plot nsq
 

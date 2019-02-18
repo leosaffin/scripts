@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
-from irise import convert, diagnostic, variable
+from irise import convert, diagnostics, variable
 from myscripts.models.um import case_studies
 import tropopause
 
@@ -25,7 +25,7 @@ def main(cubes):
 
     # Create profile of N_sq vs tropopause
     for name, mask in [('troughs', ridges), ('ridges', troughs)]:
-        cube = diagnostic.profile(nsq, ztrop, dz, mask=mask)[0]
+        cube = diagnostics.profile(nsq, ztrop, dz, mask=mask)[0]
         iplt.plot(cube, cube.coords()[0], label=name)
 
     plt.axhline(color='k')

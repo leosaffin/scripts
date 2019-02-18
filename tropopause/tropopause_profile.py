@@ -1,7 +1,8 @@
-import tropopause
 import numpy as np
 import matplotlib.pyplot as plt
-from irise import convert, diagnostic, plot
+from irise import convert, diagnostics, plot
+
+from myscripts import tropopause
 from myscripts.models.um import case_studies
 
 
@@ -14,7 +15,7 @@ def main(cubes, dz, names):
 
     # Calculate the profiles
     diags = convert.calc(names, cubes)
-    profile = diagnostic.profile(diags, trop, dz, mask=troughs)
+    profile = diagnostics.profile(diags, trop, dz, mask=troughs)
 
     # Plot the figures
     plot.multiline(profile, profile[0].coords()[0])

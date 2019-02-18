@@ -8,7 +8,7 @@ import iris
 import iris.plot as iplt
 from irise import convert, grid, interpolate
 from irise.plot.util import multilabel
-from irise.detection import rossby_waves
+from irise.diagnostics import rossby_waves
 from myscripts.models.um import case_studies
 from myscripts.projects.tropopause_sharpness import plotdir
 from myscripts import datadir

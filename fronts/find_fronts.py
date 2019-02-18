@@ -2,7 +2,7 @@ from datetime import timedelta as dt
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 from irise import convert, plot
-from irise.detection.fronts import fronts
+from irise.diagnostics.fronts import fronts
 from myscripts.models.um import case_studies
 
 

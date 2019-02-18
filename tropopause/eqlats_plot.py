@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import iris.plot as iplt
 from iris.time import PartialDateTime as PDT
 from irise import convert, grid, plot
-from irise.detection import rossby_waves
+from irise.diagnostics import rossby_waves
 from myscripts.models.um import case_studies
 
 

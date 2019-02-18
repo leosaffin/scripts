@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import iris
 from lagranto import caltra
 from irise import convert, grid, interpolate, plot
-from irise.detection import rossby_waves
+from irise.diagnostics import rossby_waves
 from myscripts import datadir
 
 

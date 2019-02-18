@@ -1,6 +1,5 @@
-import numpy as np
-from irise import convert, diagnostic, grid
-from irise.detection import rossby_waves
+from irise import convert
+from irise.diagnostics import rossby_waves, tropopause
 
 
 def ridges_troughs(cubes):
@@ -16,16 +15,6 @@ def height(cubes):
     # Calculate the tropopause height
     pv = convert.calc('ertel_potential_vorticity', cubes)
     q = convert.calc('specific_humidity', cubes)
-    trop, fold_t, fold_b = diagnostic.dynamical_tropopause(pv, q)
+    trop, fold_t, fold_b = tropopause.dynamical(pv, q)
 
     return trop, fold_t, fold_b
-
-
-def mask(cubes):
-    """Makes a mask to ignore the boundary layer and far from the tropopause
-    """
-    pv = convert.calc('ertel_potential_vorticity', cubes)
-    q = convert.calc('specific_humidity', cubes)
-    mask = np.logical_not(diagnostic.tropopause(pv, q))
-
-    return mask

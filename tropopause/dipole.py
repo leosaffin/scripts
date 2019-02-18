@@ -2,7 +2,7 @@
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from irise import convert, grid, diagnostic, plot
+from irise import convert, grid, diagnostics, plot
 from myscripts.models.um import case_studies
 import tropopause
 
@@ -21,7 +21,7 @@ def main(cubes, varnames, bins):
     mask = tropopause.mask(cubes)
 
     # Calculate the diagnostic
-    means = diagnostic.averaged_over(x, bins, q_adv, mass, mask)
+    means = diagnostics.averaged_over(x, bins, q_adv, mass, mask)
 
     # Plot the data
     means.remove(convert.calc('mass', means))

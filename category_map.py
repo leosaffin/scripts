@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from irise import convert, grid
 from myscripts import plotdir
-from irise.detection import rossby_waves
-from irise.detection.rossby_waves import tropopause_contour as tropoc
+from irise.diagnostics import rossby_waves
+from irise.diagnostics.rossby_waves import tropopause_contour as tropoc
 from myscripts.models.um import case_studies
 
 cmap = mpl.colors.ListedColormap(

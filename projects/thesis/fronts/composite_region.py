@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import iris.plot as iplt
 import iris.quickplot as qplt
-from irise import convert, diagnostic, interpolate, grid, plot
+from irise import convert, diagnostics, interpolate, grid, plot
 from irise.plot.util import multilabel, legend
 from myscripts.models.um import case_studies
 from systematic_forecasts import second_analysis
@@ -54,7 +54,7 @@ def main(cubes):
     masses = []
     # Rows are different masks
     for n, mask in enumerate(masks):
-        means = diagnostic.averaged_over(diags, levels, P, mass, mask)
+        means = diagnostics.averaged_over(diags, levels, P, mass, mask)
         masses.append(convert.calc('mass', means))
         # Columns are for different mappings
         for m, mapping in enumerate(mappings):
