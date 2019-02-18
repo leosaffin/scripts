@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import iris
 from iris.analysis import maths
 from irise.plot.util import legend, multilabel
+
 from myscripts.statistics import global_mean
 from myscripts.models.speedy import datadir, physics_schemes
 
@@ -44,10 +45,10 @@ def main():
 
     # Show the reference machine epsilon
     sbits = np.arange(5, 24)
-    error = 2.0 ** -(sbits + 1)
+    machine_error = 2.0 ** -(sbits + 1)
     for n in range(2):
         plt.axes(axes[1, n])
-        plt.plot(sbits, error, '--k')
+        plt.plot(sbits, machine_error, '--k')
 
     # Errors with respect to individual scheme
     cs = iris.Constraint(forecast_period=forecast_period, sigma=sigma)
@@ -69,7 +70,8 @@ def main():
         rel_error = display_errors(rp, fp, axes, 0, plp)
 
         # Print errors
-        print(scheme, (rel_error/error).data.mean())
+        error = rel_error/machine_error
+        print(scheme, error.data.min(), error.data.max(), error.data.mean())
 
     # Errors with respect to total physics tendency
     schemes += ['Physics', 'Cloud']
@@ -84,7 +86,8 @@ def main():
         rp = iris.load_cube(path + 'rp_' + filenames[scheme] + '_tendencies.nc', cs)[:, 1]
         plp = physics_schemes[scheme]
         rel_error = display_errors(rp, fp, axes, 1, plp, label=scheme)
-        print(scheme, (rel_error / error).data.mean())
+        error = rel_error / machine_error
+        print(scheme, error.data.min(), error.data.max(), error.data.mean())
 
     # Add dressing to the plot
     plt.axes(axes[1, 1])
