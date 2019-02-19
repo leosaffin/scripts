@@ -8,54 +8,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import seaborn as sb
-import iris
-import iris.quickplot as qplt
-from irise import plot
-from irise.diagnostic import averaged_over
-from myscripts.models.speedy import datadir
+from myscripts.projects.ithaca.tendencies.as_sppt import load_tendency
 
 
 def main():
-    path = datadir + 'stochastic/'
-    name = 'Temperature Tendency due to Physics'
-    lead_time = 2 / 3
-    sigma = 0.95
-    precision = 8
-    cs = iris.Constraint(name, lev=sigma)
-
-    rp = iris.load_cube(path + 'rp_physics_tendencies.nc', cs)[:, 1]
-    fp = rp.extract(iris.Constraint(precision=52))
-    rp = rp.extract(iris.Constraint(precision=precision))
-
-    error_vs_tendency(rp, fp, np.linspace(-2e-4, 2e-4, 21))
+    rp, fp = load_tendency(
+        variable='Temperature',
+        scheme='all physics processes',
+        precision=10,
+        forecast_period=2 / 3,
+        sigma=0.95,
+        total=True)
 
     error_distribution(rp, fp)
 
-    return
-
-
-def error_vs_tendency(rp, fp, bins):
-    """Is the error proportional to the tendency (like SPPT)
-    """
-    error = rp - fp
-    error.data = np.abs(error.data)
-    mask = np.logical_or(fp.data == 0, rp.data == 0)
-    y = averaged_over(error, bins, fp, weights=None, mask=mask)
-
-    fig, axes = plt.subplots(2, 1, sharex=True)
-
-    qplt.plot(y[0], 'kx', axes=axes[0])
-    axes[0].set_xlabel('')
-    axes[0].set_ylabel('Error in Tendency')
-    axes[0].set_title('')
-
-    x = y[1].dim_coords[0].points
-    dx = x[1] - x[0]
-    axes[1].bar(x, y[1].data, width=dx)
-    axes[1].set_ylabel('Number of Gridpoints')
-    axes[1].set_title('')
-
-    plt.show()
     return
 
 
