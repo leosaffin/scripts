@@ -8,29 +8,26 @@ shown in a table.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import iris
 from iris.analysis import maths
 from irise.plot.util import legend, multilabel
 
 from myscripts.statistics import global_mean
-from myscripts.models.speedy import datadir, physics_schemes
+from myscripts.models.speedy import physics_schemes
+from myscripts.projects.ithaca.tendencies import load_tendency
 
 
 def main():
     # Load cubes
-    path = datadir + 'deterministic/'
-    variable, units = 'Temperature', 'K/s'
+    variable = 'Temperature'
     forecast_period = 2/3
     sigma = 0.95
 
-    schemes = ['Convection', 'Condensation', 'Short-Wave Radiation',
-               'Long-Wave Radiation', 'Surface Fluxes', 'Vertical Diffusion']
-    filenames = {'Physics': 'physics',
+    filenames = {'All Parametrizations': 'all_parametrizations',
                  'Convection': 'convection',
                  'Condensation': 'condensation',
-                 'Cloud': 'cloud',
-                 'Short-Wave Radiation': 'sw_radiation',
-                 'Long-Wave Radiation': 'lw_radiation',
+                 #'Cloud': 'cloud',
+                 'Short-Wave Radiation': 'short_wave_radiation',
+                 'Long-Wave Radiation': 'long_wave_radiation',
                  'Surface Fluxes': 'surface_fluxes',
                  'Vertical Diffusion': 'vertical_diffusion'}
 
@@ -50,40 +47,27 @@ def main():
         plt.axes(axes[1, n])
         plt.plot(sbits, machine_error, '--k')
 
-    # Errors with respect to individual scheme
-    cs = iris.Constraint(forecast_period=forecast_period, sigma=sigma)
-    fp_cubes = iris.load(path + 'fp_tendencies.nc', cs)
-    rp_cubes = iris.load(path + 'rp_*_tendencies.nc', cs)
-
     # Loop over physics schemes
-    for scheme in schemes:
+    for scheme in filenames:
+        print(scheme)
         plp = physics_schemes[scheme]
 
-        if scheme == 'Condensation':
-            name = '{} Tendency due to Large-Scale Condensation [{}]'.format(variable, units)
-        else:
-            name = '{} Tendency due to {} [{}]'.format(variable, scheme, units)
-
-        fp = fp_cubes.extract_strict(iris.Constraint(name))
-        rp = rp_cubes.extract_strict(iris.Constraint(name))
+        fp = load_tendency(variable=variable, scheme=scheme, rp_scheme='all_parametrizations', precision=52)
+        rp = load_tendency(variable=variable, scheme=scheme, rp_scheme=filenames[scheme], precision=range(5, 24))
 
         rel_error = display_errors(rp, fp, axes, 0, plp)
 
         # Print errors
         error = rel_error/machine_error
-        print(scheme, error.data.min(), error.data.max(), error.data.mean())
+        print(error.data.min(), error.data.max(), error.data.mean(), '\n')
 
     # Errors with respect to total physics tendency
-    schemes += ['Physics', 'Cloud']
-    path = datadir + 'stochastic/'
+    fp = load_tendency(variable=variable, rp_scheme='all_parametrizations', precision=52)
 
-    name = '{} Tendency due to all physics processes'.format(variable)
-    cs = iris.Constraint(name, lev=sigma, precision=52)
-    fp = iris.load_cube(path + 'rp_physics_tendencies.nc', cs)[1]
+    filenames['Cloud'] = 'cloud'
 
-    cs = iris.Constraint(name, lev=sigma, precision=lambda x: x < 24)
     for scheme in filenames:
-        rp = iris.load_cube(path + 'rp_' + filenames[scheme] + '_tendencies.nc', cs)[:, 1]
+        rp = load_tendency(variable=variable, rp_scheme=filenames[scheme], precision=range(5, 24))
         plp = physics_schemes[scheme]
         rel_error = display_errors(rp, fp, axes, 1, plp, label=scheme)
         error = rel_error / machine_error
@@ -92,11 +76,13 @@ def main():
     # Add dressing to the plot
     plt.axes(axes[1, 1])
     legend(key=lambda x: physics_schemes[x[0]].idx, ncol=2,
-           title='Physics Schemes')
+           title='Parametrization Schemes')
     multilabel(axes[0, 0], 0, factor=0.01)
     multilabel(axes[0, 1], 1, factor=0.01)
     multilabel(axes[1, 0], 2, factor=0.01)
     multilabel(axes[1, 1], 3, factor=0.01)
+
+    plt.gcf().set_size_inches(16, 9)
     plt.show()
 
     return

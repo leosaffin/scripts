@@ -7,9 +7,6 @@ plotdir += 'speedy_precision/tendencies/'
 path = datadir + 'stochastic/'
 
 
-plotdir += 'as_sppt/'
-
-
 def load_tendency(
         variable='Temperature',
         scheme='All Parametrizations',
