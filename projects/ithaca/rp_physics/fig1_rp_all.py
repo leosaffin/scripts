@@ -9,40 +9,37 @@ import matplotlib.pyplot as plt
 import iris
 import iris.plot as iplt
 from irise.plot.util import multilabel
+
+from myscripts.plots import colourblind
 from myscripts.models.speedy import datadir
 
 
 def main():
     # Specify which files and variable to compare
-    path = datadir + 'output/'
-    filename = 'precision_errors_geopotential_height_500hpa.nc'
+    path = datadir
+    filename = 'precision_errors_geopotential_height_200hpa.nc'
     factor = 0.01
 
     # Set colour, linestyle and marker for each individual line
     cm = plt.cm.tab10
     # Plots vs precision
-    precisions = [(10, cm(0.0), '-', '',),
-                  (23, cm(0.1), '-', '',),
-                  (51, cm(0.2), '-', '',),
-                  (14, cm(0.3), '--', '',),
-                  (15, cm(0.4), '--', '',),
-                  (16, cm(0.5), '--', '',),
-                  (35, cm(0.6), ':', '',),
-                  (40, cm(0.7), ':', '',),
-                  (45, cm(0.8), ':', '',),
+    precisions = [(10, colourblind.blue, '-', '',),
+                  (23, colourblind.green, '-', '',),
+                  (51, colourblind.orange, '-', '',),
+                  (15, colourblind.pink, '--', '',),
+                  (35, colourblind.yellow, '--', '',),
+                  (45, colourblind.purple, '--', '',),
                   ]
 
     # Plots vs lead time
-    lead_times = [(1, cm(0.0), '-', ''),
-                  (2, cm(0.1), '--', ''),
-                  (3, cm(0.2), ':', ''),
-                  (7, cm(0.3), '-', ''),
-                  (14, cm(0.4), '--', ''),
-                  (28, cm(0.5), ':', '')]
+    lead_times = [(1, 'k', '-', ''),
+                  (7, colourblind.blue, '--', ''),
+                  (14, colourblind.green, '-', ''),
+                  (28, colourblind.orange, '--', '')]
 
     # Load the cube with the rms errors
     cs = iris.Constraint(
-        name='RMS error in Geopotential Height with Physics in reduced precision')
+        name='RMS error in Geopotential Height with All Parametrizations in reduced precision')
     cube = iris.load_cube(path + filename, cs)
     cube.coord('forecast_period').convert_units('days')
 
@@ -58,7 +55,7 @@ def main():
         make_plot(cube, precisions, 'precision')
 
         if n == 0:
-            plt.legend(title='Precision [sbits]', ncol=3)
+            plt.legend(title='Precision [sbits]', ncol=2)
         elif n == 1:
             plt.xlabel('Forecast Lead Time [days]')
 

@@ -41,8 +41,10 @@ def make_plot_pair(filename, time_cs, precision_cs, axes, factor):
     multilabel(axes[0], 0, factor=factor)
     make_plot(cubes, precision_cs)
 
-    legend(key=lambda x: physics_schemes[x[0]].idx, ncol=2, title='Physics Schemes')
+    legend(key=lambda x: physics_schemes[x[0]].idx,
+           ncol=2, title='Parametrization Schemes')
     plt.xlabel('Forecast Lead Time [days]')
+    plt.ylabel('RMS Error in Geopotential Height [m]')
 
     plt.axes(axes[1])
     multilabel(axes[1], 1, factor=factor)
