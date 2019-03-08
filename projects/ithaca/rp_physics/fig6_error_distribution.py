@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sb
+from irise.plot.util import legend
 
 from myscripts.models import speedy
 from myscripts.projects.ithaca.tendencies import load_tendency, plotdir
@@ -23,7 +24,7 @@ def main():
                             ('Meridional Velocity', 'm/s$^{-2}$'),
                             ]:
         for sigma in speedy.sigma_levels:
-            for precision in [6]:
+            for precision in [8, 10]:
                 make_plot(variable, units, sigma, precision, schemes)
 
                 plt.gcf().set_size_inches(16, 9)
@@ -62,7 +63,7 @@ def make_plot(variable, units, sigma, reduced_precision, schemes):
 
         plp = speedy.physics_schemes[scheme]
 
-        hist = draw_distribution(tendency, error, jg, plp, bins, bin_widths)
+        hist = draw_distribution(scheme, tendency, error, jg, plp, bins, bin_widths)
         hists.append(hist)
 
     for hist, scheme in zip(hists, schemes):
@@ -76,11 +77,15 @@ def make_plot(variable, units, sigma, reduced_precision, schemes):
     jg.ax_joint.set_xlabel('Double-Precision Tendency [{}]'.format(units), fontsize='x-large')
     jg.ax_joint.set_ylabel('Error in Tendency [{}]'.format(units), fontsize='x-large')
 
+    legend(ax=jg.ax_joint,
+           key=lambda x: speedy.physics_schemes[x[0]].idx,
+           title='Parametrization Schemes')
+
     return
 
 
-def draw_distribution(tendency, error, jg, plp, bins, bin_widths):
-    jg.ax_joint.scatter(tendency, error, c=plp.color, linewidths=1, alpha=0.5)
+def draw_distribution(scheme, tendency, error, jg, plp, bins, bin_widths):
+    jg.ax_joint.scatter(tendency, error, c=plp.color, linewidths=1, alpha=0.5, label=scheme)
 
     hist = np.histogram(tendency, bins)[0]
     jg.ax_marg_x.bar(bins[:-1], hist, width=bin_widths, align='edge', color='k')
