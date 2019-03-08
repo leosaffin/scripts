@@ -16,7 +16,7 @@ physics_schemes = {
     'Cloud':                PlotParameter(color=brown,  linestyle='-',  idx=3),
     'Short-Wave Radiation': PlotParameter(color=orange, linestyle='-',  idx=4),
     'Long-Wave Radiation':  PlotParameter(color=red,    linestyle='--', idx=5),
-    'Surface Fluxes':       PlotParameter(color=pink,   linestyle='-',  idx=6),
-    'Vertical Diffusion':   PlotParameter(color=green,  linestyle='--', idx=7),
+    'Surface Fluxes':       PlotParameter(color=green,  linestyle='-',  idx=6),
+    'Vertical Diffusion':   PlotParameter(color=pink,   linestyle='--', idx=7),
     'SPPT':                 PlotParameter(color='k',    linestyle='--', idx=8),
 }
