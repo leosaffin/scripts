@@ -23,18 +23,18 @@ def main():
     # Set colour, linestyle and marker for each individual line
     cm = plt.cm.tab10
     # Plots vs precision
-    precisions = [(10, colourblind.blue, '-', '',),
-                  (23, colourblind.green, '-', '',),
-                  (51, colourblind.orange, '-', '',),
-                  (15, colourblind.pink, '--', '',),
-                  (35, colourblind.yellow, '--', '',),
-                  (45, colourblind.purple, '--', '',),
+    precisions = [(10, colourblind.blue, '-', 'o',),
+                  (23, colourblind.green, '-', 'o',),
+                  (51, colourblind.orange, '-', 'o',),
+                  (11, colourblind.pink, '--', 'o',),
+                  (22, colourblind.yellow, '--', 'o',),
+                  (35, colourblind.purple, '--', 'o',),
                   ]
 
     # Plots vs lead time
-    lead_times = [(1, 'k', '-', ''),
-                  (7, colourblind.blue, '--', ''),
-                  (14, colourblind.green, '-', ''),
+    lead_times = [(7, 'k', '-', ''),
+                  (14, colourblind.blue, '--', ''),
+                  (21, colourblind.green, '-', ''),
                   (28, colourblind.orange, '--', '')]
 
     # Load the cube with the rms errors
@@ -45,7 +45,7 @@ def main():
 
     # Create a two by two grid with shared x and y axes along rows and columns
     fig, axes = plt.subplots(nrows=2, ncols=2, sharex='col', sharey='row',
-                             figsize=[9.6, 7.2])
+                             figsize=[16, 9])
 
     # Normal yscale and log scale
     for n in range(2):
