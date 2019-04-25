@@ -8,21 +8,34 @@ import matplotlib.pyplot as plt
 import iris.quickplot as qplt
 from irise.diagnostics import averaged_over
 
-from myscripts.projects.ithaca.tendencies.as_sppt import load_tendency
+from myscripts.models import speedy
+from myscripts.projects.ithaca.tendencies import load_tendency
 
 
 def main():
-    rp, fp = load_tendency(
-        variable='Temperature',
-        scheme='all physics processes',
-        precision=10,
-        forecast_period=2/3,
-        sigma=0.95,
-        total=True)
+    variable = 'Temperature'
+    scheme = 'All Parametrizations'
+    rp_scheme = 'all_parametrizations'
+    reduced_precision = 10
+    sigma = speedy.sigma_levels[0]
+
+    rp = load_tendency(
+        variable=variable,
+        scheme=scheme,
+        rp_scheme=rp_scheme,
+        sigma=sigma,
+        precision=52)
+
+    fp = load_tendency(
+        variable=variable,
+        scheme=scheme,
+        rp_scheme=rp_scheme,
+        sigma=sigma,
+        precision=reduced_precision)
 
     error_vs_tendency(rp, fp, np.linspace(-2e-4, 2e-4, 21))
 
-    plt.savefin(plotdir)
+    plt.show()
 
     return
 
