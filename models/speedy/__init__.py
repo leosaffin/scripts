@@ -20,3 +20,7 @@ physics_schemes = {
     'Vertical Diffusion':   PlotParameter(color=pink,   linestyle='--', idx=7),
     'SPPT':                 PlotParameter(color='k',    linestyle='--', idx=8),
 }
+
+
+def to_filename(title):
+    return title.replace(' ', '_').replace('-', '_').lower()
