@@ -20,7 +20,7 @@ def main():
 
     # Create a two by two grid with shared x and y axes along rows and columns
     fig, axes = plt.subplots(nrows=2, ncols=2, sharex=True,
-                             figsize=[12.0, 7.2])
+                             figsize=[16, 9])
 
     plt.axes(axes[0, 0])
     scheme = 'Condensation'
