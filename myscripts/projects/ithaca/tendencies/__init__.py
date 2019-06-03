@@ -4,7 +4,7 @@ from myscripts.models.speedy import datadir
 from myscripts.projects.ithaca import plotdir
 
 plotdir += 'speedy_precision/tendencies/'
-path = datadir + 'stochastic/'
+path = datadir + 'deterministic/tendencies/'
 
 
 def load_tendency(
