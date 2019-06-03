@@ -10,8 +10,8 @@ filename=${file%.ctl}
 cdo -f nc import_binary ${file} ${filename}.nc
 
 # Make the NetCDF file CF Conventions conforming
-ncatted -a long_name,lev,m,c,pressure ${filename}.nc
-ncatted -a units,lev,m,c,hPa ${filename}.nc
+ncatted -a long_name,lev,o,c,pressure ${filename}.nc
+ncatted -a units,lev,o,c,hPa ${filename}.nc
 
 # Delete the history as the different dates don't allow merging forecasts
 ncatted -hO -a history,global,d,, ${filename}.nc
