@@ -29,7 +29,7 @@ def main():
     ovl_mean = ovl_range.collapsed('ensemble', MEAN)
 
     # Two panels
-    fig, axes = plt.subplots(nrows=1, ncols=1, sharey='row', figsize=[8, 5])
+    fig, axes = plt.subplots(nrows=1, ncols=2, sharey='row', figsize=[16, 9])
 
     # Panel 1 -
     plt.axes(axes[0])
@@ -74,10 +74,8 @@ def main():
         plp.plot(overlap, label=label)
 
     legend()
-    axes.set_ylabel('Overlapping Coefficient')
-    axes.set_xlabel('Forecast Lead Time [days]')
+    plt.ylabel('Overlapping Coefficient')
     fig.text(0.5, 0.01, 'Forecast Lead Time [days]', ha='center')
-
 
     plt.show()
     return
