@@ -1,2 +1,6 @@
+# Packaging
+*.egg-info
+
+# Compiled Source
 *.so
 *.pyc
