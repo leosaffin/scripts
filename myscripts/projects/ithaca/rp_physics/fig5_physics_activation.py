@@ -19,19 +19,23 @@ def main():
     precisions = range(5, 24)
 
     # Create a two by two grid with shared x and y axes along rows and columns
-    fig, axes = plt.subplots(nrows=3, ncols=1, sharex='col', figsize=[8, 20])
+    fig, axes = plt.subplots(nrows=2, ncols=2, sharex='col', figsize=[16, 10])
 
-    plt.axes(axes[0])
+    plt.axes(axes[0, 0])
     scheme = 'Convection'
     make_plot(variable, scheme, sigma, precisions)
     plt.legend(title='Number of gridpoints')
 
-    plt.axes(axes[1])
+    plt.axes(axes[0, 1])
     scheme = 'Surface Fluxes'
     make_plot(variable, scheme, sigma, precisions)
 
-    plt.axes(axes[2])
+    plt.axes(axes[1, 0])
     scheme = 'Vertical Diffusion'
+    make_plot(variable, scheme, sigma, precisions)
+
+    plt.axes(axes[1, 1])
+    variable = 'Specific Humidity'
     make_plot(variable, scheme, sigma, precisions)
 
     plt.xlabel('Precision [sbits]')
