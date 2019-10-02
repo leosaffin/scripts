@@ -42,11 +42,26 @@ def main():
     anomalies = anomalies.concatenate_cube()
 
     # Information content from on spectral mode at predicting another
-    predictor = anomalies.data[:, 1, 0]
-    predictand = anomalies.data[:, 0, 0]
-    I_b = information_content(predictor, predictand, 3, 30)
+    nt, nx, mx = anomalies.shape
+    I_tot = np.zeros([nx, mx])
 
-    plt.plot(I_b)
+    for nn in range(nx):
+        print(nn)
+        for mm in range(mx-nn):
+            predictor = anomalies.data[:, 3, 3]
+            I_b = np.zeros([nx, mx])
+            for n in range(nx):
+                print(n)
+                for m in range(mx-n):
+                    predictand = anomalies.data[:, n, m]
+                    I_b[n, m] = np.sum(information_content(predictor, predictand, 3, 10))
+            I_b[nn, mm] = 0.0
+            I_tot[nn, mm] = np.sum(I_b)
+    plt.pcolormesh(np.log(I_tot))
+    plt.colorbar()
+    plt.title('Information Content')
+    plt.xlabel('Legendre Mode')
+    plt.ylabel('Fourier Mode')
     plt.show()
 
     return
