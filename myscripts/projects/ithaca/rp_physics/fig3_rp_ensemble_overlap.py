@@ -29,7 +29,7 @@ def main():
     ovl_mean = ovl_range.collapsed('ensemble', MEAN)
 
     # Two panels
-    fig, axes = plt.subplots(nrows=1, ncols=2, sharey='row', figsize=[16, 9])
+    fig, axes = plt.subplots(nrows=1, ncols=2, sharey='row', figsize=[16, 5])
 
     # Panel 1 -
     plt.axes(axes[0])
@@ -41,7 +41,8 @@ def main():
         ('overlap_52_23.nc', '23 sbit', '-', 'k'),
         ('overlap_52_10.nc', '10 sbit', '--', 'k'),
         ('overlap_52_8.nc', '8 sbit', ':', 'k'),
-        ('overlap_52_adj8.nc', '8 sbit, Fixed', '--', 'y')
+        ('overlap_52_adj8.nc', '8 sbit, Fixed', '--', 'y'),
+        ('overlap_52_half_precision_exponent.nc', '10 sbit, Exponent', '-', 'y')
         ]
 
     for filename, label, linestyle, color in files:
