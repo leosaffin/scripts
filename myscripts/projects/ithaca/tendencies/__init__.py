@@ -13,7 +13,8 @@ def load_tendency(
         rp_scheme='all_parametrizations',
         sigma=0.95,
         forecast_period=2/3,
-        precision=10):
+        precision=10,
+        filename='rp_{}_tendencies.nc'):
 
     name = '{} Tendency due to {}'.format(variable, scheme)
 
@@ -23,6 +24,6 @@ def load_tendency(
 
     cs = iris.Constraint(name, sigma=sigma, precision=precision) & time_cs
 
-    rp = iris.load_cube(path + 'rp_{}_tendencies.nc'.format(rp_scheme), cs)
+    rp = iris.load_cube(path + filename.format(rp_scheme), cs)
 
     return rp
