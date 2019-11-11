@@ -40,7 +40,7 @@ def main():
 
     limit = 0.
     for n in days:
-        row, col = get_row_and_column_index(n, ncols=2)
+        row, col = get_row_and_column_index(days.index(n), ncols=2)
         plt.axes(axes[row, col])
 
         limit = get_cscale_limit(diff[n].data, limit)

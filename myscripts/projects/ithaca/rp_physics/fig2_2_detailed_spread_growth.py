@@ -29,7 +29,8 @@ def main():
 
     limit = 0.
     for n in days:
-        row, col = get_row_and_column_index(n, ncols=2)
+        row, col = get_row_and_column_index(days.index(n), ncols=2)
+        print(row, col)
         plt.axes(axes[row, col])
 
         limit = get_cscale_limit(spread[n].data, limit)
