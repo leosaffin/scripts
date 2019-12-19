@@ -9,8 +9,8 @@ from myscripts.models.speedy import datadir
 
 def main():
     path = datadir + 'stochastic/ensembles/'
-    filename = 'rp_physics_52b.nc'
-    cs = iris.Constraint('Temperature', pressure=850)
+    filename = 'hp_exponent.nc'
+    cs = iris.Constraint('geopotential_height', pressure=500)
     ensemble = iris.load_cube(path + filename, cs)[:, 1:]
 
     bins = np.arange(4000, 6500)
@@ -50,14 +50,19 @@ def pdf_aggregator_function(bins, data, axis, kernel='gaussian'):
     output_shape = [len(bins)] + list(bandwidths.shape)
     density = np.zeros(output_shape)
 
+    idx = 0
     for index, bw in np.ndenumerate(bandwidths):
+        if index[0] == idx:
+            print(idx)
+            idx += 1
+
         # Get the full set of data at the index
         selector = list(index)
         selector.insert(axis, ...)
-        data_1d = data[selector].flatten()
+        data_1d = data[tuple(selector)].flatten()
 
         # Evaluate the probability density at each point
-        density[[...] + list(index)] =\
+        density[tuple([...] + list(index))] =\
             gridpoint_pdf(bins, data_1d, bw, kernel=kernel)
 
     return density
