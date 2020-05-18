@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-requirements = ['scitools-iris', 'numpy', 'scipy', 'matplotlib']
+requirements = ['scitools-iris', 'numpy', 'scipy', 'matplotlib', 'metpy']
 
 setup_requirements = []
 
