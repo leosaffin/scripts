@@ -1,0 +1,63 @@
+vertical_coordinates:
+- name: air_pressure
+  values: [95000, 85000, 70000, 50000, 30000, 20000, 15000]
+- name: air_potential_temperature
+  values: [300, 310, 320, 325, 330, 340, 350]
+
+single_level_fields:
+- name: surface_air_pressure
+  vmin: 100000
+  vmax: 102500
+  cmap: cubehelix_r
+- name: surface_temperature
+  vmin: 295
+  vmax: 305
+  cmap: inferno
+- name: atmosphere_boundary_layer_thickness
+  vmin: 0
+  vmax: 2000
+  cmap: cividis
+- name: toa_outgoing_shortwave_flux
+  vmin: 0
+  vmax: 1000
+  cmap: Greys_r
+- name: surface_downwelling_shortwave_flux_in_air
+  vmin: 0
+  vmax: 1000
+  cmap: Greys
+- name: toa_outgoing_longwave_flux
+  vmin: 0
+  vmax: 300
+  cmap: Greys
+- name: surface_downwelling_longwave_flux_in_air
+  vmin: 0
+  vmax: 500
+  cmap: Greys
+- name: surface_upward_sensible_heat_flux
+  vmin: 0
+  vmax: 200
+  cmap: viridis
+- name: surface_upward_latent_heat_flux
+  vmin: 0
+  vmax: 500
+  cmap: viridis
+- name: COMBINED BOUNDARY LAYER TYPE
+  vmin: -0.5
+  vmax: 9.5
+  cmap: tab10
+
+multi_level_fields:
+- name: air_temperature
+  vmin: 295
+  vmax: 305
+- name: upward_air_velocity
+  vmin: -5
+  vmax: 5
+  cmap: PiYG
+- name: specific_humidity
+  vmin: 0
+- name: relative_humidity
+  vmin: 0
+  vmax: 100
+
+

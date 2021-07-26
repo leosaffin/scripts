@@ -1,70 +1,72 @@
-import os
+"""
+
+Usage:
+    overview.py <model_data> <yaml_file> [--output_path=<path>]
+
+Arguments:
+    <model_data>
+        File containing variables to be plotted
+    <yaml_file>
+        Specification of variables and levels to plot
+Options:
+    --output_path=<path>
+        Directory to save figures [default: "./"]
+    -h --help
+        Show help
+"""
+
+import docopt
+import yaml
+
+import iris
+from iris.util import squeeze
 import matplotlib.pyplot as plt
+
+import irise
 from irise import convert, plot
-from myscripts.models.um import case_studies
-from myscripts import plotdir
-
-# Vertical coordinates
-# Inlcude each coordinate interpolated to the other coordinates
-# Altitude - Surface, 10m, 5km, 8km, 10km, 12km
-# Pressure - 950 hPa, 850hPa, 700hPa, 500hPa, 300hPa, 200hPa, 150hPa
-# Potential Temperature - 300K, 310K, 320K, 330K, 340K, 350K
-
-levels = [('altitude', [100, 5000, 8000, 10000, 12000]),
-          ('air_pressure', [95000, 85000, 70000, 50000, 30000, 20000, 15000]),
-          ('air_potential_temperature', [300, 310, 320, 325, 330, 340, 350]),
-          ('ertel_potential_vorticity', [2])]
-
-# Single Level Fields
-# MSLP, Rainfall, Total Column Water, BL Depth
-single_level_fields = ['atmosphere_boundary_layer_thickness',
-                       'convective_rainfall_amount',
-                       'stratiform_rainfall_amount',
-                       'air_pressure_at_sea_level']
 
 
-# Multi-level Fields
-# T, theta_w, u, v, w, divergence, vorticity, q, q_cl, q_cf, RH, PV tracers
-multi_level_fields = ['air_temperature',
-                      'wind_speed',
-                      'upward_air_velocity',
-                      'specific_humidity',
-                      'mass_fraction_of_cloud_liquid_water_in_air',
-                      'mass_fraction_of_cloud_ice_in_air',
-                      'relative_humidity']
+def main():
+    arguments = docopt.docopt(__doc__)
 
-tracers = ['short_wave_radiation_pv',
-           'long_wave_radiation_pv',
-           'microphysics_pv',
-           'gravity_wave_drag_pv',
-           'convection_pv',
-           'boundary_layer_pv',
-           'cloud_rebalancing_pv',
-           'dynamics_tracer_inconsistency',
-           'residual_pv']
+    print(arguments)
 
-directory = plotdir + 'output/iop8/overview/'
+    cubes = iris.cube.CubeList(
+        [squeeze(cube) for cube in irise.load(arguments["<model_data>"])]
+    )
+
+    with open(arguments["<yaml_file>"]) as f:
+        info = yaml.safe_load(f)
+
+    generate_overview(cubes, info, path=arguments["--output_path"])
 
 
-def main(cubes):
-    for name, values in levels:
-        os.system('mkdir ' + directory + name)
-        for field in multi_level_fields:
-            make_plots(field, cubes, name, values)
-        for field, dummy in levels:
-            if field != name:
-                make_plots(field, cubes, name, values)
+def generate_overview(cubes, info, path="./"):
+    for field in info["single_level_fields"]:
+        name = field.pop("name")
+        cube = convert.calc(name, cubes)
+        plot.pcolormesh(cube, **field)
+        plt.savefig("{}{}.png".format(path, name))
+        plt.clf()
+
+    for levels in info["vertical_coordinates"]:
+        for field in info["multi_level_fields"]:
+            make_plots(field.copy(), cubes, levels, path)
+        for field in info["vertical_coordinates"]:
+            if field["name"] != levels["name"]:
+                make_plots(field.copy(), cubes, levels, path)
 
 
-def make_plots(field, cubes, name, values):
-    cube = convert.calc(field, cubes, levels=(name, values))
-    for n, level in enumerate(values):
-        plot.pcolormesh(cube[n], vmin=-2, vmax=2, cmap='coolwarm')
-        plt.savefig(directory + name + '/' + field + '_' + str(level) + '.png')
+def make_plots(field, cubes, levels, path):
+    name = field.pop("name")
+    cube = convert.calc(name, cubes, levels=(levels["name"], levels["values"]))
+    for n, level in enumerate(levels["values"]):
+        plot.pcolormesh(cube[n], **field)
+        plt.savefig("{}{}_{}_{}.png".format(
+            path, name, levels["name"], levels["values"][n])
+        )
         plt.clf()
 
 
 if __name__ == '__main__':
-    forecast = case_studies.iop8.copy()
-    cubes = forecast.set_lead_time(hours=24)
-    main(cubes)
+    main()
