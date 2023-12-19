@@ -1,28 +1,30 @@
-import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.widgets import RectangleSelector
+
 import iris.quickplot as qplt
-from irise import files, convert
+
 from irise.plot.interactive import CrossSection as CS
 from irise.plot.interactive import CrossSectionPlotter as CSP
-from myscripts import datadir
+
+# Importing iris.tests overrides the matplotlib backend
+backend = matplotlib.get_backend()
+from iris.tests import stock
+matplotlib.use(backend)
 
 
 def main():
     """
     """
-    filename = datadir + 'iop5_36h.pp'
-    cubes = files.load(filename)
+    cube = stock.realistic_4d()
 
-    theta = convert.calc('air_potential_temperature', cubes)
+    plotter = CSP(True, qplt.pcolormesh, cube[0])
 
-    plotter = CSP(False, qplt.contourf, theta, np.linspace(270, 350, 15),
-                  cmap='cubehelix_r', extend='both')
+    qplt.pcolormesh(cube[0, 0])
+    ax = plt.gca()
+    ax.coastlines()
+    ax.gridlines()
 
-    onselect = CS([plotter])
-
-    qplt.contourf(theta[0], np.linspace(270, 300, 31), cmap='cubehelix_r')
-    RectangleSelector(plt.gca(), onselect, drawtype='line')
+    cross_section = CS(plt.gcf(), ax, plotters=[plotter])
 
     plt.show()
 
